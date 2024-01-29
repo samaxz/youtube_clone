@@ -19,9 +19,13 @@ class ChannelSubscription {
     this.subscriberCount,
   });
 
-  static String? thumbnailFromJson(Map<String, dynamic>? json) =>
-      json?['thumbnails']?[0]?['url'];
+  static String? thumbnailFromJson(Map<String, dynamic>? json) => json?['thumbnails']?[0]?['url'];
 
   factory ChannelSubscription.fromJson(Map<String, dynamic> json) =>
       _$ChannelSubscriptionFromJson(json);
+
+  @override
+  String toString() {
+    return 'ChannelSubscription{channelId: $channelId, title: $title, thumbnail: $thumbnail, videoCount: $videoCount, subscriberCount: $subscriberCount}';
+  }
 }

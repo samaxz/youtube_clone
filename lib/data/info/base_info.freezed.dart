@@ -231,7 +231,7 @@ class _$BaseInfoImpl<T> implements _BaseInfo<T> {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$BaseInfoImpl<T> &&

@@ -158,7 +158,7 @@ class _$CommentImpl implements _Comment {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$CommentImpl &&
@@ -344,7 +344,7 @@ class _$SnippetImpl implements _Snippet {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$SnippetImpl &&
@@ -527,7 +527,7 @@ class _$TopLevelCommentImpl implements _TopLevelComment {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$TopLevelCommentImpl &&
@@ -793,7 +793,7 @@ class _$TopLevelCommentSnippetImpl implements _TopLevelCommentSnippet {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$TopLevelCommentSnippetImpl &&
@@ -1001,7 +1001,7 @@ class _$ReplyImpl implements _Reply {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$ReplyImpl &&
@@ -1275,7 +1275,7 @@ class _$ReplySnippetImpl implements _ReplySnippet {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$ReplySnippetImpl &&

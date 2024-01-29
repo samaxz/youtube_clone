@@ -21,6 +21,11 @@ class About {
   });
 
   factory About.fromJson(Map<String, dynamic> json) => _$AboutFromJson(json);
+
+  @override
+  String toString() {
+    return 'About{stats: $stats, description: $description, title: $title, location: $location, links: $links, handle: $handle}';
+  }
 }
 
 @JsonSerializable()
@@ -36,6 +41,11 @@ class Stats {
   });
 
   factory Stats.fromJson(Map<String, dynamic> json) => _$StatsFromJson(json);
+
+  @override
+  String toString() {
+    return 'Stats{joinedDate: $joinedDate, viewCount: $viewCount, subscriberCount: $subscriberCount}';
+  }
 }
 
 @JsonSerializable()
@@ -52,4 +62,9 @@ class Link {
   });
 
   factory Link.fromJson(Map<String, dynamic> json) => _$LinkFromJson(json);
+
+  @override
+  String toString() {
+    return 'Link{url: $url, thumbnail: $thumbnail, title: $title}';
+  }
 }

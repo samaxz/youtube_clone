@@ -210,7 +210,7 @@ class _$PlaylistImpl implements _Playlist {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$PlaylistImpl &&
@@ -465,7 +465,7 @@ class _$SnippetImpl implements _Snippet {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$SnippetImpl &&
@@ -694,7 +694,7 @@ class _$ThumbnailImpl implements _Thumbnail {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$ThumbnailImpl &&

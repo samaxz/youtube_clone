@@ -137,7 +137,7 @@ class _$VideoCategoryImpl implements _VideoCategory {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$VideoCategoryImpl &&
@@ -302,7 +302,7 @@ class _$SnippetImpl implements _Snippet {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$SnippetImpl &&
