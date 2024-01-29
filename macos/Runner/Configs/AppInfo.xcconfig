@@ -5,10 +5,10 @@
 // 'flutter create' template.
 
 // The application's name. By default this is also the title of the Flutter window.
-PRODUCT_NAME = youtube_demo
+PRODUCT_NAME = youtube_clone
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.shamilgimbatov.youtubeDemo
+PRODUCT_BUNDLE_IDENTIFIER = com.shamilgimbatov.youtube_clone
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2023 com.shamilgimbatov. All rights reserved.

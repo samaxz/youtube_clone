@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:youtube_demo/services/notifiers/searched_items_notifier.dart';
+import 'package:youtube_clone/logic/notifiers/searched_items_notifier.dart';
 
 part 'channel_model.g.dart';
 
@@ -10,6 +10,12 @@ class Channel with Item {
   final String etag;
   @override
   final String id;
+
+  @override
+  String toString() {
+    return 'Channel{kind: $kind, etag: $etag, id: $id, snippet: $snippet, contentDetails: $contentDetails, statistics: $statistics}';
+  }
+
   final Snippet snippet;
   final ContentDetails? contentDetails;
   final Statistics? statistics;
@@ -24,18 +30,13 @@ class Channel with Item {
   });
 
   factory Channel.fromJson(Map<String, dynamic> json) => Channel(
-        kind: json['kind'] == 'youtube#searchResult'
-            ? json['id']['kind']
-            : json['kind'],
+        kind: json['kind'] == 'youtube#searchResult' ? json['id']['kind'] : json['kind'],
         etag: json['etag'] as String,
-        id: json['kind'] == 'youtube#searchResult'
-            ? json['id']['channelId']
-            : json['id'],
+        id: json['kind'] == 'youtube#searchResult' ? json['id']['channelId'] : json['id'],
         snippet: Snippet.fromJson(json['snippet'] as Map<String, dynamic>),
         contentDetails: json['contentDetails'] == null
             ? null
-            : ContentDetails.fromJson(
-                json['contentDetails'] as Map<String, dynamic>),
+            : ContentDetails.fromJson(json['contentDetails'] as Map<String, dynamic>),
         statistics: json['statistics'] == null
             ? null
             : Statistics.fromJson(json['statistics'] as Map<String, dynamic>),
@@ -71,10 +72,14 @@ class Snippet {
         description: json['description'] as String,
         customUrl: json['customUrl'] as String?,
         publishedAt: DateTime.parse(json['publishedAt'] as String),
-        thumbnail:
-            Thumbnials.fromJson(json['thumbnails'] as Map<String, dynamic>),
+        thumbnail: Thumbnials.fromJson(json['thumbnails'] as Map<String, dynamic>),
         country: json['country'] as String?,
       );
+
+  @override
+  String toString() {
+    return 'Snippet{myChannelId: $myChannelId, theChannelId: $theChannelId, title: $title, description: $description, customUrl: $customUrl, publishedAt: $publishedAt, thumbnail: $thumbnail, country: $country}';
+  }
 }
 
 @JsonSerializable()
@@ -94,6 +99,11 @@ class Thumbnials {
         medium: json['medium']?['url'] as String?,
         high: json['high']?['url'] as String?,
       );
+
+  @override
+  String toString() {
+    return 'Thumbnials{defaultSize: $defaultSize, medium: $medium, high: $high}';
+  }
 }
 
 @JsonSerializable()
@@ -114,13 +124,24 @@ class ContentDetails {
         uploads: json['relatedPlaylists']?['uploads'] as String?,
       );
 
-  // * this is just for now
+  // this is just for now
   List<String?> get playlists => [uploads, likes, favorites];
+
+  @override
+  String toString() {
+    return 'ContentDetails{uploads: $uploads, likes: $likes, favorites: $favorites}';
+  }
 }
 
 @JsonSerializable()
 class Statistics {
   final String viewCount;
+
+  @override
+  String toString() {
+    return 'Statistics{viewCount: $viewCount, subscriberCount: $subscriberCount, hiddenSubscriberCount: $hiddenSubscriberCount, videoCount: $videoCount}';
+  }
+
   final String subscriberCount;
   final bool hiddenSubscriberCount;
   final String videoCount;
@@ -132,6 +153,5 @@ class Statistics {
     required this.videoCount,
   });
 
-  factory Statistics.fromJson(Map<String, dynamic> json) =>
-      _$StatisticsFromJson(json);
+  factory Statistics.fromJson(Map<String, dynamic> json) => _$StatisticsFromJson(json);
 }

@@ -4,9 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:volume_control/volume_control.dart';
-import 'package:youtube_demo/screens/splash_screen.dart';
-import 'package:youtube_demo/services/common/providers.dart';
-import 'package:youtube_demo/services/common/theme_notifier.dart';
+import 'package:youtube_clone/logic/notifiers/videos_notifier.dart';
+import 'package:youtube_clone/logic/oauth2/auth_notifier.dart';
+import 'package:youtube_clone/ui/screens/nav_screen.dart';
+import 'package:youtube_clone/ui/screens/splash_screen.dart';
+import 'package:youtube_clone/logic/notifiers/providers.dart';
+import 'package:youtube_clone/logic/services/theme_notifier.dart';
 
 class MainApp extends ConsumerStatefulWidget {
   const MainApp({super.key});
@@ -16,48 +19,54 @@ class MainApp extends ConsumerStatefulWidget {
 }
 
 class _MainAppState extends ConsumerState<MainApp> {
+  ThemeData setupThemeData(bool isDarkTheme) {
+    return ThemeData(
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        selectedItemColor: isDarkTheme ? Colors.white : Colors.black,
+      ),
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: Colors.blue,
+        brightness: isDarkTheme ? Brightness.dark : Brightness.light,
+      ),
+    );
+  }
+
   Future<void> init() async {
-    await ref.read(themeNP.notifier).getCurrentTheme();
+    await ref.read(themeNP.notifier).setInitialTheme();
     await ref.read(sembastP).init();
+    await ref.read(authNotifierProvider.notifier).checkAndUpdateAuthStatus();
   }
 
   @override
   void initState() {
     super.initState();
+    // this is used for debugging purposes on emulator
+    // TODO comment this out before creating apk or pushing
     VolumeControl.setVolume(0.7);
-    Future.microtask(init);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final darkTheme = ref.watch(themeNP);
-
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.manual,
       overlays: SystemUiOverlay.values,
     );
-
     SystemChrome.setPreferredOrientations(
-      [DeviceOrientation.portraitUp, DeviceOrientation.portraitUp],
+      [DeviceOrientation.portraitUp],
     );
+    Future.delayed(const Duration(milliseconds: 600), init);
+    // Future.microtask(init);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final authState = ref.watch(authNotifierProvider);
+    final isDarkTheme = ref.watch(themeNP);
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Youtube Demo',
-      theme: setupThemeData(darkTheme),
-      home: const SplashScreen(),
-    );
-  }
-
-  ThemeData setupThemeData(bool darkTheme) {
-    return ThemeData(
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        selectedItemColor: darkTheme ? Colors.white : Colors.black,
-      ),
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: Colors.blue,
-        brightness: darkTheme ? Brightness.dark : Brightness.light,
+      title: 'Youtube clone',
+      theme: setupThemeData(isDarkTheme),
+      home: authState.maybeWhen(
+        orElse: () => const NavScreen(),
+        initial: () => const SplashScreen(),
       ),
     );
   }

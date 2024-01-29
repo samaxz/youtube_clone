@@ -218,7 +218,7 @@ class _$VideoImpl implements _Video {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$VideoImpl &&
@@ -466,7 +466,7 @@ class _$SnippetImpl implements _Snippet {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$SnippetImpl &&
@@ -694,7 +694,7 @@ class _$ThumbnailImpl implements _Thumbnail {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$ThumbnailImpl &&
@@ -879,7 +879,7 @@ class _$ContentDetailsImpl implements _ContentDetails {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$ContentDetailsImpl &&
@@ -1075,7 +1075,7 @@ class _$StatisticsImpl implements _Statistics {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$StatisticsImpl &&

@@ -16,8 +16,8 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$FailureData {
-  String? get message => throw _privateConstructorUsedError;
   int? get code => throw _privateConstructorUsedError;
+  String? get message => throw _privateConstructorUsedError;
   StackTrace? get stackTrace => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
@@ -31,7 +31,7 @@ abstract class $FailureDataCopyWith<$Res> {
           FailureData value, $Res Function(FailureData) then) =
       _$FailureDataCopyWithImpl<$Res, FailureData>;
   @useResult
-  $Res call({String? message, int? code, StackTrace? stackTrace});
+  $Res call({int? code, String? message, StackTrace? stackTrace});
 }
 
 /// @nodoc
@@ -47,19 +47,19 @@ class _$FailureDataCopyWithImpl<$Res, $Val extends FailureData>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? message = freezed,
     Object? code = freezed,
+    Object? message = freezed,
     Object? stackTrace = freezed,
   }) {
     return _then(_value.copyWith(
-      message: freezed == message
-          ? _value.message
-          : message // ignore: cast_nullable_to_non_nullable
-              as String?,
       code: freezed == code
           ? _value.code
           : code // ignore: cast_nullable_to_non_nullable
               as int?,
+      message: freezed == message
+          ? _value.message
+          : message // ignore: cast_nullable_to_non_nullable
+              as String?,
       stackTrace: freezed == stackTrace
           ? _value.stackTrace
           : stackTrace // ignore: cast_nullable_to_non_nullable
@@ -76,7 +76,7 @@ abstract class _$$FailureDataImplCopyWith<$Res>
       __$$FailureDataImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String? message, int? code, StackTrace? stackTrace});
+  $Res call({int? code, String? message, StackTrace? stackTrace});
 }
 
 /// @nodoc
@@ -90,19 +90,19 @@ class __$$FailureDataImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? message = freezed,
     Object? code = freezed,
+    Object? message = freezed,
     Object? stackTrace = freezed,
   }) {
     return _then(_$FailureDataImpl(
-      freezed == message
-          ? _value.message
-          : message // ignore: cast_nullable_to_non_nullable
-              as String?,
-      freezed == code
+      code: freezed == code
           ? _value.code
           : code // ignore: cast_nullable_to_non_nullable
               as int?,
+      message: freezed == message
+          ? _value.message
+          : message // ignore: cast_nullable_to_non_nullable
+              as String?,
       stackTrace: freezed == stackTrace
           ? _value.stackTrace
           : stackTrace // ignore: cast_nullable_to_non_nullable
@@ -114,33 +114,34 @@ class __$$FailureDataImplCopyWithImpl<$Res>
 /// @nodoc
 
 class _$FailureDataImpl implements _FailureData {
-  const _$FailureDataImpl(this.message, this.code, {this.stackTrace});
+  const _$FailureDataImpl(
+      {required this.code, required this.message, this.stackTrace});
 
   @override
-  final String? message;
-  @override
   final int? code;
+  @override
+  final String? message;
   @override
   final StackTrace? stackTrace;
 
   @override
   String toString() {
-    return 'FailureData(message: $message, code: $code, stackTrace: $stackTrace)';
+    return 'FailureData(code: $code, message: $message, stackTrace: $stackTrace)';
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$FailureDataImpl &&
-            (identical(other.message, message) || other.message == message) &&
             (identical(other.code, code) || other.code == code) &&
+            (identical(other.message, message) || other.message == message) &&
             (identical(other.stackTrace, stackTrace) ||
                 other.stackTrace == stackTrace));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, message, code, stackTrace);
+  int get hashCode => Object.hash(runtimeType, code, message, stackTrace);
 
   @JsonKey(ignore: true)
   @override
@@ -150,13 +151,15 @@ class _$FailureDataImpl implements _FailureData {
 }
 
 abstract class _FailureData implements FailureData {
-  const factory _FailureData(final String? message, final int? code,
-      {final StackTrace? stackTrace}) = _$FailureDataImpl;
+  const factory _FailureData(
+      {required final int? code,
+      required final String? message,
+      final StackTrace? stackTrace}) = _$FailureDataImpl;
 
   @override
-  String? get message;
-  @override
   int? get code;
+  @override
+  String? get message;
   @override
   StackTrace? get stackTrace;
   @override
@@ -305,7 +308,7 @@ class _$YoutubeFailureImpl implements _YoutubeFailure {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$YoutubeFailureImpl &&
@@ -438,7 +441,8 @@ class __$$NoConnectionFailureImplCopyWithImpl<$Res>
 
 class _$NoConnectionFailureImpl implements NoConnectionFailure {
   const _$NoConnectionFailureImpl(
-      {this.failureData = const FailureData('No internet connection', 000)});
+      {this.failureData =
+          const FailureData(code: 0, message: 'No internet connection')});
 
   @override
   @JsonKey()
@@ -450,7 +454,7 @@ class _$NoConnectionFailureImpl implements NoConnectionFailure {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$NoConnectionFailureImpl &&

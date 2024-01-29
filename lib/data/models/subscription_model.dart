@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:youtube_demo/data/models/channel/channel_model.dart';
+import 'package:youtube_clone/data/models/channel/channel_model.dart';
 
 part 'subscription_model.g.dart';
 
@@ -20,11 +20,10 @@ class Subscription {
     required this.subscriberSnippet,
   });
 
-  factory Subscription.fromJson(Map<String, dynamic> json) =>
-      _$SubscriptionFromJson(json);
+  factory Subscription.fromJson(Map<String, dynamic> json) => _$SubscriptionFromJson(json);
 }
 
-// * user's snippet info
+// user's snippet info
 @JsonSerializable()
 class SubscriberSnippet {
   final String channelId;

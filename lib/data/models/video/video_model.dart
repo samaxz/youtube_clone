@@ -1,6 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:youtube_demo/services/common/helper_class.dart';
-import 'package:youtube_demo/services/notifiers/searched_items_notifier.dart';
+import 'package:youtube_clone/logic/notifiers/searched_items_notifier.dart';
 
 part 'video_model.freezed.dart';
 part 'video_model.g.dart';
@@ -16,9 +15,7 @@ class Video with Item, _$Video {
   }) = _Video;
 
   factory Video.fromJson(Map<String, dynamic> json) => Video(
-        kind: json['kind'] == 'youtube#searchResult'
-            ? json['id']['kind']
-            : json['kind'],
+        kind: json['kind'] == 'youtube#searchResult' ? json['id']['kind'] : json['kind'],
         id: json['kind'] == 'youtube#searchResult'
             ? json['id']['videoId']
             : json['kind'] == 'youtube#playlistItem'
@@ -47,8 +44,7 @@ class Snippet with _$Snippet {
     required String channelTitle,
   }) = _Snippet;
 
-  factory Snippet.fromJson(Map<String, dynamic> json) =>
-      _$SnippetFromJson(json);
+  factory Snippet.fromJson(Map<String, dynamic> json) => _$SnippetFromJson(json);
 }
 
 @freezed
@@ -78,8 +74,7 @@ class ContentDetails with _$ContentDetails {
     required String? caption,
   }) = _ContentDetails;
 
-  factory ContentDetails.fromJson(Map<String, dynamic> json) =>
-      _$ContentDetailsFromJson(json);
+  factory ContentDetails.fromJson(Map<String, dynamic> json) => _$ContentDetailsFromJson(json);
 }
 
 @freezed
@@ -91,6 +86,5 @@ class Statistics with _$Statistics {
     String? commentCount,
   ) = _Statistics;
 
-  factory Statistics.fromJson(Map<String, dynamic> json) =>
-      _$StatisticsFromJson(json);
+  factory Statistics.fromJson(Map<String, dynamic> json) => _$StatisticsFromJson(json);
 }
