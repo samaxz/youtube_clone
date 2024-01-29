@@ -1,6 +1,6 @@
 {
-    "name": "youtube_demo",
-    "short_name": "youtube_demo",
+    "name": "youtube_clone",
+    "short_name": "youtube_clone",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

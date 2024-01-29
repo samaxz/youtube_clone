@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:youtube_demo/data/info/base_info.dart';
-import 'package:youtube_demo/data/info/youtube_failure.dart';
+import 'package:youtube_clone/data/info/base_info.dart';
+import 'package:youtube_clone/data/info/youtube_failure.dart';
 
 part 'base_info_state.freezed.dart';
 

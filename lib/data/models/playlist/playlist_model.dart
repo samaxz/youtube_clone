@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:youtube_demo/services/notifiers/searched_items_notifier.dart';
+import 'package:youtube_clone/logic/notifiers/searched_items_notifier.dart';
 
 part 'playlist_model.freezed.dart';
 part 'playlist_model.g.dart';
@@ -21,13 +21,9 @@ class Playlist with Item, _$Playlist {
   }) = _Playlist;
 
   factory Playlist.fromJson(Map<String, dynamic> json) => Playlist(
-        kind: json['kind'] == 'youtube#searchResult'
-            ? json['id']['kind']
-            : json['kind'],
+        kind: json['kind'] == 'youtube#searchResult' ? json['id']['kind'] : json['kind'],
         etag: json['etag'],
-        id: json['kind'] == 'youtube#searchResult'
-            ? json['id']['playlistId']
-            : json['id'],
+        id: json['kind'] == 'youtube#searchResult' ? json['id']['playlistId'] : json['id'],
         snippet: Snippet.fromJson(json['snippet'] as Map<String, dynamic>),
         privacyStatus: json['status']?['privacyStatus'],
         itemCount: json['contentDetails']?['itemCount'],
@@ -45,8 +41,7 @@ class Snippet with _$Snippet {
     required String? channelTitle,
   }) = _Snippet;
 
-  factory Snippet.fromJson(Map<String, dynamic> json) =>
-      _$SnippetFromJson(json);
+  factory Snippet.fromJson(Map<String, dynamic> json) => _$SnippetFromJson(json);
 }
 
 @freezed

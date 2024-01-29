@@ -162,7 +162,7 @@ class _$BaseInfoLoadingImpl<T> extends BaseInfoLoading<T> {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$BaseInfoLoadingImpl<T> &&
@@ -313,7 +313,7 @@ class _$BaseInfoLoadedImpl<T> extends BaseInfoLoaded<T> {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$BaseInfoLoadedImpl<T> &&
@@ -481,7 +481,7 @@ class _$BaseInfoErrorImpl<T> extends BaseInfoError<T> {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$BaseInfoErrorImpl<T> &&
