@@ -1,13 +1,15 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pod_player/pod_player.dart';
 import 'package:youtube_clone/data/info/youtube_failure.dart';
 import 'package:youtube_clone/data/models/video/video_model.dart';
+import 'package:youtube_clone/logic/notifiers/providers.dart';
 import 'package:youtube_clone/logic/notifiers/subscription_notifier.dart';
 import 'package:youtube_clone/logic/notifiers/video_details_notifier.dart';
 import 'package:youtube_clone/logic/services/helper_class.dart';
-import 'package:youtube_clone/logic/notifiers/providers.dart';
 import 'package:youtube_clone/ui/widgets/failure_tile.dart';
 import 'package:youtube_clone/ui/widgets/my_miniplayer.dart';
 import 'package:youtube_clone/ui/widgets/shimmers/loading_video_screen.dart';
@@ -32,23 +34,28 @@ class MiniplayerScreen extends ConsumerStatefulWidget {
 
 class _MiniplayerScreenState extends ConsumerState<MiniplayerScreen> {
   static const double playerMinHeight = 60;
-  late final double playerMaxHeight;
+  late double playerMaxHeight;
   late final ScrollController scrollController;
   late final PodPlayerController playerController;
 
   // this'll be used for loading details
   Future<void> loadDetails() async {
     final videoDetailsNotifier = ref.read(videoDetailsNotifierProvider.notifier);
-    final subsNotifier =
-        ref.read(subscriptionNotifierProvider(widget.video.snippet.channelId).notifier);
+    await videoDetailsNotifier.loadDetails(
+      videoId: widget.video.id,
+      channelId: widget.video.snippet.channelId,
+    );
 
-    await Future.wait([
-      videoDetailsNotifier.loadDetails(
-        videoId: widget.video.id,
-        channelId: widget.video.snippet.channelId,
-      ),
-      subsNotifier.getSubscriptionState(),
-    ]);
+    // final subsNotifier =
+    //     ref.read(subscriptionNotifierProvider(widget.video.snippet.channelId).notifier);
+
+    // await Future.wait([
+    //   videoDetailsNotifier.loadDetails(
+    //     videoId: widget.video.id,
+    //     channelId: widget.video.snippet.channelId,
+    //   ),
+    //   subsNotifier.getSubscriptionState(),
+    // ]);
   }
 
   Future<void> reloadData() async {
@@ -59,8 +66,8 @@ class _MiniplayerScreenState extends ConsumerState<MiniplayerScreen> {
     ref.invalidate(subscriptionNotifierProvider);
 
     final videoDetailsNotifier = ref.read(videoDetailsNotifierProvider.notifier);
-    final subsNotifier =
-        ref.read(subscriptionNotifierProvider(widget.video.snippet.channelId).notifier);
+    // final subsNotifier =
+    //     ref.read(subscriptionNotifierProvider(widget.video.snippet.channelId).notifier);
 
     await Future.wait([
       videoDetailsNotifier.loadDetails(
@@ -72,7 +79,7 @@ class _MiniplayerScreenState extends ConsumerState<MiniplayerScreen> {
           'https://youtu.be/${widget.video.id}',
         ),
       ),
-      subsNotifier.getSubscriptionState(),
+      // subsNotifier.getSubscriptionState(),
     ]);
 
     playerController.play();
@@ -87,10 +94,6 @@ class _MiniplayerScreenState extends ConsumerState<MiniplayerScreen> {
     )..initialise();
     // without this, the details are stuck in the loading state
     Future.microtask(loadDetails);
-    // Future.wait([
-    //   playerController.initialise(),
-    //   loadDetails(),
-    // ]);
   }
 
   @override
@@ -104,14 +107,17 @@ class _MiniplayerScreenState extends ConsumerState<MiniplayerScreen> {
     super.didUpdateWidget(oldWidget);
 
     if (widget.video.id != oldWidget.video.id) {
-      Future.wait([
-        playerController.changeVideo(
-          playVideoFrom: PlayVideoFrom.youtube(
-            'https://youtu.be/${widget.video.id}',
+      Future.microtask(
+        () => Future.wait([
+          playerController.changeVideo(
+            playVideoFrom: PlayVideoFrom.youtube(
+              'https://youtu.be/${widget.video.id}',
+            ),
           ),
-        ),
-        loadDetails(),
-      ]);
+          loadDetails(),
+        ]),
+      );
+      log('video has been changed and didUpdateWidget() got called again');
     }
   }
 
@@ -129,14 +135,13 @@ class _MiniplayerScreenState extends ConsumerState<MiniplayerScreen> {
   Widget build(BuildContext context) {
     final videoDetails = ref.watch(videoDetailsNotifierProvider);
     final selectedVideo = ref.watch(selectedVideoSP)!;
-
     final value = Helper.percentageFromValueInRange(
       min: playerMinHeight,
       max: playerMaxHeight,
       value: widget.height,
     );
 
-    // this is used to avoid overflow when in full screen
+    // this is used to avoid overflow when player in full screen
     return value > 2
         ? const SizedBox()
         : Column(
@@ -175,7 +180,10 @@ class _MiniplayerScreenState extends ConsumerState<MiniplayerScreen> {
                               onPressed: () => ref
                                   .read(miniPlayerControllerP)
                                   .animateToHeight(state: PanelState.min),
-                              icon: const Icon(Icons.keyboard_arrow_down_sharp),
+                              icon: const Icon(
+                                Icons.keyboard_arrow_down_sharp,
+                                color: Colors.white,
+                              ),
                             )
                           : const SizedBox.shrink(),
                     ],
@@ -278,7 +286,7 @@ class _MiniplayerScreenState extends ConsumerState<MiniplayerScreen> {
                         if (index == 0) {
                           return VideoInfoTile(
                             video: selectedVideo,
-                            channel: videoInfo.channel,
+                            channel: videoInfo.channelInfo,
                             commentsInfo: videoInfo.comments,
                           );
                         }
@@ -294,6 +302,7 @@ class _MiniplayerScreenState extends ConsumerState<MiniplayerScreen> {
                           video: videos[index - 1],
                           isInView: false,
                           maximize: false,
+                          elementAt: index - 1,
                           onTap: () {
                             Future.wait([
                               playerController.changeVideo(

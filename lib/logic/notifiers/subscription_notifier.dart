@@ -40,19 +40,12 @@ Future<SubState> subscriptions(SubscriptionsRef ref) async {
   return state;
 }
 
-// this is for checking if the user is subbed to the channel or not
-// (this'll be used inside the mp, shorts and channel screens)
-// this'll be used on all sorts of screens
-// based on the provided channel id, the user is either subbed or not
-// to the channel
 // this is used for the miniplayer screen
 @riverpod
 class SubscriptionNotifier extends _$SubscriptionNotifier {
   @override
-  List<AsyncValue<bool>> build(String channelId) {
-    return [
-      const AsyncLoading(),
-    ];
+  AsyncValue<bool> build(String channelId) {
+    return const AsyncLoading();
   }
 
   // late bool shouldSkip = ref.read(videoDetailsNotifierProvider.notifier).shouldSkip;
@@ -62,19 +55,18 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
   // a local variable to it
   late AuthState authState = ref.read(authNotifierProvider);
 
-  Future<void> getSubscriptionState({bool isReloading = false}) async {
-    log('getSubscriptionState() got called');
+  Future<void> getSubscriptionState() async {
+    // log('getSubscriptionState() got called');
 
-    if (isReloading) {
-      state.last = const AsyncLoading();
-    } else {
-      state.add(const AsyncLoading());
-    }
+    state = const AsyncLoading();
 
     final shouldSkip = ref.read(videoDetailsNotifierProvider.notifier).shouldSkip;
+    // log('should skip inside subs notifier: $shouldSkip');
 
     if (shouldSkip) {
-      state.last = const AsyncError(
+      // here, i could take the error from video details notifier and
+      // put it here
+      state = const AsyncError(
         'Error loading data',
         StackTrace.empty,
       );
@@ -86,28 +78,26 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
       channelId: channelId,
       authState: authState,
     );
-    state.last = AsyncData(subscribed);
+    // log('subscribed inside subs notifier is: $subscribed');
 
-    state = List.from(state);
+    state = AsyncData(subscribed);
+    // log('state inside subs notifier is: $state');
   }
 
   Future<void> changeSubscriptionState() async {
-    authState.maybeWhen(
-      orElse: () {},
-      authenticated: () async {
-        state.last = const AsyncLoading();
+    if (authState == const Authenticated()) {
+      state = const AsyncData(true);
 
-        state.last = AsyncData(
-          await authService.changeSubscription(
-            channelId: channelId,
-            authState: authState,
-          ),
-        );
+      final result = await authService.changeSubscription(
+        channelId: channelId,
+        authState: authState,
+      );
+      // TODO update notifier here for showing snack-bar if the result is negative
 
-        state = List.from(state);
-      },
-      unauthenticated: () => ref.read(unauthAttemptSP.notifier).update((state) => true),
-    );
+      state = AsyncData(result);
+    } else if (authState == const Unauthenticated()) {
+      ref.read(unauthAttemptSP.notifier).update((state) => true);
+    }
   }
 }
 

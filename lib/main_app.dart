@@ -33,9 +33,11 @@ class _MainAppState extends ConsumerState<MainApp> {
   }
 
   Future<void> init() async {
-    await ref.read(themeNP.notifier).setInitialTheme();
-    await ref.read(sembastP).init();
-    await ref.read(authNotifierProvider.notifier).checkAndUpdateAuthStatus();
+    await Future.wait([
+      ref.read(themeNP.notifier).setInitialTheme(),
+      ref.read(sembastP).init(),
+      ref.read(authNotifierProvider.notifier).checkAndUpdateAuthStatus(),
+    ]);
   }
 
   @override

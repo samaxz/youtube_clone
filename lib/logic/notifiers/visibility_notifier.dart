@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class VisibilityNotifier extends StateNotifier<List<bool>> {
@@ -18,6 +20,7 @@ class VisibilityNotifier extends StateNotifier<List<bool>> {
 
   void changeValue(int index, {bool value = true}) {
     state = List.from(state)..[index] = value;
+    // log('VisibilityNotifier state after changeValue($index, $value); $state');
 
     // state[index] = value;
     //

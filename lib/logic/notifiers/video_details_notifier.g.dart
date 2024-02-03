@@ -7,7 +7,7 @@ part of 'video_details_notifier.dart';
 // **************************************************************************
 
 String _$videoDetailsNotifierHash() =>
-    r'573676016fc7df22b1d9216a6296aab1b2c4b566';
+    r'b878a3a389698c664e3b00ab81f46cbcd8868636';
 
 /// See also [VideoDetailsNotifier].
 @ProviderFor(VideoDetailsNotifier)

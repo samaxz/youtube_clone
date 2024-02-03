@@ -6,7 +6,7 @@ part of 'shorts_notifier.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$shortsNotifierHash() => r'3e75706b1c52244245014f2aa7155f7dc9dd312d';
+String _$shortsNotifierHash() => r'c8fabd335646f7279b7d077b379fb98846c3f85b';
 
 /// Copied from Dart SDK
 class _SystemHash {

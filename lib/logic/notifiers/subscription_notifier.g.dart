@@ -22,7 +22,7 @@ final subscriptionsProvider = AutoDisposeFutureProvider<SubState>.internal(
 
 typedef SubscriptionsRef = AutoDisposeFutureProviderRef<SubState>;
 String _$subscriptionNotifierHash() =>
-    r'aebb9c5c52c05dd855ed48caedda52084ed4ce1d';
+    r'998a4bcaba78ed11c86187caceeb4269be21d518';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -46,10 +46,10 @@ class _SystemHash {
 }
 
 abstract class _$SubscriptionNotifier
-    extends BuildlessAutoDisposeNotifier<List<AsyncValue<bool>>> {
+    extends BuildlessAutoDisposeNotifier<AsyncValue<bool>> {
   late final String channelId;
 
-  List<AsyncValue<bool>> build(
+  AsyncValue<bool> build(
     String channelId,
   );
 }
@@ -59,7 +59,7 @@ abstract class _$SubscriptionNotifier
 const subscriptionNotifierProvider = SubscriptionNotifierFamily();
 
 /// See also [SubscriptionNotifier].
-class SubscriptionNotifierFamily extends Family<List<AsyncValue<bool>>> {
+class SubscriptionNotifierFamily extends Family<AsyncValue<bool>> {
   /// See also [SubscriptionNotifier].
   const SubscriptionNotifierFamily();
 
@@ -98,7 +98,7 @@ class SubscriptionNotifierFamily extends Family<List<AsyncValue<bool>>> {
 
 /// See also [SubscriptionNotifier].
 class SubscriptionNotifierProvider extends AutoDisposeNotifierProviderImpl<
-    SubscriptionNotifier, List<AsyncValue<bool>>> {
+    SubscriptionNotifier, AsyncValue<bool>> {
   /// See also [SubscriptionNotifier].
   SubscriptionNotifierProvider(
     String channelId,
@@ -129,7 +129,7 @@ class SubscriptionNotifierProvider extends AutoDisposeNotifierProviderImpl<
   final String channelId;
 
   @override
-  List<AsyncValue<bool>> runNotifierBuild(
+  AsyncValue<bool> runNotifierBuild(
     covariant SubscriptionNotifier notifier,
   ) {
     return notifier.build(
@@ -154,8 +154,8 @@ class SubscriptionNotifierProvider extends AutoDisposeNotifierProviderImpl<
   }
 
   @override
-  AutoDisposeNotifierProviderElement<SubscriptionNotifier,
-      List<AsyncValue<bool>>> createElement() {
+  AutoDisposeNotifierProviderElement<SubscriptionNotifier, AsyncValue<bool>>
+      createElement() {
     return _SubscriptionNotifierProviderElement(this);
   }
 
@@ -175,14 +175,14 @@ class SubscriptionNotifierProvider extends AutoDisposeNotifierProviderImpl<
 }
 
 mixin SubscriptionNotifierRef
-    on AutoDisposeNotifierProviderRef<List<AsyncValue<bool>>> {
+    on AutoDisposeNotifierProviderRef<AsyncValue<bool>> {
   /// The parameter `channelId` of this provider.
   String get channelId;
 }
 
 class _SubscriptionNotifierProviderElement
     extends AutoDisposeNotifierProviderElement<SubscriptionNotifier,
-        List<AsyncValue<bool>>> with SubscriptionNotifierRef {
+        AsyncValue<bool>> with SubscriptionNotifierRef {
   _SubscriptionNotifierProviderElement(super.provider);
 
   @override

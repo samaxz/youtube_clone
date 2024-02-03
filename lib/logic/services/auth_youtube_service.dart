@@ -167,6 +167,7 @@ class AuthYoutubeService {
     try {
       late final RatingState ratingState;
 
+      // TODO change this to if/else
       authState.maybeWhen(
         orElse: () => ratingState = const Neither(),
         authenticated: () async {
@@ -223,7 +224,8 @@ class AuthYoutubeService {
     late final Map<String, String> queryParams;
     late final Uri url;
 
-    if (rating == const Liked() || rating == const Disliked()) {
+    // if (rating == const Liked() || rating == const Disliked()) {
+    if (rating case const Liked() || const Disliked()) {
       queryParams = {
         'id': videoId,
         'rating': 'none',
@@ -256,6 +258,7 @@ class AuthYoutubeService {
     late final RatingState ratingState;
     final rating = await getVideoRating(videoId: videoId, authState: authState);
 
+    // TODO change this to if/else
     rating.maybeWhen(
       orElse: () async {
         await _dio.postUri(
@@ -281,6 +284,7 @@ class AuthYoutubeService {
     late final RatingState ratingState;
     final rating = await getVideoRating(videoId: videoId, authState: authState);
 
+    // TODO change this to if/else
     rating.maybeWhen(
       orElse: () async {
         await _dio.postUri(
@@ -349,6 +353,7 @@ class AuthYoutubeService {
   }) async {
     late final bool containsId;
 
+    // TODO change this to if/else
     authState.maybeWhen(
       orElse: () => containsId = false,
       authenticated: () async {
@@ -372,12 +377,12 @@ class AuthYoutubeService {
     // required bool subbedState,
     required AuthState authState,
   }) async {
-    final subbed = await subscribed(
+    final alreadySubscribed = await subscribed(
       channelId: channelId,
       authState: authState,
     );
 
-    return subbed
+    return alreadySubscribed
         ? unsubscribe(channelId: channelId, authState: authState)
         : subscribe(channelId: channelId, authState: authState);
   }
@@ -446,7 +451,7 @@ class AuthYoutubeService {
 
   // if user is subscribed, he'll unsubscribe and vice versa
   // TODO finish this and use it
-  // Future<bool> changeSubscribtion(String channelId) async {
+  // Future<bool> changeSubscription(String channelId) async {
   //   final channels = await _getChannelSubscriptions(channelId);
 
   //   final subscriptionId = channels.firstWhere(

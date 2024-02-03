@@ -65,7 +65,7 @@ dependencies:
   permission_handler: ^11.2.0
   pod_player: ^0.2.0
   riverpod_annotation: ^2.1.1
-  share_plus: ^7.1.0
+  share_plus: ^7.2.2
   visibility_detector: ^0.4.0+2
   envied: ^0.5.3
   firebase_performance: ^0.9.2+7
@@ -74,6 +74,7 @@ dependencies:
   firebase_analytics: ^10.5.1
   shared_preferences: ^2.2.2
   any_link_preview: ^3.0.1
+  readmore: ^2.2.0
 
 dev_dependencies:
   flutter_test:

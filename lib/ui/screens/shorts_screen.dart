@@ -6,7 +6,7 @@ import 'package:youtube_clone/data/info/base_info.dart';
 import 'package:youtube_clone/data/info/base_info_state.dart';
 import 'package:youtube_clone/data/info/youtube_failure.dart';
 import 'package:youtube_clone/data/models/video/video_model.dart';
-import 'package:youtube_clone/logic/notifiers/pushed_screens_notifier.dart';
+
 import 'package:youtube_clone/logic/notifiers/screens_manager.dart';
 import 'package:youtube_clone/logic/notifiers/shorts/shorts_notifier.dart';
 import 'package:youtube_clone/ui/widgets/bodies/shorts_body.dart';

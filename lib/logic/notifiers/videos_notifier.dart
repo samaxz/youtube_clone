@@ -65,6 +65,9 @@ class VideosNotifier extends _$VideosNotifier {
   }
 
   Future<void> _getPopularVideos() async {
+    // UPD decided not gonna use this
+    // state = BaseInfoLoading(baseInfo: state.baseInfo);
+
     if (loadCategories) {
       await ref.read(videoCategoriesNotifierProvider.notifier).getVideoCategories();
     }
@@ -73,9 +76,8 @@ class VideosNotifier extends _$VideosNotifier {
 
     final service = ref.read(youtubeServiceP);
     final videosOrFailure = await service.getPopularVideos(
-      maxResults: '4',
-      pageToken: state.baseInfo.nextPageToken,
       videoCategoryId: '$categoryId',
+      pageToken: state.baseInfo.nextPageToken,
     );
 
     state = videosOrFailure.fold(

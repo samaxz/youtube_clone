@@ -9,7 +9,7 @@ import 'package:youtube_clone/data/info/youtube_failure.dart';
 import 'package:youtube_clone/data/models/video/video_model.dart';
 import 'package:youtube_clone/logic/notifiers/subscription_notifier.dart';
 import 'package:youtube_clone/logic/services/custom_screen.dart';
-import 'package:youtube_clone/logic/notifiers/pushed_screens_notifier.dart';
+
 import 'package:youtube_clone/logic/notifiers/rating_notifier.dart';
 import 'package:youtube_clone/logic/notifiers/screens_manager.dart';
 import 'package:youtube_clone/logic/notifiers/shorts/shorts_details_notifier.dart';
@@ -146,7 +146,8 @@ class _ShortsBodyPlayerState extends ConsumerState<ShortsBodyPlayer>
     final shortsDetails = ref.watch(shortsDetailsNotifierProvider(widget.screenIndex)).last;
     final screenIndex = ref.watch(currentScreenIndexSP);
     final rating = ref.watch(ratingNotifierProvider(widget.short.id));
-    final subscribed = ref.watch(subscriptionNotifierProvider(widget.short.snippet.channelId)).last;
+    // TODO change this in the future
+    const subscribed = AsyncLoading();
     final currentScreen = ref.watch(screensManagerProvider(widget.screenIndex)).last;
 
     ref.listen(screensManagerProvider(widget.screenIndex), (_, state) {

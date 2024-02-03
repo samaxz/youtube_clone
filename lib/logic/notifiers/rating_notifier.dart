@@ -9,7 +9,7 @@ import 'package:youtube_clone/logic/notifiers/providers.dart';
 
 part 'rating_notifier.g.dart';
 
-// this class is used for the mp screen
+// this is used for the mp screen
 @riverpod
 class RatingNotifier extends _$RatingNotifier {
   @override
@@ -22,10 +22,7 @@ class RatingNotifier extends _$RatingNotifier {
 
   Future<void> getVideoRating() async {
     final rating = await AsyncValue.guard(
-      () => authService.getVideoRating(
-        videoId: videoId,
-        authState: authState,
-      ),
+      () => authService.getVideoRating(videoId: videoId, authState: authState),
     );
 
     final videoDetailsNot = ref.read(videoDetailsNotifierProvider.notifier);
@@ -36,39 +33,44 @@ class RatingNotifier extends _$RatingNotifier {
           videoDetailsNot.shouldSkip = false;
         },
         error: (error, stackTrace) {
+          final failure = error as YoutubeFailure;
+
           videoDetailsNot.shouldSkip = true;
-          videoDetailsNot.setFailureState();
+          videoDetailsNot.setFailureState(failure.failureData.message!);
         },
       );
   }
 
-  // TODO refactor them if they're wrong
   Future<void> like() async {
-    authState.maybeWhen(
-      orElse: () {},
-      authenticated: () async {
-        state = AsyncValue.data(
-          await authService.likeVideo(videoId: videoId, authState: authState),
-        );
-      },
-      unauthenticated: () {
-        ref.read(unauthAttemptSP.notifier).update((state) => true);
-      },
-    );
+    if (authState == const Authenticated()) {
+      state = const AsyncData(Liked());
+
+      final likeVideo = await authService.likeVideo(
+        videoId: videoId,
+        authState: authState,
+      );
+      // TODO update notifier here for showing snack-bar if the result is negative
+
+      state = AsyncData(likeVideo);
+    } else if (authState == const Unauthenticated()) {
+      ref.read(unauthAttemptSP.notifier).update((state) => true);
+    }
   }
 
   Future<void> dislike() async {
-    authState.maybeWhen(
-      orElse: () {},
-      authenticated: () async {
-        state = AsyncValue.data(
-          await authService.dislikeVideo(videoId: videoId, authState: authState),
-        );
-      },
-      unauthenticated: () {
-        ref.read(unauthAttemptSP.notifier).update((state) => true);
-      },
-    );
+    if (authState == const Authenticated()) {
+      state = const AsyncData(Disliked());
+
+      final dislikeVideo = await authService.dislikeVideo(
+        videoId: videoId,
+        authState: authState,
+      );
+      // TODO update notifier here for showing snack-bar if the result is negative
+
+      state = AsyncData(dislikeVideo);
+    } else if (authState == const Unauthenticated()) {
+      ref.read(unauthAttemptSP.notifier).update((state) => true);
+    }
   }
 }
 

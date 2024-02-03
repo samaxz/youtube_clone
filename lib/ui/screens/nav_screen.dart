@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:youtube_clone/logic/services/custom_screen.dart';
-import 'package:youtube_clone/logic/notifiers/pushed_screens_notifier.dart';
+
 import 'package:youtube_clone/logic/notifiers/screens_manager.dart';
 import 'package:youtube_clone/logic/services/common_classes.dart';
 import 'package:youtube_clone/logic/services/helper_class.dart';
@@ -31,7 +31,7 @@ class NavScreen extends ConsumerStatefulWidget {
 
 class _NavScreenState extends ConsumerState<NavScreen> {
   static const double playerMinHeight = 60;
-  late final double playerMaxHeight;
+  late double playerMaxHeight;
   final pageController = PageController();
 
   // these are screens for the bottom nav bar
@@ -133,12 +133,19 @@ class _NavScreenState extends ConsumerState<NavScreen> {
             offline = true;
 
             Helper.scaffoldKey.currentState!.showBottomSheet(
-              (context) => Container(
-                height: 30,
-                width: double.infinity,
-                color: Colors.red,
-                alignment: Alignment.center,
-                child: const Text('No internet'),
+              (context) => ValueListenableBuilder(
+                valueListenable: playerExpandProgressVN,
+                builder: (context, height, child) => SizedBox(
+                  height: height,
+                  child: child,
+                ),
+                child: Container(
+                  // height: 30,
+                  width: double.infinity,
+                  color: Colors.red,
+                  alignment: Alignment.center,
+                  child: const Text('No internet'),
+                ),
               ),
             );
           },
@@ -237,6 +244,7 @@ class _NavScreenState extends ConsumerState<NavScreen> {
         body: SafeArea(
           // this is used to make the shorts body visible behind system bar
           top: !isShortsScreen,
+          // bottom: false,
           child: Stack(
             children: [
               PageView(

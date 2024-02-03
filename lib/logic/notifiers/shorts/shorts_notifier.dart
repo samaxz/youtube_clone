@@ -29,7 +29,7 @@ class ShortsNotifier extends _$ShortsNotifier {
       // TODO make this show a snack bar with failure message
       failure: (failure) {},
     );
-    log('getShorts() inside ShortsNotifier');
+    // log('getShorts() inside ShortsNotifier');
   }
 
   Future<void> _getLikedShorts() async {
@@ -63,8 +63,6 @@ class ShortsNotifier extends _$ShortsNotifier {
   Future<void> _getPopularShorts() async {
     final service = ref.read(youtubeServiceP);
     final shortsOrFailure = await service.getPopularVideos(
-      // TODO change this value after testing
-      maxResults: '3',
       pageToken: state.last.baseInfo.nextPageToken,
     );
 

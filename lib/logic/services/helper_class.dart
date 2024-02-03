@@ -76,6 +76,7 @@ class Helper {
 
   static final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  // actions that are performed on video tiles
   static List<Widget> getVideoCardActions({
     required BuildContext context,
     required WidgetRef ref,
@@ -107,7 +108,8 @@ class Helper {
         'Share',
         onTap: () => share(
           context: context,
-          link: 'https://youtu.be/$videoId',
+          // videoId: 'https://youtu.be/$videoId',
+          videoId: videoId,
         ),
       ),
       BuildAction(
@@ -160,6 +162,7 @@ class Helper {
   static Future<bool> hasInternet() async {
     try {
       final result = await InternetAddress.lookup('google.com');
+
       return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
     } on SocketException catch (_) {
       return false;
@@ -218,9 +221,10 @@ class Helper {
       context: context,
       delegate: CustomSearchDelegate(ref: ref, screenIndex: screenIndex),
     );
-    log('did this get called?');
+    // log('did this get called?');
   }
 
+  // what is this?
   static void handleMoreVertPressed({
     required BuildContext context,
     required WidgetRef ref,
@@ -279,29 +283,48 @@ class Helper {
     );
   }
 
-  // TODO make use of this
-  static void handleSharePressed(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      builder: (context) => ShowModalBottomSheetBuilder(
-        actions: [
-          BuildAction(
-            Icons.reply_outlined,
-            'Share the video',
-            onTap: () {},
-          ),
-        ],
+  // TODO remove this
+  // static void handleSharePressed({
+  //   required BuildContext context,
+  //   required String videoId,
+  // }) {
+  //   Share.shareUri(
+  //     Uri.https(
+  //       'www.youtube.com',
+  //       '/watch',
+  //       {'v': videoId},
+  //     ),
+  //   );
+  //   // showModalBottomSheet(
+  //   //   context: context,
+  //   //   backgroundColor: Colors.transparent,
+  //   //   elevation: 0,
+  //   //   // builder: (context) => ShowModalBottomSheetBuilder(
+  //   //   //   actions: [
+  //   //   //     BuildAction(
+  //   //   //       Icons.reply_outlined,
+  //   //   //       'Share the video',
+  //   //   //       onTap: () {},
+  //   //   //     ),
+  //   //   //   ],
+  //   //   // ),
+  //   //   // builder: (context) => Share.shareUri(
+  //   //   //   Uri.https(authority),
+  //   //   // ),
+  //   // );
+  // }
+
+  static void share({
+    required BuildContext context,
+    required String videoId,
+  }) async {
+    Share.shareUri(
+      Uri.https(
+        'www.youtube.com',
+        '/watch',
+        {'v': videoId},
       ),
     );
-  }
-
-  static Future<void> share({
-    required BuildContext context,
-    required String link,
-  }) async {
-    await Share.share(link);
   }
 
   static Future<bool> requestPermission(Permission permission) async {
@@ -409,23 +432,25 @@ class Helper {
     return '${txt.replaceAll(RegExp(r'[^0-9]'), '')}p';
   }
 
-  static Future<void> showDownloadPressed({
+  static void showDownloadPressed({
     required BuildContext context,
     required WidgetRef ref,
     required String videoId,
   }) async {
     final videoUrl = explode.VideoId(videoId);
-    log('videoUrl: $videoUrl');
+    // log('videoUrl: $videoUrl');
 
     final qualities = ref.watch(
       videoQualityFP(videoUrl),
     );
 
-    log('qualities: $qualities');
+    // final qualities = await getVideoQualities(videoUrl);
+
+    // log('qualities: $qualities');
 
     if (!context.mounted) return;
 
-    await showDialog(
+    showDialog(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(
@@ -435,78 +460,91 @@ class Helper {
           child: Text('Select quality'),
         ),
         content: qualities.when(
-          data: (data) => Column(
-            mainAxisSize: MainAxisSize.min,
-            children: data
-                .map(
-                  (quality) => Card(
-                    shape: RoundedRectangleBorder(
-                      side: const BorderSide(
-                        color: Colors.grey,
-                        width: 1,
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: ListTile(
-                      dense: true,
-                      onTap: () async {
-                        await downloadVideo(
-                          videoId: videoUrl,
-                          quality: quality,
-                        );
+          data: (data) {
+            log('data state');
 
-                        Future.delayed(
-                          const Duration(seconds: 1),
-                        ).then(
-                          (value) => Navigator.of(context).pop(),
-                        );
-                      },
-                      leading: Icon(MdiIcons.youtube),
-                      trailing: const Icon(
-                        Icons.download,
-                        size: 20,
-                      ),
-                      title: Text(
-                        _qualityNameConvert(
-                          quality.toString(),
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: data
+                  .map(
+                    (quality) => Card(
+                      shape: RoundedRectangleBorder(
+                        side: const BorderSide(
+                          color: Colors.grey,
+                          width: 1,
                         ),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: ListTile(
+                        dense: true,
+                        onTap: () async {
+                          await downloadVideo(
+                            videoId: videoUrl,
+                            quality: quality,
+                          );
+
+                          Future.delayed(
+                            const Duration(seconds: 1),
+                          ).then(
+                            (value) => Navigator.of(context).pop(),
+                          );
+                        },
+                        leading: Icon(MdiIcons.youtube),
+                        trailing: const Icon(
+                          Icons.download,
+                          size: 20,
+                        ),
+                        title: Text(
+                          _qualityNameConvert(
+                            quality.toString(),
+                          ),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
+                  )
+                  .toList(),
+            );
+          },
+          error: (error, stackTrace) {
+            log('error state');
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: TextButton(
+                    // TODO make this work
+                    onPressed: () => ref.read(
+                      videoQualityFP(videoUrl),
+                    ),
+                    child: const Text('Retry'),
                   ),
-                )
-                .toList(),
-          ),
-          error: (error, stackTrace) => Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: TextButton(
-                  // TODO make this work
-                  onPressed: () => ref.read(
-                    videoQualityFP(videoUrl),
-                  ),
-                  child: const Text('Retry'),
                 ),
-              ),
-            ],
-          ),
-          loading: () => const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: CircularProgressIndicator(),
-              ),
-            ],
-          ),
+              ],
+            );
+          },
+          loading: () {
+            log('loading state');
+
+            return const Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
   }
 
+  // TODO use data from notifier here
   static void handleSavePressed(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -515,8 +553,8 @@ class Helper {
       builder: (context) => ShowModalBottomSheetBuilder(
         actions: [
           BuildAction(
-            Icons.reply_outlined,
-            'Share the video',
+            Icons.playlist_add_outlined,
+            'Save the video to playlist',
             onTap: () {},
           ),
         ],
@@ -535,10 +573,9 @@ class Helper {
       elevation: 0,
       builder: (context) => DraggableScrollableSheet(
         // TODO make this adaptive
-        initialChildSize: 0.68,
-        maxChildSize: 1,
-        // not sure this is the right value
-        minChildSize: 0.68,
+        initialChildSize: 0.67,
+        // maxChildSize: 1,
+        minChildSize: 0.6,
         builder: (context, scrollController) => Popover(
           isCommentsSection: true,
           child: Expanded(
@@ -546,18 +583,19 @@ class Helper {
               shrinkWrap: true,
               itemCount: commentsInfo.data.length,
               itemBuilder: (context, index) {
-                if (commentsInfo.disabled != null || commentsInfo.failure != null) {
-                  return const Center(
-                    child: Text('comments are private'),
-                  );
-                }
+                // if (commentsInfo.disabled != null || commentsInfo.failure != null) {
+                //   return const Center(
+                //     child: Text('comments are private'),
+                //   );
+                // }
 
-                final topLevelCommentSnippet =
-                    commentsInfo.data[index].snippet.topLevelComment.topLevelCommentSnippet;
-                final totalReplyCount = commentsInfo.data[index].snippet.totalReplyCount;
+                final snippet = commentsInfo.data[index].snippet;
+                final topLevelCommentSnippet = snippet.topLevelComment.topLevelCommentSnippet;
+                final totalReplyCount = snippet.totalReplyCount;
 
                 return CommentCard(
-                  author: topLevelCommentSnippet.authorDisplayName,
+                  channelId: topLevelCommentSnippet.authorChannelId,
+                  channelHandle: topLevelCommentSnippet.authorDisplayName,
                   text: topLevelCommentSnippet.textDisplay,
                   likeCount: topLevelCommentSnippet.likeCount,
                   replyCount: totalReplyCount,
@@ -866,6 +904,7 @@ class Helper {
 // *************************************************
 
 // TODO use this in the future
+// TODO delete this
 // @riverpod
 // WidgetMethods widgetMethodsProvider(WidgetRef ref, BuildContext context) {
 //   return WidgetMethods(ref: ref, context: context);

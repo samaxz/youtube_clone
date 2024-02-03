@@ -1,9 +1,11 @@
 import 'dart:developer';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:url_launcher/url_launcher.dart';
 import 'package:youtube_clone/data/info/base_info.dart';
 import 'package:youtube_clone/data/models/channel/channel_model.dart';
 import 'package:youtube_clone/data/models/comment_model.dart';
@@ -14,7 +16,8 @@ import 'package:youtube_clone/logic/notifiers/subscription_notifier.dart';
 import 'package:youtube_clone/logic/services/helper_class.dart';
 import 'package:youtube_clone/logic/notifiers/providers.dart';
 import 'package:youtube_clone/logic/services/custom_screen.dart';
-import 'package:youtube_clone/logic/notifiers/pushed_screens_notifier.dart';
+import 'package:youtube_clone/logic/services/theme_notifier.dart';
+
 import 'package:youtube_clone/ui/screens/channel_screen.dart';
 import 'package:youtube_clone/ui/widgets/comment_card.dart';
 import 'package:youtube_clone/ui/widgets/custom_inkwell.dart';
@@ -39,57 +42,125 @@ class VideoInfoTile extends ConsumerStatefulWidget {
 class _VideoInfoTileState extends ConsumerState<VideoInfoTile> {
   bool expanded = false;
 
+  TextSpan linkify(BuildContext context, String rawText) {
+    final spans = rawText.split(RegExp('(?=https?://|mailto:|tel:)')).indexed.expand((e) {
+      final (i, chunk) = e;
+      final index = i == 0 ? 0 : chunk.indexOf(RegExp('\\s|\\)|\$'));
+      final link = chunk.substring(0, index);
+      final isDarkTheme = ref.watch(themeNP);
+
+      return [
+        if (i != 0)
+          TextSpan(
+            text: link.replaceFirst(RegExp('^(mailto|tel):'), ''),
+            // style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            //       // decoration: TextDecoration.underline,
+            //       color: Theme.of(context).colorScheme.primary,
+            //     ),
+            style: const TextStyle(
+              // color: Theme.of(context).colorScheme.primary,
+              color: Colors.blue,
+              fontSize: 16,
+            ),
+            recognizer: TapGestureRecognizer()
+              ..onTap = () => launchUrl(
+                    Uri.parse(link),
+                  ),
+          ),
+        TextSpan(
+          text: chunk.substring(index),
+          style: TextStyle(
+            fontSize: 16,
+            color: isDarkTheme ? Colors.white : Colors.black,
+          ),
+          // style: Theme.of(context).textTheme.bodyLarge,
+        ),
+      ];
+    });
+
+    return TextSpan(
+      children: [...spans],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isDarkTheme = ref.watch(themeNP);
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ExpansionTile(
-          onExpansionChanged: (value) => setState(() => expanded = !expanded),
-          title: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              const SizedBox(height: 5),
-              Text(
-                widget.video.snippet.title,
-                textAlign: TextAlign.start,
-              ),
-              const SizedBox(height: 5),
-              Row(
+        Material(
+          color: Theme.of(context).cardColor,
+          // this removes the expansion tile's white line at the bottom
+          child: Theme(
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            child: ExpansionTile(
+              childrenPadding: EdgeInsets.zero,
+              tilePadding: const EdgeInsets.symmetric(horizontal: 8),
+              iconColor: isDarkTheme ? Colors.white : Colors.black,
+              collapsedIconColor: isDarkTheme ? Colors.white : Colors.black,
+              onExpansionChanged: (value) => setState(() => expanded = !expanded),
+              textColor: isDarkTheme ? Colors.white : Colors.black,
+              collapsedTextColor: isDarkTheme ? Colors.white : Colors.black,
+              title: Column(
                 children: [
-                  Text(
-                    widget.video.statistics?.viewCount != null
-                        ? '${Helper.numberFormatter(widget.video.statistics!.viewCount!)} views  •'
-                        : 'unknown views  •',
-                    style: Theme.of(context).textTheme.bodySmall!.copyWith(fontSize: 14),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      widget.video.snippet.title,
+                      textAlign: TextAlign.start,
+                    ),
                   ),
-                  const SizedBox(width: 5),
-                  Text(
-                    timeago.format(widget.video.snippet.publishedAt),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      Text(
+                        widget.video.statistics?.viewCount != null
+                            ? '${Helper.numberFormatter(widget.video.statistics!.viewCount!)} views  •'
+                            : 'unknown views  •',
+                        // style: Theme.of(context).textTheme.bodySmall!.copyWith(fontSize: 14),
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        timeago.format(widget.video.snippet.publishedAt),
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
-          trailing: expanded ? Icon(MdiIcons.menuUp) : Icon(MdiIcons.menuDown),
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(15),
-              child: Text(
-                widget.video.snippet.description,
-                style: const TextStyle(fontSize: 16),
-              ),
+              trailing: expanded ? Icon(MdiIcons.menuUp) : Icon(MdiIcons.menuDown),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 9, right: 9, bottom: 5),
+                  // child: Align(
+                  //   alignment: Alignment.centerLeft,
+                  //   child: Text(
+                  //     widget.video.snippet.description,
+                  //     style: const TextStyle(fontSize: 16),
+                  //   ),
+                  // ),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: RichText(
+                      text: linkify(context, widget.video.snippet.description),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-        const Divider(),
+        const Divider(height: 0),
         _ActionsRow(widget.video),
-        const Divider(),
+        const Divider(height: 0),
         _AuthorInfo(widget.channel),
-        const Divider(),
+        const Divider(height: 0),
         _CommentsSection(widget.commentsInfo),
-        const Divider(),
+        const Divider(height: 0),
       ],
     );
   }
@@ -139,7 +210,6 @@ class _ActionsRow extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // like,
               like ?? const CircularProgressIndicator(),
               const SizedBox(height: 5),
               Text(
@@ -157,7 +227,6 @@ class _ActionsRow extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // dislike,
               dislike ?? const CircularProgressIndicator(),
               const SizedBox(height: 5),
               const Text('Dislike'),
@@ -178,7 +247,8 @@ class _ActionsRow extends ConsumerWidget {
               Text('Share'),
             ],
           ),
-          onTap: () => Helper.handleSharePressed(context),
+          onTap: () => Helper.share(context: context, videoId: video.id),
+          onLongPress: () => Helper.share(context: context, videoId: video.id),
         ),
         CustomInkWell(
           child: const Column(
@@ -199,6 +269,13 @@ class _ActionsRow extends ConsumerWidget {
               videoId: video.id,
             );
           },
+          onLongPress: () {
+            Helper.showDownloadPressed(
+              context: context,
+              ref: ref,
+              videoId: video.id,
+            );
+          },
         ),
         CustomInkWell(
           child: const Column(
@@ -212,126 +289,148 @@ class _ActionsRow extends ConsumerWidget {
               Text('Save'),
             ],
           ),
-          onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('The video has been added to Watch Later'),
-            ),
-          ),
-          onLongPress: () => Helper.handleSavePressed(context),
+          onTap: () {
+            // TODO use a helper method here that will use notifier under the hood
+            ref.read(unauthAttemptSP.notifier).update((state) => true);
+          },
+          onLongPress: () {
+            // TODO use this in the future
+            // Helper.handleSavePressed(context);
+            ref.read(unauthAttemptSP.notifier).update((state) => true);
+          },
         ),
       ],
     );
   }
 }
 
-class _AuthorInfo extends ConsumerWidget {
+class _AuthorInfo extends ConsumerStatefulWidget {
   final Channel channel;
 
   const _AuthorInfo(this.channel);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // final index = ref.watch(currentScreenIndexSP);
-    // final subscription = ref.watch(subscriptionSNP);
-    final subscription = ref.watch(subscriptionNotifierProvider(channel.id)).last;
-    // final pushedScreens = ref.watch(
-    //   pushedScreensCNP.select(
-    //     (value) => value.screens[index]?.lastWhere(
-    //       (element) => true,
-    //       orElse: () => CustomScreen.initial(),
-    //     ),
-    //   ),
-    // );
+  ConsumerState createState() => _AuthorInfoState();
+}
+
+class _AuthorInfoState extends ConsumerState<_AuthorInfo> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(
+      () {
+        final notifier = ref.read(subscriptionNotifierProvider(widget.channel.id).notifier);
+        notifier.getSubscriptionState();
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final channel = widget.channel;
+    final subscription = ref.watch(subscriptionNotifierProvider(channel.id));
 
     final subscribed = subscription
         .whenData(
           (subscribed) => TextButton(
             onPressed: () {
               final notifier = ref.read(subscriptionNotifierProvider(channel.id).notifier);
-              notifier.getSubscriptionState();
+              notifier.changeSubscriptionState();
+            },
+            onLongPress: () {
+              final notifier = ref.read(subscriptionNotifierProvider(channel.id).notifier);
+              notifier.changeSubscriptionState();
             },
             // TODO change styles here when the user is subbed or unsubbed
-            child: Text((subscribed) ? 'Subscribed' : 'Subscribe'),
+            child: Text(subscribed ? 'SUBSCRIBED' : 'SUBSCRIBE'),
           ),
         )
         .valueOrNull;
 
-    // final screensManager = ref.watch(screensManagerProvider(index));
-
-    return GestureDetector(
-      // this is for detecting empty space - like spacer, so that
-      // it works with it
-      behavior: HitTestBehavior.opaque,
-      onTap: () {
-        // TODO uncomment this in the future if anything goes south
-        // ref.read(miniPlayerControllerP).animateToHeight(state: PanelState.min);
-        //
-        // if (pushedScreens!.screenTypeAndId.screenId == channel.id) return;
-        //
-        // final notifier = ref.read(pushedScreensCNP.notifier);
-        // notifier.pushScreen(
-        //   index: index,
-        //   screenTypeAndId: ScreenTypeAndId(
-        //     screenType: ScreenType.channel,
-        //     screenId: channel.id,
-        //   ),
-        // );
-
-        // if (screensManager.isNotEmpty &&
-        //     screensManager.last.screenTypeAndId.screenId == channel.id) {
-        //   return;
-        // }
-
-        // log('user pressed the channel icon on video info tile');
-
-        final index = ref.read(currentScreenIndexSP);
-        final notifier = ref.read(screensManagerProvider(index).notifier);
-        notifier.pushScreen(
-          CustomScreen.channel(
-            channelId: channel.id,
-            screenIndex: index,
-          ),
-        );
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: Row(
-          children: [
-            const CircleAvatar(
-              foregroundImage: AssetImage(Helper.defaultPfp),
-              backgroundColor: Colors.transparent,
+    return Material(
+      color: Theme.of(context).cardColor,
+      child: InkWell(
+        // this is for detecting empty space - like spacer, so that
+        // it works with it
+        // behavior: HitTestBehavior.opaque,
+        onTap: () {
+          final screenIndex = ref.read(currentScreenIndexSP);
+          final notifier = ref.read(screensManagerProvider(screenIndex).notifier);
+          notifier.pushScreen(
+            CustomScreen.channel(
+              channelId: channel.id,
+              screenIndex: screenIndex,
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Flexible(
-                    child: Text(
-                      channel.snippet.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 15),
-                    ),
-                  ),
-                  Flexible(
-                    child: Text(
-                      channel.statistics?.subscriberCount != null
-                          ? Helper.numberFormatter(
-                              channel.statistics!.subscriberCount,
-                            )
-                          : 'unknown',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall!.copyWith(fontSize: 14),
-                    ),
-                  ),
-                ],
+          );
+        },
+        onLongPress: () {
+          final screenIndex = ref.read(currentScreenIndexSP);
+          final notifier = ref.read(screensManagerProvider(screenIndex).notifier);
+          notifier.pushScreen(
+            CustomScreen.channel(
+              channelId: channel.id,
+              screenIndex: screenIndex,
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 4),
+          child: Row(
+            children: [
+              const CircleAvatar(
+                foregroundImage: AssetImage(Helper.defaultPfp),
+                backgroundColor: Colors.transparent,
               ),
-            ),
-            subscribed ?? const CircularProgressIndicator(),
-          ],
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        channel.snippet.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 15),
+                      ),
+                    ),
+                    Flexible(
+                      child: Text(
+                        channel.statistics?.subscriberCount != null
+                            ? Helper.numberFormatter(channel.statistics!.subscriberCount)
+                            : 'unknown',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodySmall!.copyWith(fontSize: 14),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              subscribed ?? const CircularProgressIndicator(),
+              // subscribed.when(
+              //   data: (subscribed) => TextButton(
+              //     onPressed: () {
+              //       final notifier = ref.read(subscriptionNotifierProvider(channel.id).notifier);
+              //       notifier.changeSubscriptionState();
+              //     },
+              //     // TODO change styles
+              //     child: Text((subscribed) ? 'SUBSCRIBED' : 'SUBSCRIBE'),
+              //   ),
+              //   error: (error, stackTrace) => TextButton(
+              //     onPressed: () {
+              //       final notifier = ref.read(subscriptionNotifierProvider(channel.id).notifier);
+              //       notifier.getSubscriptionState();
+              //     },
+              //     child: const Text('try again'),
+              //   ),
+              //   loading: () => const Center(
+              //     child: CircularProgressIndicator(),
+              //   ),
+              // ),
+            ],
+          ),
         ),
       ),
     );
@@ -361,19 +460,43 @@ class _CommentsSection extends ConsumerWidget {
 
     final snippet = commentsInfo.data.first.snippet;
     final topLevelCommentSnippet = snippet.topLevelComment.topLevelCommentSnippet;
-    final totalReplyCount = snippet.totalReplyCount;
 
-    return GestureDetector(
-      onTap: () => Helper.handleCommentsPressed(
-        context: context,
-        commentsInfo: commentsInfo,
-      ),
-      child: CommentCard(
-        author: topLevelCommentSnippet.authorDisplayName,
-        text: topLevelCommentSnippet.textDisplay,
-        likeCount: topLevelCommentSnippet.likeCount,
-        replyCount: totalReplyCount,
-        publishedTime: topLevelCommentSnippet.updatedAt,
+    return Material(
+      color: Theme.of(context).cardColor,
+      child: InkWell(
+        onTap: () => Helper.handleCommentsPressed(
+          context: context,
+          commentsInfo: commentsInfo,
+        ),
+        onLongPress: () => Helper.handleCommentsPressed(
+          context: context,
+          commentsInfo: commentsInfo,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              // color: Colors.grey.shade700,
+              // color: Theme.of(context).colorScheme.onSecondary,
+              // surfaceTint, surfaceVariant, secondaryContainer, primaryContainer (meh)
+              color: Theme.of(context).buttonTheme.colorScheme?.secondaryContainer,
+              // color: Theme.of(context).primaryColorDark,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  topLevelCommentSnippet.textDisplay.split('\n')[0],
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

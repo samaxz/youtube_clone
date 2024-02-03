@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:inview_notifier_list/inview_notifier_list.dart';
 import 'package:youtube_clone/logic/services/custom_screen.dart';
-import 'package:youtube_clone/logic/notifiers/pushed_screens_notifier.dart';
+
 import 'package:youtube_clone/logic/notifiers/rating_notifier.dart';
 import 'package:youtube_clone/logic/notifiers/screens_manager.dart';
 import 'package:youtube_clone/logic/notifiers/videos_notifier.dart';
@@ -32,14 +32,12 @@ class _HomeScreenBodyState extends ConsumerState<HomeScreenBody>
 
     final visibilityNotifier = ref.read(visibilitySNP.notifier);
     visibilityNotifier.toggleSelection(20);
-    // log('8) initHomeScreenBody() got called inside _HomeScreenBodyState`s initState()');
   }
 
   @override
   void initState() {
     super.initState();
     Future.microtask(init);
-    // log('7) _HomeScreenBodyState`s initState() got called');
   }
 
   int lastIndex = 0;
@@ -66,7 +64,7 @@ class _HomeScreenBodyState extends ConsumerState<HomeScreenBody>
       },
     );
 
-    log('can load next page: $canLoadNextPage');
+    // log('can load next page: $canLoadNextPage');
 
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
@@ -129,9 +127,9 @@ class _HomeScreenBodyState extends ConsumerState<HomeScreenBody>
                   builder: (context, isInView, child) => VideoTile(
                     elementAt: index,
                     video: videoInfo.data[index],
-                    // isInView: isInView && shouldAutoPlay,
+                    isInView: isInView && shouldAutoPlay,
                     // TODO remove this
-                    isInView: false,
+                    // isInView: false,
                   ),
                 );
               },

@@ -24,8 +24,7 @@ class ChannelSliverPersistentHeader extends ConsumerStatefulWidget {
 
 class _ChannelSliverPersistentHeaderState extends ConsumerState<ChannelSliverPersistentHeader> {
   Future<void> getSubbedState({bool isReloading = false}) async {
-    final notifier = ref.read(subscriptionNotifierProvider(widget.channel.id).notifier);
-    await notifier.getSubscriptionState(isReloading: isReloading);
+    // TODO call method for checking subbed state for shorts here
   }
 
   @override
@@ -36,7 +35,8 @@ class _ChannelSliverPersistentHeaderState extends ConsumerState<ChannelSliverPer
 
   @override
   Widget build(BuildContext context) {
-    final subbed = ref.watch(subscriptionNotifierProvider(widget.channel.id)).last;
+    // TODO change this in the future
+    const subbed = AsyncLoading();
     final isDarkTheme = ref.watch(themeNP);
 
     return SliverPersistentHeader(

@@ -247,11 +247,17 @@ final ytExplodeP = Provider(
 final videoQualityFP =
     FutureProvider.autoDispose.family<Set<explode.VideoQuality>, explode.VideoId>(
   (ref, videoUrl) async {
-    final ytExplode = ref.read(ytExplodeP);
+    // log('1: start of the future provider');
+    final ytExplode = ref.watch(ytExplodeP);
+    // log('2: ytExplode has been initialized');
     final manifest = await ytExplode.videos.streamsClient.getManifest(videoUrl);
-    // log('manifest: $manifest');
+    // log('3: manifest: $manifest');
     final videoQualities = manifest.muxed.getAllVideoQualities();
-    // log('video: $videoQualities');
+    // log('4: video: $videoQualities');
+
+    // ref.onDispose(() { videoQualities.cl});
+
+    // final videoQualities = await getVideoQualities(videoUrl);
 
     return videoQualities;
   },

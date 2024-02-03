@@ -7,7 +7,7 @@ part of 'shorts_details_notifier.dart';
 // **************************************************************************
 
 String _$shortsDetailsNotifierHash() =>
-    r'c9966ad2c2fe745671608114bb43c0d26818a345';
+    r'5eedf97cfa13b179abf6b2095ce475e366fec84e';
 
 /// Copied from Dart SDK
 class _SystemHash {

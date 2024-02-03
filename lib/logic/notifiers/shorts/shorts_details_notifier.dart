@@ -72,7 +72,7 @@ class ShortsDetailsNotifier extends _$ShortsDetailsNotifier {
       final success = AsyncData(
         VideoDetails(
           // UPD this is used for displaying channel data
-          channel: channel.rightOrDefault!,
+          channelInfo: channel.rightOrDefault!,
           comments: comments.rightOrDefault!,
         ),
       );

@@ -38,8 +38,8 @@ class _ChannelSubState extends ConsumerState<ChannelSubCard> with AutomaticKeepA
   Widget build(BuildContext context) {
     super.build(context);
 
-    // final subscribed = ref.watch(subscriptionSNP);
-    final subscribed = ref.watch(subscriptionNotifierProvider(widget.channelId)).last;
+    // TODO Change this in the future
+    const subscribed = AsyncLoading();
 
     return Padding(
       padding: const EdgeInsets.all(8),

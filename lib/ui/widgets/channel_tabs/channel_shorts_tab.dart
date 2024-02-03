@@ -4,16 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:youtube_clone/data/info/base_info.dart';
 import 'package:youtube_clone/data/info/base_info_state.dart';
 import 'package:youtube_clone/data/info/youtube_failure.dart';
-import 'package:youtube_clone/logic/notifiers/screens_manager.dart';
-import 'package:youtube_clone/logic/notifiers/providers.dart';
-import 'package:youtube_clone/logic/services/theme_notifier.dart';
 import 'package:youtube_clone/logic/notifiers/channel/channel_shorts_notifier.dart';
+import 'package:youtube_clone/logic/notifiers/screens_manager.dart';
 import 'package:youtube_clone/logic/services/custom_screen.dart';
-import 'package:youtube_clone/logic/notifiers/pushed_screens_list_notifier.dart';
-import 'package:youtube_clone/logic/notifiers/pushed_screens_notifier.dart';
-import 'package:youtube_clone/ui/widgets/channel_tabs/channel_shorts_card.dart';
+import 'package:youtube_clone/logic/services/theme_notifier.dart';
 import 'package:youtube_clone/ui/widgets/bodies/shorts_body.dart';
-import 'package:youtube_clone/ui/widgets/bodies/shorts_body_player.dart';
+import 'package:youtube_clone/ui/widgets/channel_tabs/channel_shorts_card.dart';
 
 class ChannelShortsTab extends ConsumerStatefulWidget {
   final int screenIndex;

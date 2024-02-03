@@ -46,8 +46,8 @@ class _SearchSubState extends ConsumerState<SearchSub> {
 
   @override
   Widget build(BuildContext context) {
-    // final subscribed = ref.watch(subscriptionSNP);
-    final subscribed = ref.watch(subscriptionNotifierProvider(widget.channelId)).last;
+    // TODO Change this in the future
+    const subscribed = AsyncLoading();
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -55,11 +55,6 @@ class _SearchSubState extends ConsumerState<SearchSub> {
       onLongPress: goToChannel,
       child: Column(
         children: [
-          // const Divider(
-          //   // height: 0,
-          //   thickness: 0.2,
-          //   color: Colors.white,
-          // ),
           Padding(
             padding: const EdgeInsets.all(8),
             child: Row(

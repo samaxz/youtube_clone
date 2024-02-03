@@ -41,7 +41,7 @@ class YoutubeService {
   Future<Either<YoutubeFailure, BaseInfo<Item>>> searchItems(
     String query, {
     String? pageToken,
-    String regionCode = 'RU',
+    String regionCode = 'US',
   }) async {
     try {
       final queryParameters = {
@@ -251,7 +251,7 @@ class YoutubeService {
   Future<Either<YoutubeFailure, BaseInfo<Video>>> getPopularVideos({
     String? pageToken,
     String maxResults = maxResults,
-    String regionCode = 'RU',
+    String regionCode = 'US',
     String videoCategoryId = '0',
   }) async {
     try {
@@ -314,7 +314,9 @@ class YoutubeService {
 
   // get video categories from popular videos, based on the
   // region code
-  Future<List<VideoCategory>> getVideoCategories({String regionCode = 'RU'}) async {
+  Future<List<VideoCategory>> getVideoCategories({
+    String regionCode = 'US',
+  }) async {
     try {
       final queryParameters = {
         'part': 'snippet',
@@ -335,7 +337,11 @@ class YoutubeService {
 
       return categories;
     } on DioException catch (e, st) {
-      log('dio caught exception inside getVideoCategories()', error: e, stackTrace: st);
+      log(
+        'dio caught exception inside getVideoCategories()',
+        error: e,
+        stackTrace: st,
+      );
 
       final failure = FailureData(
         code: e.response?.statusCode,

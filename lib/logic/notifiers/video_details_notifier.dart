@@ -14,10 +14,7 @@ import 'package:youtube_clone/logic/notifiers/providers.dart';
 
 part 'video_details_notifier.g.dart';
 
-// details for the video inside the mp
-// this can't be used for shorts, cause user can push to new
-// screens and the previous data won't be saved - so, for shorts,
-// i'll be using a list of AsyncValue<VideoDetails>
+// details for a video inside the mp
 @riverpod
 class VideoDetailsNotifier extends _$VideoDetailsNotifier {
   @override
@@ -27,10 +24,10 @@ class VideoDetailsNotifier extends _$VideoDetailsNotifier {
 
   bool shouldSkip = false;
 
-  void setFailureState() {
-    state = const AsyncError(
-      'Failed to load data',
-      StackTrace.empty,
+  void setFailureState(String message) {
+    state = AsyncError(
+      message,
+      StackTrace.current,
     );
   }
 
@@ -39,12 +36,6 @@ class VideoDetailsNotifier extends _$VideoDetailsNotifier {
     required String channelId,
   }) async {
     state = const AsyncLoading();
-
-    // if (shouldSkip) {
-    //   setFailureState();
-    //
-    //   return;
-    // }
 
     await ref.read(ratingNotifierProvider(videoId).notifier).getVideoRating();
 
@@ -75,7 +66,7 @@ class VideoDetailsNotifier extends _$VideoDetailsNotifier {
     } else {
       state = AsyncData(
         VideoDetails(
-          channel: channel.rightOrDefault!,
+          channelInfo: channel.rightOrDefault!,
           videoInfo: videosOrFailure.rightOrDefault!,
           comments: comments.rightOrDefault!,
         ),

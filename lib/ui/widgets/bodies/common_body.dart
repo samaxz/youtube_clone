@@ -44,8 +44,6 @@ class _CommonBodyState extends ConsumerState<CommonBody> {
         scrollController = ref.read(subsScrollControllerP);
       case 4:
         scrollController = ref.read(libScrollControllerP);
-      // default:
-      //   scrollController = ref.read(homeScrollControllerP);
     }
 
     return scrollController;
@@ -65,45 +63,52 @@ class _CommonBodyState extends ConsumerState<CommonBody> {
         body = const SubsScreenBody();
       case 4:
         body = const LibScreenBody();
-      // default:
-      //   body = const HomeScreenBody();
     }
 
-    log('setupBody() got called inside common body');
+    // log('setupBody() got called inside common body');
 
     return body;
   }
 
-  // late final Widget screenBody;
+  late final ScrollPhysics? scrollPhysics;
+  late final ScrollController scrollController;
+  late final bool displayExpandedHeight;
+  late final Widget screenBody;
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   // screenBody = setupBody();
-  // }
+  @override
+  void initState() {
+    super.initState();
+    scrollPhysics = setupScrollPhysics();
+    scrollController = setupScrollController();
+    displayExpandedHeight = setupDisplayingExpandedHeight();
+    screenBody = setupBody();
+  }
 
   @override
   Widget build(BuildContext context) {
     return NestedScrollView(
       // TODO remove this in the future, once i've implemented subs
       // and library screens
-      physics: setupScrollPhysics(),
+      // physics: setupScrollPhysics(),
+      physics: scrollPhysics,
       // controller: widget.scrollController,
-      controller: widget.scrollController ?? setupScrollController(),
+      // controller: widget.scrollController ?? setupScrollController(),
+      controller: scrollController,
       floatHeaderSlivers: true,
       headerSliverBuilder: (context, innerBoxIsScrolled) => [
         CustomSliverAppBar(
           // displayExpandedHeight: widget.displayExpandedHeight!,
-          displayExpandedHeight: setupDisplayingExpandedHeight(),
+          // displayExpandedHeight: setupDisplayingExpandedHeight(),
+          displayExpandedHeight: displayExpandedHeight,
           // displayExpandedHeight: widget.displayExpandedHeight ?? setupDisplayingExpandedHeight(),
           index: widget.index,
         ),
       ],
       // body: widget.body!,
       // body: widget.body ?? screenBody,
-      body: widget.body ?? setupBody(),
+      // body: widget.body ?? setupBody(),
+      body: screenBody,
       // body: setupBody(),
-      // body: screenBody,
     );
   }
 }

@@ -6,7 +6,7 @@ part of 'videos_notifier.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$videosNotifierHash() => r'266ba8120d95c1a219c84348936597bde2e1b48b';
+String _$videosNotifierHash() => r'89d76d5f73af3eb3b5b97f2771eb747ea7fcf4d1';
 
 /// See also [VideosNotifier].
 @ProviderFor(VideosNotifier)

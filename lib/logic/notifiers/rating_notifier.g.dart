@@ -6,7 +6,7 @@ part of 'rating_notifier.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$ratingNotifierHash() => r'80bf910b8fe7cd0e05abfe51d74eb024eaf876d2';
+String _$ratingNotifierHash() => r'df68f46f97f7797ba4e77e30f9f23239bf42a07f';
 
 /// Copied from Dart SDK
 class _SystemHash {
