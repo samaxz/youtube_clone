@@ -65,8 +65,6 @@ class _CommonBodyState extends ConsumerState<CommonBody> {
         body = const LibScreenBody();
     }
 
-    // log('setupBody() got called inside common body');
-
     return body;
   }
 
@@ -87,28 +85,16 @@ class _CommonBodyState extends ConsumerState<CommonBody> {
   @override
   Widget build(BuildContext context) {
     return NestedScrollView(
-      // TODO remove this in the future, once i've implemented subs
-      // and library screens
-      // physics: setupScrollPhysics(),
       physics: scrollPhysics,
-      // controller: widget.scrollController,
-      // controller: widget.scrollController ?? setupScrollController(),
       controller: scrollController,
       floatHeaderSlivers: true,
       headerSliverBuilder: (context, innerBoxIsScrolled) => [
         CustomSliverAppBar(
-          // displayExpandedHeight: widget.displayExpandedHeight!,
-          // displayExpandedHeight: setupDisplayingExpandedHeight(),
           displayExpandedHeight: displayExpandedHeight,
-          // displayExpandedHeight: widget.displayExpandedHeight ?? setupDisplayingExpandedHeight(),
           index: widget.index,
         ),
       ],
-      // body: widget.body!,
-      // body: widget.body ?? screenBody,
-      // body: widget.body ?? setupBody(),
       body: screenBody,
-      // body: setupBody(),
     );
   }
 }
