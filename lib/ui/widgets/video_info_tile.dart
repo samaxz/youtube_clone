@@ -71,9 +71,8 @@ class _VideoInfoTileState extends ConsumerState<VideoInfoTile> {
           text: chunk.substring(index),
           style: TextStyle(
             fontSize: 16,
-            color: isDarkTheme ? Colors.white : Colors.black,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
-          // style: Theme.of(context).textTheme.bodyLarge,
         ),
       ];
     });
@@ -99,11 +98,11 @@ class _VideoInfoTileState extends ConsumerState<VideoInfoTile> {
             child: ExpansionTile(
               childrenPadding: EdgeInsets.zero,
               tilePadding: const EdgeInsets.symmetric(horizontal: 8),
-              iconColor: isDarkTheme ? Colors.white : Colors.black,
-              collapsedIconColor: isDarkTheme ? Colors.white : Colors.black,
+              // iconColor: isDarkTheme ? Colors.white : Colors.black,
+              // collapsedIconColor: isDarkTheme ? Colors.white : Colors.black,
               onExpansionChanged: (value) => setState(() => expanded = !expanded),
-              textColor: isDarkTheme ? Colors.white : Colors.black,
-              collapsedTextColor: isDarkTheme ? Colors.white : Colors.black,
+              // textColor: isDarkTheme ? Colors.white : Colors.black,
+              // collapsedTextColor: isDarkTheme ? Colors.white : Colors.black,
               title: Column(
                 children: [
                   Align(
@@ -176,28 +175,32 @@ class _ActionsRow extends ConsumerWidget {
     final rating = ref.watch(ratingFP(video));
     final like = rating
         .whenData((value) => value.maybeWhen(
-              orElse: () => const Icon(
+              orElse: () => Icon(
                 Icons.thumb_up_off_alt_outlined,
                 size: 28,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
-              liked: () => const Icon(
+              liked: () => Icon(
                 Icons.thumb_up,
                 size: 28,
-                color: Colors.white,
+                // color: Colors.white,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ))
         .valueOrNull;
 
     final dislike = rating
         .whenData((value) => value.maybeWhen(
-              orElse: () => const Icon(
+              orElse: () => Icon(
                 Icons.thumb_down_off_alt_outlined,
                 size: 28,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
-              liked: () => const Icon(
+              liked: () => Icon(
                 Icons.thumb_down,
                 size: 28,
-                color: Colors.white,
+                // color: Colors.white,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ))
         .valueOrNull;
@@ -236,30 +239,32 @@ class _ActionsRow extends ConsumerWidget {
           onLongPress: () => ref.read(ratingNotifierProvider(video.id).notifier).dislike(),
         ),
         CustomInkWell(
-          child: const Column(
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 Icons.reply_outlined,
                 size: 30,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
-              SizedBox(height: 5),
-              Text('Share'),
+              const SizedBox(height: 5),
+              const Text('Share'),
             ],
           ),
           onTap: () => Helper.share(context: context, videoId: video.id),
           onLongPress: () => Helper.share(context: context, videoId: video.id),
         ),
         CustomInkWell(
-          child: const Column(
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 Icons.download_outlined,
                 size: 30,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
-              SizedBox(height: 5),
-              Text('Download'),
+              const SizedBox(height: 5),
+              const Text('Download'),
             ],
           ),
           onTap: () {
@@ -278,15 +283,17 @@ class _ActionsRow extends ConsumerWidget {
           },
         ),
         CustomInkWell(
-          child: const Column(
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 Icons.library_add_outlined,
                 size: 30,
+                // secondary is ok
+                color: Theme.of(context).colorScheme.onSurface,
               ),
-              SizedBox(height: 5),
-              Text('Save'),
+              const SizedBox(height: 5),
+              const Text('Save'),
             ],
           ),
           onTap: () {
@@ -327,6 +334,7 @@ class _AuthorInfoState extends ConsumerState<_AuthorInfo> {
 
   @override
   Widget build(BuildContext context) {
+    // TODO remove this
     final channel = widget.channel;
     final subscription = ref.watch(subscriptionNotifierProvider(channel.id));
 
