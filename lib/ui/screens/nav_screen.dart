@@ -344,7 +344,8 @@ class _NavScreenState extends ConsumerState<NavScreen> {
                       }
                     }
                   },
-                  unselectedItemColor: isDarkTheme ? Colors.white : Colors.black,
+                  // unselectedItemColor: isDarkTheme ? Colors.white : Colors.black,
+                  unselectedItemColor: Theme.of(context).colorScheme.onSurface,
                   selectedFontSize: 10,
                   unselectedFontSize: 10,
                   items: const [
@@ -397,7 +398,8 @@ class _NavScreenState extends ConsumerState<NavScreen> {
                   child: Icon(
                     Icons.add_circle_outline_sharp,
                     size: 40,
-                    color: isDarkTheme ? Colors.white : Colors.black,
+                    // color: isDarkTheme ? Colors.white : Colors.black,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ],
