@@ -109,6 +109,7 @@ class _HomeScreenBodyState extends ConsumerState<HomeScreenBody>
                     builder: (context, isInView, child) => VideoTile(
                       video: videoInfo.data[index],
                       isInView: isInView && shouldAutoPlay,
+                      elementAt: index,
                     ),
                   );
                 } else {
@@ -140,6 +141,7 @@ class _HomeScreenBodyState extends ConsumerState<HomeScreenBody>
                     builder: (context, isInView, child) => VideoTile(
                       video: videoInfo.data[index],
                       isInView: isInView && shouldAutoPlay,
+                      elementAt: index,
                     ),
                   );
                 } else {
