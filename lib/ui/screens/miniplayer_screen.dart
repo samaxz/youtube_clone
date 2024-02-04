@@ -1,6 +1,4 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pod_player/pod_player.dart';
@@ -45,17 +43,6 @@ class _MiniplayerScreenState extends ConsumerState<MiniplayerScreen> {
       videoId: widget.video.id,
       channelId: widget.video.snippet.channelId,
     );
-
-    // final subsNotifier =
-    //     ref.read(subscriptionNotifierProvider(widget.video.snippet.channelId).notifier);
-
-    // await Future.wait([
-    //   videoDetailsNotifier.loadDetails(
-    //     videoId: widget.video.id,
-    //     channelId: widget.video.snippet.channelId,
-    //   ),
-    //   subsNotifier.getSubscriptionState(),
-    // ]);
   }
 
   Future<void> reloadData() async {
@@ -66,8 +53,6 @@ class _MiniplayerScreenState extends ConsumerState<MiniplayerScreen> {
     ref.invalidate(subscriptionNotifierProvider);
 
     final videoDetailsNotifier = ref.read(videoDetailsNotifierProvider.notifier);
-    // final subsNotifier =
-    //     ref.read(subscriptionNotifierProvider(widget.video.snippet.channelId).notifier);
 
     await Future.wait([
       videoDetailsNotifier.loadDetails(
@@ -79,7 +64,6 @@ class _MiniplayerScreenState extends ConsumerState<MiniplayerScreen> {
           'https://youtu.be/${widget.video.id}',
         ),
       ),
-      // subsNotifier.getSubscriptionState(),
     ]);
 
     playerController.play();
@@ -117,7 +101,6 @@ class _MiniplayerScreenState extends ConsumerState<MiniplayerScreen> {
           loadDetails(),
         ]),
       );
-      log('video has been changed and didUpdateWidget() got called again');
     }
   }
 
@@ -140,6 +123,12 @@ class _MiniplayerScreenState extends ConsumerState<MiniplayerScreen> {
       max: playerMaxHeight,
       value: widget.height,
     );
+    final height = Helper.valueFromPercentageInRange(
+          min: playerMinHeight,
+          max: playerMaxHeight,
+          percentage: value,
+        ) /
+        30;
 
     // this is used to avoid overflow when player in full screen
     return value > 2
@@ -169,6 +158,33 @@ class _MiniplayerScreenState extends ConsumerState<MiniplayerScreen> {
                               controller: playerController,
                               matchVideoAspectRatioToFrame: true,
                               alwaysShowProgressBar: true,
+                              onVideoError: () => AspectRatio(
+                                aspectRatio: 16 / 9,
+                                child: Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.warning,
+                                        color: Colors.yellow,
+                                        size: height,
+                                      ),
+                                      const SizedBox(height: 20),
+                                      Flexible(
+                                        child: SizedBox(
+                                          // TODO change this
+                                          height: height,
+                                          child: Text(
+                                            playerController.videoPlayerValue?.errorDescription ??
+                                                'error happened while loading video',
+                                            style: const TextStyle(color: Colors.red),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                               overlayBuilder:
                                   value < 0.96 ? (options) => const SizedBox.shrink() : null,
                             ),
