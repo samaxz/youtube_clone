@@ -245,8 +245,9 @@ class _VideoTileState extends ConsumerState<VideoTile> with AutomaticKeepAliveCl
                                   : '',
                               style: Theme.of(context)
                                   .textTheme
-                                  .bodySmall!
-                                  .copyWith(color: Colors.white),
+                                  .bodySmall
+                                  ?.copyWith(color: Colors.white),
+                              // .copyWith(color: Theme.of(context).colorScheme.onSurface),
                             ),
                           ),
                         ),
@@ -303,7 +304,11 @@ class _VideoTileState extends ConsumerState<VideoTile> with AutomaticKeepAliveCl
                         ),
                         GestureDetector(
                           onTap: handleMoreVertPressed,
-                          child: const Icon(Icons.more_vert, size: 20),
+                          child: Icon(
+                            Icons.more_vert,
+                            size: 20,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                         ),
                       ],
                     ),
