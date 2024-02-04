@@ -61,7 +61,10 @@ class _CustomSliverAppBarState extends ConsumerState<CustomSliverAppBar> {
                             right: 16,
                           ),
                           child: FilterButton(
-                            item: Icon(MdiIcons.compassOutline),
+                            item: Icon(
+                              MdiIcons.compassOutline,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
                             id: '',
                             index: index,
                             isFirst: true,
@@ -95,10 +98,7 @@ class _CustomSliverAppBarState extends ConsumerState<CustomSliverAppBar> {
                             selectedPosition: _selectedIndex,
                             color: _selectedIndex == index ? Colors.black : null,
                             onTap: (index) {
-                              log('hold on a sec, does this get called?');
-                              setState(() {
-                                _selectedIndex = index;
-                              });
+                              setState(() => _selectedIndex = index);
                               ref.invalidate(videosNotifierProvider);
                               ref.read(videosNotifierProvider.notifier).getVideos(newCategoryId: 0);
                             },
@@ -127,10 +127,7 @@ class _CustomSliverAppBarState extends ConsumerState<CustomSliverAppBar> {
                           index: index,
                           selectedPosition: _selectedIndex,
                           onTap: (index) {
-                            setState(() {
-                              _selectedIndex = index;
-                            });
-                            log('or does this get called?');
+                            setState(() => _selectedIndex = index);
                             ref.invalidate(videosNotifierProvider);
                             ref
                                 .read(videosNotifierProvider.notifier)
@@ -155,7 +152,7 @@ class _CustomSliverAppBarState extends ConsumerState<CustomSliverAppBar> {
         IconButton(
           icon: Icon(
             Icons.cast,
-            color: isDarkTheme ? Colors.white : Colors.black,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
           onPressed: () => showModalBottomSheet(
             context: context,
@@ -170,7 +167,10 @@ class _CustomSliverAppBarState extends ConsumerState<CustomSliverAppBar> {
                     children: [
                       IconButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.clear),
+                        icon: Icon(
+                          Icons.clear,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
                       const Spacer(),
                     ],
@@ -190,7 +190,7 @@ class _CustomSliverAppBarState extends ConsumerState<CustomSliverAppBar> {
         IconButton(
           icon: Icon(
             Icons.notifications_outlined,
-            color: isDarkTheme ? Colors.white : Colors.black,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
           onPressed: () => Navigator.of(context).push(
             MaterialPageRoute(
@@ -201,7 +201,7 @@ class _CustomSliverAppBarState extends ConsumerState<CustomSliverAppBar> {
         IconButton(
           icon: Icon(
             Icons.search,
-            color: isDarkTheme ? Colors.white : Colors.black,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
           onPressed: () => Helper.handleShowSearch(
             context: context,
@@ -230,7 +230,10 @@ class _CustomSliverAppBarState extends ConsumerState<CustomSliverAppBar> {
                       children: [
                         IconButton(
                           onPressed: () => Navigator.pop(context),
-                          icon: const Icon(Icons.clear),
+                          icon: Icon(
+                            Icons.clear,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                         ),
                         const Spacer(),
                       ],
@@ -243,11 +246,9 @@ class _CustomSliverAppBarState extends ConsumerState<CustomSliverAppBar> {
                           const Text('Dark mode:'),
                           Switch(
                             value: isDarkTheme,
-                            onChanged: (value) async {
-                              setState(() {
-                                isDarkTheme = !isDarkTheme;
-                              });
-                              await ref.read(themeNP.notifier).toggleTheme();
+                            onChanged: (value) {
+                              setState(() => isDarkTheme = !isDarkTheme);
+                              ref.read(themeNP.notifier).toggleTheme();
                             },
                           ),
                         ],
