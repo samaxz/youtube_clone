@@ -84,7 +84,7 @@ class _VideoInfoTileState extends ConsumerState<VideoInfoTile> {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkTheme = ref.watch(themeNP);
+    // final isDarkTheme = ref.watch(themeNP);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -98,8 +98,8 @@ class _VideoInfoTileState extends ConsumerState<VideoInfoTile> {
             child: ExpansionTile(
               childrenPadding: EdgeInsets.zero,
               tilePadding: const EdgeInsets.symmetric(horizontal: 8),
-              // iconColor: isDarkTheme ? Colors.white : Colors.black,
-              // collapsedIconColor: isDarkTheme ? Colors.white : Colors.black,
+              iconColor: Theme.of(context).iconTheme.color,
+              collapsedIconColor: Theme.of(context).iconTheme.color,
               onExpansionChanged: (value) => setState(() => expanded = !expanded),
               // textColor: isDarkTheme ? Colors.white : Colors.black,
               // collapsedTextColor: isDarkTheme ? Colors.white : Colors.black,

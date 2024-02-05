@@ -65,7 +65,11 @@ class _ChannelScreenState extends ConsumerState<ChannelScreen> with TickerProvid
         appBar: AppBar(
           leading: IconButton(
             onPressed: Navigator.of(context).pop,
-            icon: const Icon(Icons.chevron_left, size: 31),
+            icon: Icon(
+              Icons.chevron_left,
+              size: 31,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
         ),
         body: const Center(

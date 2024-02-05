@@ -160,12 +160,12 @@ class _ChannelSliverPersistentHeaderState extends ConsumerState<ChannelSliverPer
                     highlightColor: Colors.grey.shade300,
                     child: SizedBox(
                       width: MediaQuery.of(context).size.width - 10,
-                      child: TextButton(
-                        style: const ButtonStyle(
+                      child: const TextButton(
+                        style: ButtonStyle(
                           backgroundColor: MaterialStatePropertyAll(Colors.white),
                         ),
-                        onPressed: () {},
-                        child: const SizedBox.shrink(),
+                        onPressed: null,
+                        child: SizedBox.shrink(),
                       ),
                     ),
                   ),
