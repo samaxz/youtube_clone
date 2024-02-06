@@ -53,6 +53,11 @@ class Uploads {
     required this.videos,
     required this.shorts,
   });
+
+  @override
+  String toString() {
+    return 'Uploads{videos: $videos, shorts: $shorts}';
+  }
 }
 
 // TODO delete this and use the one above
@@ -64,6 +69,11 @@ class VideoTypes {
     required this.videos,
     required this.shorts,
   });
+
+  @override
+  String toString() {
+    return 'VideoTypes{videos: $videos, shorts: $shorts}';
+  }
 }
 
 class Helper {
@@ -97,20 +107,12 @@ class Helper {
       BuildAction(
         Icons.file_download_outlined,
         'Download video',
-        onTap: () => showDownloadPressed(
-          context: context,
-          ref: ref,
-          videoId: videoId,
-        ),
+        onTap: () => showDownloadPressed(context: context, ref: ref, videoId: videoId),
       ),
       BuildAction(
         Icons.share,
         'Share',
-        onTap: () => share(
-          context: context,
-          // videoId: 'https://youtu.be/$videoId',
-          videoId: videoId,
-        ),
+        onTap: () => share(context: context, videoId: videoId),
       ),
       BuildAction(
         Icons.block,

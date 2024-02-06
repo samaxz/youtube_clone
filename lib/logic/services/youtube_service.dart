@@ -364,17 +364,18 @@ class YoutubeService {
     try {
       final popularVideosOrFailure = await getPopularVideos(pageToken: pageToken);
       final popularVideosBaseInfo = popularVideosOrFailure.rightOrDefault!;
-      final popularVideos = popularVideosOrFailure.rightOrDefault!.data;
-
-      final shorts = <Video>[];
-
-      // TODO refactor this
-      await _getShortsFromVideos(
-        videos: popularVideos,
-        nextPageToken: pageToken,
-      ).then(
-        (value) => shorts.addAll(value.rightOrDefault!.videos),
-      );
+      // TODO delete this
+      // final popularVideos = popularVideosOrFailure.rightOrDefault!.data;
+      //
+      // final shorts = <Video>[];
+      //
+      // // TODO refactor this
+      // await _getShortsFromVideos(
+      //   videos: popularVideos,
+      //   nextPageToken: pageToken,
+      // ).then(
+      //   (value) => shorts.addAll(value.rightOrDefault!.videos),
+      // );
 
       return right(popularVideosBaseInfo);
     } on DioException catch (e, st) {
@@ -398,7 +399,7 @@ class YoutubeService {
   }
 
   // this is a separate method just for getting uploads from
-  // a channel
+  // a channel, used on home tab of the channel screen
   Future<Uploads> getChannelUploads(String channelId) async {
     final videosId = channelId.replaceRange(0, 2, 'UULF');
     final videos = await getPlaylistVideos(videosId);
@@ -412,6 +413,7 @@ class YoutubeService {
     );
   }
 
+  // used for getting videos for channel
   Future<List<Video>> getPlaylistVideos(
     String playlistId, {
     String maxResults = '7',
@@ -428,22 +430,31 @@ class YoutubeService {
         playlistItemsEnd,
         queryParameters,
       );
+
       final response = await _dio.getUri(url);
+      final error = response.data['error'] as Map<String, dynamic>?;
+
+      if (error != null) {
+        final failure = FailureData(
+          code: error['code'],
+          message: error['message'],
+        );
+
+        throw YoutubeFailure(failure);
+      }
 
       // this is the playlist
       final playlistItemsRaw = response.data['items'] as List;
       final playlistItems = playlistItemsRaw
           .map((playlistItemRaw) => PlaylistItem.fromJson(playlistItemRaw))
           .toList();
-      final List<String> playlistVideosIds = [];
+      final playlistVideosIds = <String>[];
 
       for (final element in playlistItems) {
         playlistVideosIds.add(element.contentDetails.videoId!);
       }
 
-      final playlistVideosOrFailure = await _getListOfVideoDetails(
-        playlistVideosIds,
-      );
+      final playlistVideosOrFailure = await _getListOfVideoDetails(playlistVideosIds);
       final playlistVideos = playlistVideosOrFailure.rightOrDefault!;
 
       return playlistVideos;
@@ -488,8 +499,11 @@ class YoutubeService {
       );
 
       final response = await _dio.getUri(url);
-      final videosResponse =
-          (response.data['items'] as List).map((video) => Video.fromJson(video)).toList();
+      final videosResponse = (response.data['items'] as List)
+          .map(
+            (video) => Video.fromJson(video),
+          )
+          .toList();
 
       return right(videosResponse);
     } on DioException catch (e, st) {
@@ -651,8 +665,10 @@ class YoutubeService {
         channelsEnd,
         queryParameters,
       );
+      // log('url: $url');
 
       final response = await _dio.getUri(url);
+      // log('response: $response');
       final channelRaw = response.data['items'] as List;
       final channel = Channel.fromJson(channelRaw.first);
 
@@ -966,6 +982,17 @@ class YoutubeService {
       );
 
       final response = await _dio.getUri(url);
+      final error = response.data['error'] as Map<String, dynamic>?;
+
+      if (error != null) {
+        final failure = FailureData(
+          code: error['code'],
+          message: error['message'],
+        );
+
+        throw YoutubeFailure(failure);
+      }
+
       final playlistsRaw = List<Map<String, dynamic>>.from(
         response.data['items']?[0]?['playlistSections']?[0]?['playlists'],
       );
@@ -1009,6 +1036,17 @@ class YoutubeService {
       );
 
       final response = await _dio.getUri(url);
+      final error = response.data['error'] as Map<String, dynamic>?;
+
+      if (error != null) {
+        final failure = FailureData(
+          code: error['code'],
+          message: error['message'],
+        );
+
+        throw YoutubeFailure(failure);
+      }
+
       final communityPostsRaw = List<Map<String, dynamic>>.from(
         response.data['items']?[0]?['community'],
       );
@@ -1052,11 +1090,24 @@ class YoutubeService {
         'channels',
         queryParameters,
       );
+      // log('url: $url');
+
       final response = await _dio.getUri(url);
+      final error = response.data['error'] as Map<String, dynamic>?;
+
+      if (error != null) {
+        final failure = FailureData(
+          code: error['code'],
+          message: error['message'],
+        );
+
+        throw YoutubeFailure(failure);
+      }
+
+      // log('response: $response');
       final channelSubsRaw = List<Map<String, dynamic>>.from(
         response.data['items']?[0]?['channelSections'][0]['sectionChannels'],
       );
-
       final channelSubs = channelSubsRaw
           .map(
             (rawSub) => ChannelSubscription.fromJson(rawSub),
@@ -1078,9 +1129,12 @@ class YoutubeService {
 
       if (e.isNoConnectionError) {
         throw const NoConnectionFailure();
-      } else if (e.response?.statusCode == 404) {
-        return [];
-      } else {
+      }
+      // TODO remove this
+      // else if (e.response?.statusCode == 404) {
+      //   return [];
+      // }
+      else {
         throw YoutubeFailure(failure);
       }
     }
@@ -1099,6 +1153,17 @@ class YoutubeService {
       );
 
       final response = await _dio.getUri(url);
+      final error = response.data['error'] as Map<String, dynamic>?;
+
+      if (error != null) {
+        final failure = FailureData(
+          code: error['code'],
+          message: error['message'],
+        );
+
+        throw YoutubeFailure(failure);
+      }
+
       final aboutRaw = Map<String, dynamic>.from(
         response.data['items']?[0]?['about'],
       );
