@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:youtube_clone/data/models/channel/channel_subscription_new.dart';
+import 'package:youtube_clone/logic/notifiers/channel/channel_subs_notifier.dart';
 import 'package:youtube_clone/logic/notifiers/subscription_notifier.dart';
 import 'package:youtube_clone/logic/services/helper_class.dart';
 import 'package:youtube_clone/logic/notifiers/providers.dart';
 
 class ChannelSubCard extends ConsumerStatefulWidget {
   final ChannelSubscription sub;
-  final String channelId;
+  final int screenIndex;
 
   const ChannelSubCard({
     super.key,
     required this.sub,
-    required this.channelId,
+    required this.screenIndex,
   });
 
   @override
@@ -24,7 +25,7 @@ class _ChannelSubState extends ConsumerState<ChannelSubCard> with AutomaticKeepA
   bool get wantKeepAlive => true;
 
   Future<void> getSubbedState() async {
-    final notifier = ref.read(subscriptionNotifierProvider(widget.channelId).notifier);
+    final notifier = ref.read(subscriptionNotifierProvider(widget.sub.channelId).notifier);
     await notifier.getSubscriptionState();
   }
 
@@ -65,7 +66,7 @@ class _ChannelSubState extends ConsumerState<ChannelSubCard> with AutomaticKeepA
                 data: (data) => GestureDetector(
                   onTap: () {
                     final notifier =
-                        ref.read(subscriptionNotifierProvider(widget.channelId).notifier);
+                        ref.read(subscriptionNotifierProvider(widget.sub.channelId).notifier);
                     notifier.changeSubscriptionState();
                   },
                   child: Text(
@@ -76,7 +77,6 @@ class _ChannelSubState extends ConsumerState<ChannelSubCard> with AutomaticKeepA
                     ),
                   ),
                 ),
-                // TODO finish these states
                 error: (error, stackTrace) => Center(
                   child: TextButton(
                     onPressed: getSubbedState,
