@@ -6,12 +6,12 @@ import 'package:youtube_clone/ui/widgets/channel_tabs/channel_playlist_card.dart
 
 class ChannelPlaylistsTab extends ConsumerStatefulWidget {
   final String channelId;
-  final int index;
+  final int screenIndex;
 
   const ChannelPlaylistsTab({
     super.key,
     required this.channelId,
-    required this.index,
+    required this.screenIndex,
   });
 
   @override
@@ -24,7 +24,7 @@ class _PlaylistsChannelTabState extends ConsumerState<ChannelPlaylistsTab>
   bool get wantKeepAlive => true;
 
   Future<void> loadPlaylists({bool isReloading = false}) async {
-    final notifier = ref.read(channelPlaylistsNotifierProvider(widget.index).notifier);
+    final notifier = ref.read(channelPlaylistsNotifierProvider(widget.screenIndex).notifier);
     await notifier.getChannelPlaylists(widget.channelId, isReloading: isReloading);
   }
 
@@ -40,7 +40,7 @@ class _PlaylistsChannelTabState extends ConsumerState<ChannelPlaylistsTab>
   Widget build(BuildContext context) {
     super.build(context);
 
-    final playlists = ref.watch(channelPlaylistsNotifierProvider(widget.index)).last;
+    final playlists = ref.watch(channelPlaylistsNotifierProvider(widget.screenIndex)).last;
 
     return playlists.when(
       data: (playlists) {
@@ -71,30 +71,33 @@ class _PlaylistsChannelTabState extends ConsumerState<ChannelPlaylistsTab>
 
             return ChannelPlaylistCard(
               playlist: playlists[index - 1],
-              index: widget.index,
+              index: widget.screenIndex,
             );
           },
         );
       },
       error: (error, stackTrace) {
         final failure = error as YoutubeFailure;
+        final code = failure.failureData.code;
 
         return Center(
-          child: TextButton(
-            onPressed: () => loadPlaylists(isReloading: true),
-            child: const Text('Tap to retry'),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (code == 403) ...[
+                const Text('too many requests, try again later'),
+              ] else if (code == 404) ...[
+                const Text('oops, looks like it`s empty'),
+              ] else ...[
+                const Text('unknown error, try again later'),
+              ],
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () => loadPlaylists(isReloading: true),
+                child: const Text('tap to retry'),
+              ),
+            ],
           ),
-          // child: Column(
-          //   mainAxisSize: MainAxisSize.min,
-          //   children: [
-          //     Text('Error: ${error.failureData.message}'),
-          //     const SizedBox(height: 10),
-          //     ElevatedButton(
-          //       onPressed: () => getPlaylists(isReloading: true),
-          //       child: const Text('Tap to retry'),
-          //     ),
-          //   ],
-          // ),
         );
       },
       loading: () => const Center(

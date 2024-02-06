@@ -87,30 +87,30 @@ class _ChannelHomeTabState extends ConsumerState<ChannelHomeTab>
               );
             },
             error: (error, stackTrace) {
-              // final failure = error as YoutubeFailure;
+              final failure = error as YoutubeFailure;
+              final code = failure.failureData.code;
 
               return SliverToBoxAdapter(
                 child: Center(
                   child: Padding(
                     padding: const EdgeInsets.only(top: 90),
-                    child: TextButton(
-                      onPressed: () => loadHomeVids(isReloading: true),
-                      child: const Text('Tap to retry'),
+                    child: Column(
+                      children: [
+                        if (code == 403) ...[
+                          const Text('too many requests, try again later'),
+                        ] else if (code == 404) ...[
+                          const Text('oops, looks like it`s empty'),
+                        ] else ...[
+                          const Text('unknown error, try again later'),
+                        ],
+                        const SizedBox(height: 10),
+                        ElevatedButton(
+                          onPressed: () => loadHomeVids(isReloading: true),
+                          child: const Text('tap to retry'),
+                        ),
+                      ],
                     ),
                   ),
-                  // child: Padding(
-                  //   padding: const EdgeInsets.only(top: 90),
-                  //   child: Column(
-                  //     children: [
-                  //       Text('Error: ${error.failureData.message}'),
-                  //       const SizedBox(height: 10),
-                  //       ElevatedButton(
-                  //         onPressed: loadHomeVids,
-                  //         child: const Text('Tap to retry'),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
                 ),
               );
             },

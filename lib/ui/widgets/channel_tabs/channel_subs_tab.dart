@@ -6,12 +6,12 @@ import 'package:youtube_clone/ui/widgets/channel_tabs/channel_sub_card.dart';
 
 class ChannelSubsTab extends ConsumerStatefulWidget {
   final String channelId;
-  final int index;
+  final int screenIndex;
 
   const ChannelSubsTab({
     super.key,
     required this.channelId,
-    required this.index,
+    required this.screenIndex,
   });
 
   @override
@@ -24,7 +24,7 @@ class _ChannelSubsTabState extends ConsumerState<ChannelSubsTab>
   bool get wantKeepAlive => true;
 
   Future<void> loadSubs({bool isReloading = false}) async {
-    final notifier = ref.read(channelSubsNotifierProvider(widget.index).notifier);
+    final notifier = ref.read(channelSubsNotifierProvider(widget.screenIndex).notifier);
     await notifier.getChannelSubs(widget.channelId, isReloading: isReloading);
   }
 
@@ -38,7 +38,7 @@ class _ChannelSubsTabState extends ConsumerState<ChannelSubsTab>
   Widget build(BuildContext context) {
     super.build(context);
 
-    final subs = ref.watch(channelSubsNotifierProvider(widget.index)).last;
+    final subs = ref.watch(channelSubsNotifierProvider(widget.screenIndex)).last;
 
     return subs.when(
       data: (data) {
@@ -51,30 +51,36 @@ class _ChannelSubsTabState extends ConsumerState<ChannelSubsTab>
         return ListView.builder(
           padding: const EdgeInsets.only(top: 50),
           itemCount: data.length,
-          itemBuilder: (context, index) => ChannelSubCard(
-            sub: data[index],
-            channelId: data[index].channelId,
-          ),
+          itemBuilder: (context, index) {
+            return ChannelSubCard(
+              sub: data[index],
+              screenIndex: widget.screenIndex,
+            );
+          },
         );
       },
       error: (error, stackTrace) {
         final failure = error as YoutubeFailure;
+        final code = failure.failureData.code;
 
         return Center(
-          child: TextButton(
-            onPressed: () => loadSubs(isReloading: true),
-            child: const Text('Tap to retry'),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (code == 403) ...[
+                const Text('too many requests, try again later'),
+              ] else if (code == 404) ...[
+                const Text('oops, looks like it`s empty'),
+              ] else ...[
+                const Text('unknown error, try again later'),
+              ],
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () => loadSubs(isReloading: true),
+                child: const Text('tap to retry'),
+              ),
+            ],
           ),
-          // child: Column(
-          //   mainAxisSize: MainAxisSize.min,
-          //   children: [
-          //     const SizedBox(height: 10),
-          //     ElevatedButton(
-          //       onPressed: loadSubs,
-          //       child: const Text('Tap to retry'),
-          //     ),
-          //   ],
-          // ),
         );
       },
       loading: () => const Center(

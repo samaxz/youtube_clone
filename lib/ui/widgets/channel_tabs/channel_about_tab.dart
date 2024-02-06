@@ -10,12 +10,12 @@ import 'package:youtube_clone/logic/notifiers/channel/channel_about_notifier.dar
 
 class ChannelAboutTab extends ConsumerStatefulWidget {
   final String channelId;
-  final int index;
+  final int screenIndex;
 
   const ChannelAboutTab({
     super.key,
     required this.channelId,
-    required this.index,
+    required this.screenIndex,
   });
 
   @override
@@ -28,7 +28,7 @@ class _ChannelSubsTabState extends ConsumerState<ChannelAboutTab>
   bool get wantKeepAlive => true;
 
   Future<void> loadAbout({bool isReloading = false}) async {
-    final notifier = ref.read(channelAboutNotifierProvider(widget.index).notifier);
+    final notifier = ref.read(channelAboutNotifierProvider(widget.screenIndex).notifier);
     await notifier.getAbout(widget.channelId, isReloading: isReloading);
   }
 
@@ -42,13 +42,12 @@ class _ChannelSubsTabState extends ConsumerState<ChannelAboutTab>
   Widget build(BuildContext context) {
     super.build(context);
 
-    final about = ref.watch(channelAboutNotifierProvider(widget.index)).last;
+    final about = ref.watch(channelAboutNotifierProvider(widget.screenIndex)).last;
 
     return about.when(
       data: (data) => ListView(
         padding: const EdgeInsets.fromLTRB(10, 55, 10, 10),
         children: [
-          // const SizedBox(height: 55),
           if (data.description != null) ...[
             const Text(
               'Description',
@@ -191,24 +190,28 @@ class _ChannelSubsTabState extends ConsumerState<ChannelAboutTab>
       ),
       error: (error, stackTrace) {
         final failure = error as YoutubeFailure;
+        final code = failure.failureData.code;
 
         return Center(
-          // child: Column(
-          //   mainAxisSize: MainAxisSize.min,
-          //   children: [
-          //     Text('Error: ${error.failureData.message}'),
-          //     const SizedBox(height: 10),
-          //     ElevatedButton(
-          //       onPressed: getAbout,
-          //       child: const Text('Tap to retry'),
-          //     ),
-          //   ],
-          // ),
+          // TODO probably delete this in the future
           child: Padding(
-            padding: const EdgeInsets.only(top: 90),
-            child: TextButton(
-              onPressed: () => loadAbout(isReloading: true),
-              child: const Text('tap to retry'),
+            padding: const EdgeInsets.only(top: 30),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (code == 403) ...[
+                  const Text('too many requests, try again later'),
+                ] else if (code == 404) ...[
+                  const Text('oops, looks like it`s empty'),
+                ] else ...[
+                  const Text('unknown error, try again later'),
+                ],
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () => loadAbout(isReloading: true),
+                  child: const Text('tap to retry'),
+                ),
+              ],
             ),
           ),
         );

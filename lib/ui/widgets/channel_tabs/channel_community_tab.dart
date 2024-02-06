@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:youtube_clone/data/info/youtube_failure.dart';
-import 'package:youtube_clone/logic/notifiers/providers.dart';
 import 'package:youtube_clone/logic/notifiers/channel/channel_community_posts_notifier.dart';
 import 'package:youtube_clone/ui/widgets/community_post.dart';
 
 class ChannelCommunityTab extends ConsumerStatefulWidget {
   final String channelId;
-  final int index;
+  final int screenIndex;
 
   const ChannelCommunityTab({
     super.key,
     required this.channelId,
-    required this.index,
+    required this.screenIndex,
   });
 
   @override
@@ -25,7 +24,7 @@ class _ChannelCommunityTabState extends ConsumerState<ChannelCommunityTab>
   bool get wantKeepAlive => true;
 
   Future<void> loadPosts({bool isReloading = false}) async {
-    final notifier = ref.read(channelCommunityNotifierProvider(widget.index).notifier);
+    final notifier = ref.read(channelCommunityNotifierProvider(widget.screenIndex).notifier);
     await notifier.getCommunityPosts(widget.channelId, isReloading: isReloading);
   }
 
@@ -39,7 +38,7 @@ class _ChannelCommunityTabState extends ConsumerState<ChannelCommunityTab>
   Widget build(BuildContext context) {
     super.build(context);
 
-    final posts = ref.watch(channelCommunityNotifierProvider(widget.index)).last;
+    final posts = ref.watch(channelCommunityNotifierProvider(widget.screenIndex)).last;
 
     return posts.when(
       data: (data) => ListView.separated(
@@ -48,28 +47,31 @@ class _ChannelCommunityTabState extends ConsumerState<ChannelCommunityTab>
         itemCount: data.length,
         itemBuilder: (context, index) => CommunityPost(
           communityPost: data[index],
-          index: widget.index,
+          index: widget.screenIndex,
         ),
       ),
       error: (error, stackTrace) {
         final failure = error as YoutubeFailure;
+        final code = failure.failureData.code;
 
         return Center(
-          child: TextButton(
-            onPressed: () => loadPosts(isReloading: true),
-            child: const Text('Tap to retry'),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (code == 403) ...[
+                const Text('too many requests, try again later'),
+              ] else if (code == 404) ...[
+                const Text('oops, looks like it`s empty'),
+              ] else ...[
+                const Text('unknown error, try again later'),
+              ],
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () => loadPosts(isReloading: true),
+                child: const Text('tap to retry'),
+              ),
+            ],
           ),
-          // child: Column(
-          //   mainAxisSize: MainAxisSize.min,
-          //   children: [
-          //     Text('Error: ${error.failureData.message}'),
-          //     const SizedBox(height: 10),
-          //     ElevatedButton(
-          //       onPressed: getPosts,
-          //       child: const Text('Tap to retry'),
-          //     ),
-          //   ],
-          // ),
         );
       },
       loading: () => const Center(

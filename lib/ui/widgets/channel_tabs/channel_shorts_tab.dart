@@ -57,11 +57,7 @@ class _ChannelShortsTabState extends ConsumerState<ChannelShortsTab>
         if (!shorts.isLoading && !shorts.hasError && shorts.hasValue && shorts.value!.isNotEmpty)
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.only(
-                top: 55,
-                left: 5,
-                bottom: 10,
-              ),
+              padding: const EdgeInsets.only(top: 55, left: 5, bottom: 10),
               child: Row(
                 children: filters
                     .mapIndexed(
@@ -71,19 +67,6 @@ class _ChannelShortsTabState extends ConsumerState<ChannelShortsTab>
                           final notifier =
                               ref.read(channelShortsNotifierProvider(widget.screenIndex).notifier);
                           notifier.switchCategory(index == 1);
-
-                          // if (index == 0) {
-                          //   notifier.getShorts(
-                          //     index: widget.index,
-                          //     channelId: widget.channelId,
-                          //     addState: false,
-                          //   );
-                          // } else {
-                          //   notifier.getPopularShorts(
-                          //     index: widget.index,
-                          //     channelId: widget.channelId,
-                          //   );
-                          // }
                         },
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -229,6 +212,7 @@ class _ChannelShortsTabState extends ConsumerState<ChannelShortsTab>
           },
           error: (error, stackTrace) {
             final failure = error as YoutubeFailure;
+            final code = failure.failureData.code;
 
             return SliverToBoxAdapter(
               child: Padding(
@@ -236,11 +220,17 @@ class _ChannelShortsTabState extends ConsumerState<ChannelShortsTab>
                 child: Center(
                   child: Column(
                     children: [
-                      Text('Error: ${error.failureData.message}'),
+                      if (code == 403) ...[
+                        const Text('too many requests, try again later'),
+                      ] else if (code == 404) ...[
+                        const Text('oops, looks like it`s empty'),
+                      ] else ...[
+                        const Text('unknown error, try again later'),
+                      ],
                       const SizedBox(height: 10),
                       ElevatedButton(
                         onPressed: () => loadShorts(isReloading: true),
-                        child: const Text('Tap to retry'),
+                        child: const Text('tap to retry'),
                       ),
                     ],
                   ),
