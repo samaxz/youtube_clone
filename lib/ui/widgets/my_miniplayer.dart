@@ -1,6 +1,7 @@
 library miniplayer;
 
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -41,7 +42,8 @@ class Miniplayer extends StatefulWidget {
 
   ///Deprecated
   @Deprecated(
-      "Migrate onDismiss to onDismissed as onDismiss will be used differently in a future version.")
+    "Migrate onDismiss to onDismissed as onDismiss will be used differently in a future version.",
+  )
   final Function? onDismiss;
 
   ///If onDismissed is set, the miniplayer can be dismissed
@@ -51,7 +53,7 @@ class Miniplayer extends StatefulWidget {
   final MiniplayerController? controller;
 
   const Miniplayer({
-    Key? key,
+    super.key,
     required this.minHeight,
     required this.maxHeight,
     required this.builder,
@@ -63,7 +65,7 @@ class Miniplayer extends StatefulWidget {
     this.onDismiss,
     this.onDismissed,
     this.controller,
-  }) : super(key: key);
+  });
 
   @override
   State<Miniplayer> createState() => _MiniplayerState();
@@ -108,6 +110,8 @@ class _MiniplayerState extends State<Miniplayer> with TickerProviderStateMixin {
 
   @override
   void initState() {
+    super.initState();
+
     if (widget.valueNotifier == null) {
       heightNotifier = ValueNotifier(widget.minHeight);
     } else {
@@ -129,7 +133,7 @@ class _MiniplayerState extends State<Miniplayer> with TickerProviderStateMixin {
       onDismissed = widget.onDismiss;
     }
 
-    super.initState();
+    // log('initState() got called inside my miniplayer`s state');
   }
 
   @override
@@ -141,14 +145,17 @@ class _MiniplayerState extends State<Miniplayer> with TickerProviderStateMixin {
       widget.controller!.removeListener(controllerListener);
     }
 
+    // log('dispose() got called inside my miniplayer`s state');
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // if (dismissed) {
-    //   return Container();
-    // }
+    if (dismissed) {
+      // return Container();
+      // log('dismissed');
+    }
 
     return Consumer(
       builder: (context, ref, _) => MiniplayerWillPopScope(
@@ -226,9 +233,12 @@ class _MiniplayerState extends State<Miniplayer> with TickerProviderStateMixin {
                           ),
                         ),
                       ),
-                      onTap: () => _snapToPosition(
-                        _dragHeight != widget.maxHeight ? PanelState.max : PanelState.min,
-                      ),
+                      onTap: () {
+                        _snapToPosition(
+                          _dragHeight != widget.maxHeight ? PanelState.max : PanelState.min,
+                        );
+                        // log('onTap()');
+                      },
                       onPanStart: (details) {
                         _startHeight = _dragHeight;
                         updateCount = 0;
@@ -329,6 +339,8 @@ class _MiniplayerState extends State<Miniplayer> with TickerProviderStateMixin {
         ),
       );
 
+      // log('percentage down: $percentageDown');
+
       if (dragDownPercentage.value != percentageDown) {
         dragDownPercentage.value = percentageDown;
       }
@@ -338,6 +350,7 @@ class _MiniplayerState extends State<Miniplayer> with TickerProviderStateMixin {
         setState(() {
           dismissed = true;
         });
+        // log('dismissed = true');
       }
     }
   }

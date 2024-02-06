@@ -1,4 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pod_player/pod_player.dart';
@@ -90,7 +92,7 @@ class _MiniplayerScreenState extends ConsumerState<MiniplayerScreen> {
   void didUpdateWidget(covariant MiniplayerScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.video.id != oldWidget.video.id) {
+    if (mounted && widget.video.id != oldWidget.video.id) {
       Future.microtask(
         () => Future.wait([
           playerController.changeVideo(
@@ -101,15 +103,22 @@ class _MiniplayerScreenState extends ConsumerState<MiniplayerScreen> {
           loadDetails(),
         ]),
       );
+      // log('didUpdateWidget() got called');
     }
   }
 
   @override
   void dispose() {
-    playerController.dispose();
-    scrollController.dispose();
-    ref.invalidate(videoDetailsNotifierProvider);
-    ref.invalidate(subscriptionNotifierProvider);
+    if (!mounted) {
+      // TODO probably delete these
+      // ref.invalidate(videoDetailsNotifierProvider);
+      // ref.invalidate(subscriptionNotifierProvider);
+
+      playerController.dispose();
+      scrollController.dispose();
+    }
+
+    // log('dispose() got called inside miniplayer screen`s state');
 
     super.dispose();
   }

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:youtube_clone/data/models/video/video_model.dart';
@@ -31,6 +33,13 @@ class _CustomMiniplayerState extends ConsumerState<CustomMiniplayer> {
   }
 
   @override
+  void dispose() {
+    log('dispose() got called inside custom miniplayer`s state');
+
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final miniplayerController = ref.watch(miniPlayerControllerP);
 
@@ -40,6 +49,7 @@ class _CustomMiniplayerState extends ConsumerState<CustomMiniplayer> {
         // without this, the mp doesn't dismiss
         ref.read(miniPlayerControllerP).animateToHeight(state: PanelState.dismiss);
         ref.read(selectedVideoSP.notifier).update((state) => null);
+        // log('onDismissed() got called inside custom miniplayer`s state');
       },
       controller: miniplayerController,
       minHeight: playerMinHeight,
