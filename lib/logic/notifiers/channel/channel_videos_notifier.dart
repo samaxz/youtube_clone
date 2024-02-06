@@ -27,9 +27,11 @@ class ChannelVideosNotifier extends _$ChannelVideosNotifier {
     required String videosId,
     String maxResults = '20',
   }) async {
-    log('channel id: $channelId');
+    state = List.from(state);
+
+    // log('channel id: $channelId');
     final newVideosId = channelId.replaceRange(0, 2, videosId);
-    log('new videos id: $newVideosId');
+    // log('new videos id: $newVideosId');
 
     final service = ref.read(youtubeServiceP);
     final videos = await AsyncValue.guard(
@@ -90,19 +92,6 @@ class ChannelVideosNotifier extends _$ChannelVideosNotifier {
 
     await _loadVideos(videosId: 'UULF');
   }
-
-  // this is for the popular videos filter on the
-  // channel's videos tab (i think so, at least)
-  // Future<void> getPopularVideos() async {
-  //   state.last = const AsyncLoading();
-  //
-  //   final popVidsId = channelId.replaceRange(0, 2, 'UULP');
-  //   final popVids = await AsyncValue.guard(
-  //     () => service.getPlaylistVideos(popVidsId, maxResults: '20'),
-  //   );
-  //
-  //   state.last = popVids;
-  // }
 
   Future<void> switchVideos(bool isPopular) async {
     state.last = const AsyncLoading();

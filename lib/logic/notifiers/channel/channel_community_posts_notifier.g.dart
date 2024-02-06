@@ -7,7 +7,7 @@ part of 'channel_community_posts_notifier.dart';
 // **************************************************************************
 
 String _$channelCommunityNotifierHash() =>
-    r'2a1b196e4fa4ef66838c7fb268c7a92aa00d91e6';
+    r'd10051cd989e1816efd8530149c292eb9715c3c6';
 
 /// Copied from Dart SDK
 class _SystemHash {

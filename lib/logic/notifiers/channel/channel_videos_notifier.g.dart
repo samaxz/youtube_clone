@@ -7,7 +7,7 @@ part of 'channel_videos_notifier.dart';
 // **************************************************************************
 
 String _$channelVideosNotifierHash() =>
-    r'e006de4a8a4772f215db0c7e0c05a87d36665808';
+    r'0e95a37a3d4126ff2aec8b67813d30b6f4824dc1';
 
 /// Copied from Dart SDK
 class _SystemHash {

@@ -50,6 +50,7 @@ class ChannelInfoNotifier extends _$ChannelInfoNotifier {
     final channelInfo = await AsyncValue.guard(
       () => service.getChannelInfo(channelId),
     );
+    // log('channel info: $channelInfo');
     state.last = channelInfo;
 
     state = List.from(state);

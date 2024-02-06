@@ -27,6 +27,8 @@ class ChannelPlaylistsNotifier extends _$ChannelPlaylistsNotifier {
       state.add(const AsyncLoading());
     }
 
+    state = List.from(state);
+
     final service = ref.read(youtubeServiceP);
     final playlists = await AsyncValue.guard(
       () => service.getChannelPlaylists(channelId),

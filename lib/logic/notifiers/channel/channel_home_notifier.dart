@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:youtube_clone/logic/services/helper_class.dart';
 import 'package:youtube_clone/logic/notifiers/providers.dart';
@@ -24,10 +26,15 @@ class ChannelHomeNotifier extends _$ChannelHomeNotifier {
       state.add(const AsyncLoading());
     }
 
+    // this could be inside isReloading
+    // TODO move this inside isReloading
+    state = List.from(state);
+
     final service = ref.read(youtubeServiceP);
     final uploads = await AsyncValue.guard(
       () => service.getChannelUploads(channelId),
     );
+    log('uploads: $uploads');
     state.last = uploads;
 
     state = List.from(state);

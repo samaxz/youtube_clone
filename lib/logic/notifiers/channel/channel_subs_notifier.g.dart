@@ -7,7 +7,7 @@ part of 'channel_subs_notifier.dart';
 // **************************************************************************
 
 String _$channelSubsNotifierHash() =>
-    r'53d30038431e05ac03154dcf862819b7fd6b17fb';
+    r'45be35482e23958dce0aebf745105945065536f6';
 
 /// Copied from Dart SDK
 class _SystemHash {

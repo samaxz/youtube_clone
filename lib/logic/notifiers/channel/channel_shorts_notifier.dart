@@ -26,6 +26,8 @@ class ChannelShortsNotifier extends _$ChannelShortsNotifier {
     required String shortsId,
     String maxResults = '20',
   }) async {
+    state = List.from(state);
+
     final newShortsId = channelId.replaceRange(0, 2, shortsId);
     final shorts = await AsyncValue.guard(
       () => service.getPlaylistVideos(newShortsId, maxResults: maxResults),

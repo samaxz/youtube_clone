@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:developer';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:youtube_clone/data/models/channel/channel_subscription_new.dart';
 import 'package:youtube_clone/logic/notifiers/providers.dart';
@@ -25,10 +25,14 @@ class ChannelSubsNotifier extends _$ChannelSubsNotifier {
       state.add(const AsyncLoading());
     }
 
+    // TODO add this to every other channel tab notifier that uses list
+    state = List.from(state);
+
     final service = ref.read(youtubeServiceP);
     final subs = await AsyncValue.guard(
       () => service.getChannelSubscriptions(channelId),
     );
+    // log('subs: $subs');
     state.last = subs;
 
     state = List.from(state);

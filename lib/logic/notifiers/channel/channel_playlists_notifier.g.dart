@@ -7,7 +7,7 @@ part of 'channel_playlists_notifier.dart';
 // **************************************************************************
 
 String _$channelPlaylistsNotifierHash() =>
-    r'ebe0268da11996f2ab30bdf85d4c00ee7dcb58d8';
+    r'b101cc99005a82d62f3275cd1ab9e4bf6a4de02c';
 
 /// Copied from Dart SDK
 class _SystemHash {

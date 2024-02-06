@@ -25,6 +25,8 @@ class ChannelAboutNotifier extends _$ChannelAboutNotifier {
       state.add(const AsyncLoading());
     }
 
+    state = List.from(state);
+
     final service = ref.read(youtubeServiceP);
     final about = await AsyncValue.guard(
       () => service.getChannelAbout(channelId),

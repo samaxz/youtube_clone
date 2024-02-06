@@ -7,7 +7,7 @@ part of 'channel_home_notifier.dart';
 // **************************************************************************
 
 String _$channelHomeNotifierHash() =>
-    r'85198b137f8ac528409894113b1b8a2ebb2fef9a';
+    r'c294887095ab650eda7d0bc2870c069e4dfa9f6c';
 
 /// Copied from Dart SDK
 class _SystemHash {

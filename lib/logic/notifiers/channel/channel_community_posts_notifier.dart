@@ -25,6 +25,8 @@ class ChannelCommunityNotifier extends _$ChannelCommunityNotifier {
       state.add(const AsyncLoading());
     }
 
+    state = List.from(state);
+
     final service = ref.read(youtubeServiceP);
     final posts = await AsyncValue.guard(
       () => service.getChannelCommunityPosts(channelId),
