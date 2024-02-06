@@ -171,6 +171,8 @@ class _VideoTileState extends ConsumerState<VideoTile> with AutomaticKeepAliveCl
                 }
 
                 widget.onTap?.call();
+
+                // log('user clicked on video tile');
               },
               onLongPress: () {
                 handleMoreVertPressed();
@@ -280,9 +282,6 @@ class _VideoTileState extends ConsumerState<VideoTile> with AutomaticKeepAliveCl
                                   widget.video.snippet.title,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
-                                  // style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                                  //       fontSize: 15,
-                                  //     ),
                                   style: const TextStyle(fontSize: 15),
                                 ),
                               ),
@@ -292,10 +291,6 @@ class _VideoTileState extends ConsumerState<VideoTile> with AutomaticKeepAliveCl
                                   '${widget.video.snippet.channelTitle} • ${widget.video.statistics?.viewCount != null ? Helper.numberFormatter(widget.video.statistics!.viewCount!) : 'unknown'} views • ${timeago.format(widget.video.snippet.publishedAt)}',
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
-                                  // style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                                  //       fontSize: 14,
-                                  //       color: isDarkTheme ? Colors.white70 : Colors.black,
-                                  //     ),
                                   style: const TextStyle(fontSize: 13),
                                 ),
                               ),

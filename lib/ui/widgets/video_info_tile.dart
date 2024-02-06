@@ -47,18 +47,12 @@ class _VideoInfoTileState extends ConsumerState<VideoInfoTile> {
       final (i, chunk) = e;
       final index = i == 0 ? 0 : chunk.indexOf(RegExp('\\s|\\)|\$'));
       final link = chunk.substring(0, index);
-      final isDarkTheme = ref.watch(themeNP);
 
       return [
         if (i != 0)
           TextSpan(
             text: link.replaceFirst(RegExp('^(mailto|tel):'), ''),
-            // style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            //       // decoration: TextDecoration.underline,
-            //       color: Theme.of(context).colorScheme.primary,
-            //     ),
             style: const TextStyle(
-              // color: Theme.of(context).colorScheme.primary,
               color: Colors.blue,
               fontSize: 16,
             ),
@@ -84,8 +78,6 @@ class _VideoInfoTileState extends ConsumerState<VideoInfoTile> {
 
   @override
   Widget build(BuildContext context) {
-    // final isDarkTheme = ref.watch(themeNP);
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,8 +93,6 @@ class _VideoInfoTileState extends ConsumerState<VideoInfoTile> {
               iconColor: Theme.of(context).iconTheme.color,
               collapsedIconColor: Theme.of(context).iconTheme.color,
               onExpansionChanged: (value) => setState(() => expanded = !expanded),
-              // textColor: isDarkTheme ? Colors.white : Colors.black,
-              // collapsedTextColor: isDarkTheme ? Colors.white : Colors.black,
               title: Column(
                 children: [
                   Align(
@@ -135,13 +125,6 @@ class _VideoInfoTileState extends ConsumerState<VideoInfoTile> {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(left: 9, right: 9, bottom: 5),
-                  // child: Align(
-                  //   alignment: Alignment.centerLeft,
-                  //   child: Text(
-                  //     widget.video.snippet.description,
-                  //     style: const TextStyle(fontSize: 16),
-                  //   ),
-                  // ),
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: RichText(

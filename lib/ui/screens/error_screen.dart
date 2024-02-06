@@ -28,10 +28,12 @@ class ErrorScreen extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // TODO delete this and use ifs like on channel tabs
                 const Text('Error happened:'),
                 const SizedBox(height: 10),
                 Text(
                   failure.when(
+                    // TODO handle null here
                     (failureData) => failure.failureData.message.toString(),
                     noConnection: (failureData) => failureData.message != null
                         ? failureData.message!
@@ -49,7 +51,7 @@ class ErrorScreen extends ConsumerWidget {
                     ),
                   ),
                   onPressed: onError,
-                  child: const Text('Tap to retry'),
+                  child: const Text('tap to retry'),
                 ),
               ],
             ),
