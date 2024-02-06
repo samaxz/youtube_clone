@@ -56,7 +56,7 @@ class ChannelSliverAppbar extends ConsumerWidget {
                   const Expanded(
                     child: Center(
                       child: Text(
-                        'I don`t thinkg i`m gonna implement this to begin with',
+                        'I don`t think i`m gonna implement this to begin with',
                       ),
                     ),
                   ),

@@ -89,6 +89,8 @@ class _ChannelScreenState extends ConsumerState<ChannelScreen> with TickerProvid
               index: widget.screenIndex,
             ),
             ChannelSliverPersistentHeader(
+              screenIndex: widget.screenIndex,
+              channelId: widget.channelId,
               channel: data,
               onAboutPressed: () => tabController.animateTo(6),
             ),
@@ -104,7 +106,7 @@ class _ChannelScreenState extends ConsumerState<ChannelScreen> with TickerProvid
               ),
               ChannelVideosTab(
                 channelId: widget.channelId,
-                index: widget.screenIndex,
+                screenIndex: widget.screenIndex,
               ),
               ChannelShortsTab(
                 channelId: widget.channelId,
@@ -112,19 +114,19 @@ class _ChannelScreenState extends ConsumerState<ChannelScreen> with TickerProvid
               ),
               ChannelPlaylistsTab(
                 channelId: widget.channelId,
-                index: widget.screenIndex,
+                screenIndex: widget.screenIndex,
               ),
               ChannelCommunityTab(
                 channelId: widget.channelId,
-                index: widget.screenIndex,
+                screenIndex: widget.screenIndex,
               ),
               ChannelSubsTab(
                 channelId: widget.channelId,
-                index: widget.screenIndex,
+                screenIndex: widget.screenIndex,
               ),
               ChannelAboutTab(
                 channelId: widget.channelId,
-                index: widget.screenIndex,
+                screenIndex: widget.screenIndex,
               ),
             ],
           ),

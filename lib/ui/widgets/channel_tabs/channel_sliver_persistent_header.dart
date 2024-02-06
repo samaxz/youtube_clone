@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:youtube_clone/data/models/channel/channel_model.dart';
+import 'package:youtube_clone/logic/notifiers/channel/channel_subs_notifier.dart';
+import 'package:youtube_clone/logic/notifiers/channel/channel_subscription_notifier.dart';
 import 'package:youtube_clone/logic/notifiers/subscription_notifier.dart';
 import 'package:youtube_clone/logic/services/helper_class.dart';
 import 'package:youtube_clone/logic/notifiers/providers.dart';
@@ -11,11 +13,15 @@ import 'package:youtube_clone/ui/widgets/channel_tabs/channel_custom_sliver_head
 class ChannelSliverPersistentHeader extends ConsumerStatefulWidget {
   final Channel channel;
   final VoidCallback onAboutPressed;
+  final int screenIndex;
+  final String channelId;
 
   const ChannelSliverPersistentHeader({
     super.key,
     required this.channel,
     required this.onAboutPressed,
+    required this.screenIndex,
+    required this.channelId,
   });
 
   @override
@@ -24,7 +30,11 @@ class ChannelSliverPersistentHeader extends ConsumerStatefulWidget {
 
 class _ChannelSliverPersistentHeaderState extends ConsumerState<ChannelSliverPersistentHeader> {
   Future<void> getSubbedState({bool isReloading = false}) async {
-    // TODO call method for checking subbed state for shorts here
+    final notifier = ref.read(channelSubscriptionNotifierProvider(
+      screenIndex: widget.screenIndex,
+      channelId: widget.channelId,
+    ).notifier);
+    await notifier.getSubscriptionState(isReloading: isReloading);
   }
 
   @override
@@ -35,8 +45,12 @@ class _ChannelSliverPersistentHeaderState extends ConsumerState<ChannelSliverPer
 
   @override
   Widget build(BuildContext context) {
-    // TODO change this in the future
-    const subbed = AsyncLoading();
+    final subbed = ref
+        .watch(channelSubscriptionNotifierProvider(
+          screenIndex: widget.screenIndex,
+          channelId: widget.channelId,
+        ))
+        .last;
     final isDarkTheme = ref.watch(themeNP);
 
     return SliverPersistentHeader(
