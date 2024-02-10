@@ -327,7 +327,7 @@ class _MiniplayerScreenState extends ConsumerState<MiniplayerScreen> {
                           video: videos[index - 1],
                           isInView: false,
                           maximize: false,
-                          elementAt: index - 1,
+                          videoIndex: index - 1,
                           onTap: () {
                             Future.wait([
                               playerController.changeVideo(
