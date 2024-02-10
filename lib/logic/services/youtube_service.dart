@@ -16,6 +16,7 @@ import 'package:youtube_clone/data/models/playlist_model_new.dart' as playlist_n
 import 'package:youtube_clone/data/models/video/video_category_model.dart';
 import 'package:youtube_clone/data/models/video/video_model.dart';
 import 'package:youtube_clone/env/env.dart';
+import 'package:youtube_clone/data/info/common_classes.dart';
 import 'package:youtube_clone/logic/services/dio.dart';
 import 'package:youtube_clone/logic/services/either_extension.dart';
 import 'package:youtube_clone/logic/services/helper_class.dart';
@@ -58,9 +59,12 @@ class YoutubeService {
         searchEnd,
         queryParameters,
       );
+      log('items url: $url');
 
       final response = await _dio.getUri(url);
       final items = List.from(response.data['items']);
+
+      // log('items: $items');
 
       final videoIds = <String>[];
       final playlistIds = <String>[];
@@ -77,6 +81,8 @@ class YoutubeService {
           channelIds.add(element['id']['channelId']);
         }
       }
+
+      // log('channel ids: $channelIds');
 
       final videos = await _getVideoDetails(videoIds.join(','));
       final playlists = await _getPlaylistDetails(playlistIds.join(','));
@@ -129,6 +135,8 @@ class YoutubeService {
 
   // this is for searched videos details (videos and their details)
   Future<List<Video>> _getVideoDetails(String videoId) async {
+    if (videoId.isEmpty) return [];
+
     try {
       final queryParameters = {
         'part': 'id,snippet,statistics,contentDetails',
@@ -165,6 +173,8 @@ class YoutubeService {
 
   // this is for searched playlists' details
   Future<List<Playlist>> _getPlaylistDetails(String playlistId) async {
+    if (playlistId.isEmpty) return [];
+
     try {
       final queryParameters = {
         'part': 'id,snippet,contentDetails,status',
@@ -207,6 +217,8 @@ class YoutubeService {
 
   // this is for searched channel's details
   Future<List<Channel>> _getChannelDetails(String channelId) async {
+    if (channelId.isEmpty) return [];
+
     try {
       final queryParameters = {
         'part': 'id,snippet,contentDetails,statistics',
@@ -218,9 +230,15 @@ class YoutubeService {
         channelsEnd,
         queryParameters,
       );
+      log('url: $url');
 
       final response = await _dio.getUri(url);
-      final channelResponse = (List.from(response.data['items']))
+      // final channels = response.data['items'] as List<Map<String, dynamic>>?;
+      final channels = List<Map<String, dynamic>>.from(response.data['items']);
+
+      // if (channels == null || channels.isEmpty) return [];
+
+      final channelResponse = channels
           .map(
             (channel) => Channel.fromJson(channel),
           )
@@ -552,17 +570,25 @@ class YoutubeService {
         commentsEnd,
         queryParameters,
       );
+      log('comments url: $url');
 
       final response = await _dio.getUri(url);
+      // TODO remove this
+      // final error = response.data['error'] as Map<String, dynamic>?;
+      //
+      // if (error != null) {}
 
-      if (response.statusCode == 403) {
-        return right(
-          const BaseInfo<Comment>(disabled: true),
-        );
-      }
+      // if (response.statusCode == 403) {
+      //   return right(
+      //     const BaseInfo<Comment>(disabled: true),
+      //   );
+      // }
 
-      final comments =
-          (response.data['items'] as List).map((item) => Comment.fromJson(item)).toList();
+      final comments = (response.data['items'] as List)
+          .map(
+            (item) => Comment.fromJson(item),
+          )
+          .toList();
 
       final nextPageToken = response.data['nextPageToken'];
       final totalResults = response.data['pageInfo']['totalResults'];
@@ -592,14 +618,11 @@ class YoutubeService {
         return left(
           const NoConnectionFailure(),
         );
-      }
-      // TODO remove this
-      // else if (e.response?.statusCode == 403) {
-      //   return right(
-      //     const BaseInfo<Comment>(),
-      //   );
-      // }
-      else {
+      } else if (e.response?.statusCode == 403) {
+        return right(
+          const BaseInfo<Comment>(disabled: true),
+        );
+      } else {
         return left(
           YoutubeFailure(failure),
         );
@@ -608,7 +631,6 @@ class YoutubeService {
   }
 
   // small info about the channel: title and subscriptions count
-
   Future<Either<YoutubeFailure, Channel>> getChannelInfoEither(
     String channelId,
   ) async {
