@@ -19,12 +19,12 @@ class VisibilityNotifier extends StateNotifier<List<bool>> {
   }
 
   void changeValue(int index, {bool value = true}) {
-    state = List.from(state)..[index] = value;
+    // state = List.from(state)..[index] = value;
     // log('VisibilityNotifier state after changeValue($index, $value); $state');
 
-    // state[index] = value;
-    //
-    // state = List.from(state);
+    state[index] = value;
+
+    state = List.from(state);
   }
 
   bool isSelected(int index) {
