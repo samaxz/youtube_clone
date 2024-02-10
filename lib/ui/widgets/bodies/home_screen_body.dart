@@ -1,15 +1,11 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:inview_notifier_list/inview_notifier_list.dart';
-import 'package:youtube_clone/logic/services/custom_screen.dart';
-
-import 'package:youtube_clone/logic/notifiers/rating_notifier.dart';
+import 'package:youtube_clone/data/custom_screen.dart';
+import 'package:youtube_clone/logic/notifiers/providers.dart';
 import 'package:youtube_clone/logic/notifiers/screens_manager.dart';
 import 'package:youtube_clone/logic/notifiers/videos_notifier.dart';
 import 'package:youtube_clone/logic/notifiers/visibility_notifier.dart';
-import 'package:youtube_clone/logic/notifiers/providers.dart';
 import 'package:youtube_clone/ui/widgets/failure_tile.dart';
 import 'package:youtube_clone/ui/widgets/shimmers/loading_videos_screen.dart';
 import 'package:youtube_clone/ui/widgets/video_tile.dart';
@@ -109,7 +105,7 @@ class _HomeScreenBodyState extends ConsumerState<HomeScreenBody>
                     builder: (context, isInView, child) => VideoTile(
                       video: videoInfo.data[index],
                       isInView: isInView && shouldAutoPlay,
-                      elementAt: index,
+                      videoIndex: index,
                     ),
                   );
                 } else {
@@ -126,7 +122,7 @@ class _HomeScreenBodyState extends ConsumerState<HomeScreenBody>
                 return InViewNotifierWidget(
                   id: videoInfo.data[index].id,
                   builder: (context, isInView, child) => VideoTile(
-                    elementAt: index,
+                    videoIndex: index,
                     video: videoInfo.data[index],
                     isInView: isInView && shouldAutoPlay,
                     // TODO remove this
@@ -141,7 +137,7 @@ class _HomeScreenBodyState extends ConsumerState<HomeScreenBody>
                     builder: (context, isInView, child) => VideoTile(
                       video: videoInfo.data[index],
                       isInView: isInView && shouldAutoPlay,
-                      elementAt: index,
+                      videoIndex: index,
                     ),
                   );
                 } else {
