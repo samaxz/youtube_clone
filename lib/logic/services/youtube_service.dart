@@ -59,7 +59,7 @@ class YoutubeService {
         searchEnd,
         queryParameters,
       );
-      log('items url: $url');
+      // log('items url: $url');
 
       final response = await _dio.getUri(url);
       final items = List.from(response.data['items']);
@@ -111,7 +111,11 @@ class YoutubeService {
         ),
       );
     } on DioException catch (e, st) {
-      log('dio caught exception inside searchItems($query)', error: e, stackTrace: st);
+      log(
+        'dio caught exception inside searchItems($query)',
+        error: e,
+        stackTrace: st,
+      );
 
       final failure = FailureData(
         code: e.response?.statusCode,
@@ -150,12 +154,19 @@ class YoutubeService {
       );
 
       final response = await _dio.getUri(url);
-      final videosResponse =
-          (response.data['items'] as List).map((video) => Video.fromJson(video)).toList();
+      final videosResponse = (response.data['items'] as List)
+          .map(
+            (video) => Video.fromJson(video),
+          )
+          .toList();
 
       return videosResponse;
     } on DioException catch (e, st) {
-      log('dio caught exception inside _getVideoDetails($videoId)', error: e, stackTrace: st);
+      log(
+        'dio caught exception inside _getVideoDetails($videoId)',
+        error: e,
+        stackTrace: st,
+      );
 
       final failure = FailureData(
         code: e.response?.statusCode,
@@ -230,7 +241,7 @@ class YoutubeService {
         channelsEnd,
         queryParameters,
       );
-      log('url: $url');
+      // log('url: $url');
 
       final response = await _dio.getUri(url);
       // final channels = response.data['items'] as List<Map<String, dynamic>>?;
@@ -570,7 +581,7 @@ class YoutubeService {
         commentsEnd,
         queryParameters,
       );
-      log('comments url: $url');
+      // log('comments url: $url');
 
       final response = await _dio.getUri(url);
       // TODO remove this
@@ -607,7 +618,11 @@ class YoutubeService {
         ),
       );
     } on DioException catch (e, st) {
-      log('dio caught exception inside getVideoComments($videoId)', error: e, stackTrace: st);
+      log(
+        'dio caught exception inside getVideoComments($videoId)',
+        error: e,
+        stackTrace: st,
+      );
 
       final failure = FailureData(
         code: e.response?.statusCode,
@@ -696,14 +711,18 @@ class YoutubeService {
 
       return channel;
     } on DioException catch (e, st) {
-      log('dio caught exception inside getChannelInfo($channelId)', error: e, stackTrace: st);
+      log(
+        'dio caught exception inside getChannelInfo($channelId)',
+        error: e,
+        stackTrace: st,
+      );
 
       final failure = FailureData(
         code: e.response?.statusCode,
         message: e.response?.statusMessage,
       );
 
-      log('exception type is: ${e.type}');
+      // log('exception type is: ${e.type}');
 
       if (e.isNoConnectionError) {
         throw const NoConnectionFailure();
