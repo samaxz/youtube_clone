@@ -1,14 +1,9 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:youtube_clone/data/info/base_info_state.dart';
 import 'package:youtube_clone/data/models/video/video_model.dart';
-import 'package:youtube_clone/logic/notifiers/shorts/shorts_notifier.dart';
-import 'package:youtube_clone/logic/oauth2/auth_notifier.dart';
-import 'package:youtube_clone/logic/services/common_classes.dart';
-import 'package:youtube_clone/logic/services/helper_class.dart';
 import 'package:youtube_clone/logic/notifiers/providers.dart';
+import 'package:youtube_clone/logic/services/helper_class.dart';
 import 'package:youtube_clone/ui/widgets/bodies/shorts_body_player.dart';
 import 'package:youtube_clone/ui/widgets/failure_tile.dart';
 import 'package:youtube_clone/ui/widgets/shimmers/loading_shorts_body.dart';
@@ -245,14 +240,8 @@ class _ShortsBodyState extends ConsumerState<ShortsBody> with AutomaticKeepAlive
                 ),
               ),
               IconButton(
-                onPressed: () => Helper.handleMoreVertPressed(
-                  context: context,
-                  ref: ref,
-                  screenIdAndActions: ScreenIdAndActions(
-                    id: shorts.baseInfo.data[lastIndex].id,
-                    actions: ScreenActions.shortsBody,
-                  ),
-                ),
+                // TODO change this
+                onPressed: () => Helper.showOtherActions(context),
                 icon: const Icon(
                   Icons.more_vert,
                   color: Colors.white,
