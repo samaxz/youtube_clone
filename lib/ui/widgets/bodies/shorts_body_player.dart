@@ -1,35 +1,21 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:pod_player/pod_player.dart';
+import 'package:youtube_clone/data/custom_screen.dart';
 import 'package:youtube_clone/data/info/youtube_failure.dart';
 import 'package:youtube_clone/data/models/video/video_model.dart';
-import 'package:youtube_clone/logic/notifiers/subscription_notifier.dart';
-import 'package:youtube_clone/logic/services/custom_screen.dart';
-
+import 'package:youtube_clone/logic/notifiers/providers.dart';
 import 'package:youtube_clone/logic/notifiers/rating_notifier.dart';
 import 'package:youtube_clone/logic/notifiers/screens_manager.dart';
 import 'package:youtube_clone/logic/notifiers/shorts/shorts_details_notifier.dart';
-import 'package:youtube_clone/logic/oauth2/auth_notifier.dart';
+import 'package:youtube_clone/logic/notifiers/subscription_notifier.dart';
 import 'package:youtube_clone/logic/services/helper_class.dart';
-import 'package:youtube_clone/logic/notifiers/providers.dart';
-import 'package:youtube_clone/logic/services/theme_notifier.dart';
 import 'package:youtube_clone/ui/widgets/custom_inkwell.dart';
 import 'package:youtube_clone/ui/widgets/failure_tile.dart';
 import 'package:youtube_clone/ui/widgets/shimmers/loading_shorts_body.dart';
-
-// TODO remove this
-// final playShortSP = StateProvider<Map<int, bool>>(
-//   (ref) => {
-//     0: false,
-//     1: true,
-//     3: false,
-//     4: false,
-//   },
-// );
 
 class ShortsBodyPlayer extends ConsumerStatefulWidget {
   final Video short;
