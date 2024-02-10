@@ -1,27 +1,20 @@
-import 'dart:developer';
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:youtube_clone/data/custom_screen.dart';
 import 'package:youtube_clone/data/info/base_info.dart';
 import 'package:youtube_clone/data/models/channel/channel_model.dart';
 import 'package:youtube_clone/data/models/comment_model.dart';
 import 'package:youtube_clone/data/models/video/video_model.dart';
+import 'package:youtube_clone/logic/notifiers/providers.dart';
 import 'package:youtube_clone/logic/notifiers/rating_notifier.dart';
 import 'package:youtube_clone/logic/notifiers/screens_manager.dart';
 import 'package:youtube_clone/logic/notifiers/subscription_notifier.dart';
 import 'package:youtube_clone/logic/services/helper_class.dart';
-import 'package:youtube_clone/logic/notifiers/providers.dart';
-import 'package:youtube_clone/logic/services/custom_screen.dart';
-import 'package:youtube_clone/logic/services/theme_notifier.dart';
-
-import 'package:youtube_clone/ui/screens/channel_screen.dart';
-import 'package:youtube_clone/ui/widgets/comment_card.dart';
 import 'package:youtube_clone/ui/widgets/custom_inkwell.dart';
-import 'package:youtube_clone/ui/widgets/my_miniplayer.dart';
 
 class VideoInfoTile extends ConsumerStatefulWidget {
   final Video video;
@@ -304,6 +297,17 @@ class _AuthorInfo extends ConsumerStatefulWidget {
 }
 
 class _AuthorInfoState extends ConsumerState<_AuthorInfo> {
+  void pushScreen() {
+    final screenIndex = ref.read(currentScreenIndexSP);
+    final notifier = ref.read(screensManagerProvider(screenIndex).notifier);
+    notifier.pushScreen(
+      CustomScreen.channel(
+        channelId: widget.channel.id,
+        screenIndex: screenIndex,
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -341,29 +345,8 @@ class _AuthorInfoState extends ConsumerState<_AuthorInfo> {
     return Material(
       color: Theme.of(context).cardColor,
       child: InkWell(
-        // this is for detecting empty space - like spacer, so that
-        // it works with it
-        // behavior: HitTestBehavior.opaque,
-        onTap: () {
-          final screenIndex = ref.read(currentScreenIndexSP);
-          final notifier = ref.read(screensManagerProvider(screenIndex).notifier);
-          notifier.pushScreen(
-            CustomScreen.channel(
-              channelId: channel.id,
-              screenIndex: screenIndex,
-            ),
-          );
-        },
-        onLongPress: () {
-          final screenIndex = ref.read(currentScreenIndexSP);
-          final notifier = ref.read(screensManagerProvider(screenIndex).notifier);
-          notifier.pushScreen(
-            CustomScreen.channel(
-              channelId: channel.id,
-              screenIndex: screenIndex,
-            ),
-          );
-        },
+        onTap: pushScreen,
+        onLongPress: pushScreen,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 4),
           child: Row(
@@ -400,26 +383,6 @@ class _AuthorInfoState extends ConsumerState<_AuthorInfo> {
                 ),
               ),
               subscribed ?? const CircularProgressIndicator(),
-              // subscribed.when(
-              //   data: (subscribed) => TextButton(
-              //     onPressed: () {
-              //       final notifier = ref.read(subscriptionNotifierProvider(channel.id).notifier);
-              //       notifier.changeSubscriptionState();
-              //     },
-              //     // TODO change styles
-              //     child: Text((subscribed) ? 'SUBSCRIBED' : 'SUBSCRIBE'),
-              //   ),
-              //   error: (error, stackTrace) => TextButton(
-              //     onPressed: () {
-              //       final notifier = ref.read(subscriptionNotifierProvider(channel.id).notifier);
-              //       notifier.getSubscriptionState();
-              //     },
-              //     child: const Text('try again'),
-              //   ),
-              //   loading: () => const Center(
-              //     child: CircularProgressIndicator(),
-              //   ),
-              // ),
             ],
           ),
         ),
@@ -436,16 +399,39 @@ class _CommentsSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (commentsInfo.disabled != null) {
-      return const Center(
-        child: Text('comments are private'),
+      return Material(
+        color: Theme.of(context).cardColor,
+        child: InkWell(
+          onTap: () {},
+          child: const Center(
+            child: Padding(
+              padding: EdgeInsets.all(15),
+              child: Text('comments are disabled'),
+            ),
+          ),
+        ),
       );
+      // TODO remove this case, cause it'll never happen
+      // i also don't want it to happen
     } else if (commentsInfo.failure != null) {
       return Center(
-        child: Text(commentsInfo.failure!.message!),
+        child: Padding(
+          padding: const EdgeInsets.all(15),
+          child: Text(commentsInfo.failure!.message!),
+        ),
       );
     } else if (commentsInfo.data.isEmpty) {
-      return const Center(
-        child: Text('comments are empty'),
+      return Material(
+        color: Theme.of(context).cardColor,
+        child: InkWell(
+          onTap: () {},
+          child: const Center(
+            child: Padding(
+              padding: EdgeInsets.all(15),
+              child: Text('comments are empty'),
+            ),
+          ),
+        ),
       );
     }
 
@@ -470,11 +456,8 @@ class _CommentsSection extends ConsumerWidget {
             alignment: Alignment.centerLeft,
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              // color: Colors.grey.shade700,
-              // color: Theme.of(context).colorScheme.onSecondary,
               // surfaceTint, surfaceVariant, secondaryContainer, primaryContainer (meh)
               color: Theme.of(context).buttonTheme.colorScheme?.secondaryContainer,
-              // color: Theme.of(context).primaryColorDark,
               borderRadius: BorderRadius.circular(4),
             ),
             child: Column(
