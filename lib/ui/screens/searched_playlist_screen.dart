@@ -5,51 +5,39 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:youtube_clone/data/models/playlist/playlist_model.dart';
+import 'package:youtube_clone/logic/notifiers/playlist/channel_playlist_notifier.dart';
+import 'package:youtube_clone/logic/notifiers/playlist/searched_playlist_notifier.dart';
 import 'package:youtube_clone/logic/services/helper_class.dart';
-import 'package:youtube_clone/logic/notifiers/providers.dart';
 import 'package:youtube_clone/ui/widgets/channel_tabs/channel_sliver_appbar.dart';
 import 'package:youtube_clone/ui/widgets/channel_tabs/channel_video_tile.dart';
-import 'package:youtube_clone/ui/widgets/failure_tile.dart';
 
 // this widget is used for displaying searched playlists
-class PlaylistScreen extends ConsumerStatefulWidget {
+class SearchedPlaylistScreen extends ConsumerStatefulWidget {
   final Playlist playlist;
-  final int index;
+  final int screenIndex;
 
-  const PlaylistScreen({
+  const SearchedPlaylistScreen({
     super.key,
     required this.playlist,
-    required this.index,
+    required this.screenIndex,
   });
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _PlaylistScreenState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _SearchedPlaylistScreenState();
 }
 
-class _PlaylistScreenState extends ConsumerState<PlaylistScreen> {
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(getPlaylistVideos);
-  }
-
-  Future<void> getPlaylistVideos() async {
-    final not = ref.read(playlistVideosNotifierProvider.notifier);
-    await not.getPlaylistVideos(widget.playlist.id);
-  }
-
+class _SearchedPlaylistScreenState extends ConsumerState<SearchedPlaylistScreen> {
   void randomPressButton() {
-    final random = Random();
-    final videos = ref.read(playlistVideosNotifierProvider);
+    final videos = ref.read(channelPlaylistNotifierProvider).last;
 
     Helper.handleVideoCardPressed(
       ref: ref,
-      video: videos.baseInfo.data[random.nextInt(videos.baseInfo.data.length)],
+      video: videos.baseInfo.data[Random().nextInt(videos.baseInfo.data.length)],
     );
   }
 
   void firstPressButton() {
-    final videos = ref.read(playlistVideosNotifierProvider);
+    final videos = ref.read(channelPlaylistNotifierProvider).last;
 
     Helper.handleVideoCardPressed(
       ref: ref,
@@ -57,14 +45,25 @@ class _PlaylistScreenState extends ConsumerState<PlaylistScreen> {
     );
   }
 
+  Future<void> loadPlaylistVideos({bool isReloading = false}) async {
+    final notifier = ref.read(searchedPlaylistNotifierProvider.notifier);
+    await notifier.getPlaylistVideos(widget.playlist.id, isReloading: isReloading);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(loadPlaylistVideos);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final videos = ref.watch(playlistVideosNotifierProvider);
+    final videos = ref.watch(channelPlaylistNotifierProvider).last;
 
     return videos.when(
       loaded: (videos) => CustomScrollView(
         slivers: [
-          ChannelSliverAppbar(index: widget.index),
+          ChannelSliverAppbar(index: widget.screenIndex),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -210,14 +209,48 @@ class _PlaylistScreenState extends ConsumerState<PlaylistScreen> {
           ),
         ],
       ),
-      error: (_, failure) => Center(
-        child: FailureTile(
-          failure: failure,
-          onTap: getPlaylistVideos,
+      error: (_, failure) {
+        final code = failure.failureData.code;
+
+        return Center(
+          child: Column(
+            children: [
+              // not sure these codes are accurate, but, we'll see
+              if (code == 403) ...[
+                const Text('too many requests, try again later'),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () => loadPlaylistVideos(isReloading: true),
+                  child: const Text('tap to retry'),
+                ),
+              ] else if (code == 404) ...[
+                const Text('oops, looks like it`s empty'),
+              ] else ...[
+                const Text('unknown error, try again later'),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () => loadPlaylistVideos(isReloading: true),
+                  child: const Text('tap to retry'),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+      loading: (_) => Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            onPressed: Navigator.of(context).pop,
+            icon: Icon(
+              Icons.chevron_left,
+              size: 31,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
         ),
-      ),
-      loading: (_) => const Center(
-        child: CircularProgressIndicator(),
+        body: const Center(
+          child: CircularProgressIndicator(),
+        ),
       ),
     );
   }
