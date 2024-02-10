@@ -1,93 +1,80 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:inview_notifier_list/inview_notifier_list.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:youtube_clone/data/models/channel/channel_model.dart';
 import 'package:youtube_clone/data/models/playlist/playlist_model.dart';
 import 'package:youtube_clone/data/models/video/video_model.dart';
-import 'package:youtube_clone/logic/notifiers/searched_items_notifier.dart';
-import 'package:youtube_clone/logic/oauth2/auth_notifier.dart';
 import 'package:youtube_clone/logic/notifiers/providers.dart';
+import 'package:youtube_clone/logic/notifiers/searched_items_notifier.dart';
 import 'package:youtube_clone/ui/widgets/failure_tile.dart';
 import 'package:youtube_clone/ui/widgets/search_playlist.dart';
 import 'package:youtube_clone/ui/widgets/search_sub.dart';
 import 'package:youtube_clone/ui/widgets/shimmers/loading_videos_screen.dart';
 import 'package:youtube_clone/ui/widgets/video_tile.dart';
 
-part 'searched_videos_list.g.dart';
-
-// this could be a state provider
-// what is this?
-@riverpod
-class SearchIndex extends _$SearchIndex {
-  // i could've made it null, but didn't want to deal with it later on
-  // TODO change this to be something different - make it a family
-  // modifier that is responsible for setting the search index where
-  // it's used, not just a single index
-  @override
-  int build() => 0;
-
-  void setSearchIndex(int index) => state = index;
-}
-
 class SearchItem extends ConsumerWidget {
   final String kind;
   final Item item;
   final bool isInViewToo;
+  final int videoIndex;
+  final int screenIndex;
 
   const SearchItem({
     super.key,
     required this.kind,
     required this.item,
     required this.isInViewToo,
+    required this.videoIndex,
+    required this.screenIndex,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final searchIndex = ref.watch(searchIndexProvider);
-
     return kind == 'youtube#video'
         ? InViewNotifierWidget(
             id: item.id,
             builder: (context, isInView, child) => VideoTile(
               video: item as Video,
               isInView: isInView && isInViewToo,
+              videoIndex: videoIndex,
             ),
           )
         : kind == 'youtube#playlist'
             ? SearchPlaylist(
                 playlist: item as Playlist,
-                index: searchIndex,
+                // screenIndex: searchIndex,
+                screenIndex: screenIndex,
               )
             : SearchSub(
                 sub: item as Channel,
                 channelId: item.id,
+                screenIndex: screenIndex,
               );
   }
 }
 
-class SearchedVideosList extends ConsumerStatefulWidget {
+// can turn this into consumer widget
+class SearchedItemsList extends ConsumerStatefulWidget {
   final String query;
-  final int index;
+  // this is a search index, not screen index
+  final int screenIndex;
 
-  const SearchedVideosList({
+  const SearchedItemsList({
     super.key,
     required this.query,
-    required this.index,
+    required this.screenIndex,
   });
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _SearchedVideosListState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _SearchedItemsListState();
 }
 
-class _SearchedVideosListState extends ConsumerState<SearchedVideosList> {
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(
-      () => ref
-          .read(searchItemsNotifierProvider.notifier)
-          .searchItems(query: widget.query, index: widget.index),
+class _SearchedItemsListState extends ConsumerState<SearchedItemsList> {
+  Future<void> searchItems() async {
+    final notifier = ref.read(searchItemsNotifierProvider(widget.screenIndex).notifier);
+    await notifier.searchItems(
+      query: widget.query,
+      screenIndex: widget.screenIndex,
     );
   }
 
@@ -95,21 +82,24 @@ class _SearchedVideosListState extends ConsumerState<SearchedVideosList> {
 
   @override
   Widget build(BuildContext context) {
-    final items = ref.watch(searchItemsNotifierProvider)[widget.index]!.last;
+    final items = ref.watch(searchItemsNotifierProvider(widget.screenIndex)).last;
     final selectedVideo = ref.watch(selectedVideoSP);
     final screenIndex = ref.watch(currentScreenIndexSP);
-    ref.listen(searchItemsNotifierProvider, (_, state) {
-      state[widget.index]!.last.when(
-            loading: (searchItemsInfo) => canLoadNextPage = false,
-            loaded: (searchItemsInfo) => canLoadNextPage = true,
-            error: (searchItemsInfo, failure) => canLoadNextPage = false,
-          );
-    });
+    final isInViewToo = selectedVideo == null && screenIndex == widget.screenIndex;
+
+    ref.listen(
+      searchItemsNotifierProvider(widget.screenIndex),
+      (_, state) {
+        state.last.maybeWhen(
+          orElse: () => canLoadNextPage = false,
+          loaded: (_) => canLoadNextPage = true,
+        );
+      },
+    );
 
     return RefreshIndicator(
-      onRefresh: () => ref
-          .refresh(searchItemsNotifierProvider.notifier)
-          .searchItems(query: widget.query, index: widget.index),
+      // not gonna set isReloading to true
+      onRefresh: () => searchItems(),
       child: NotificationListener<ScrollNotification>(
         onNotification: (notification) {
           final metrics = notification.metrics;
@@ -117,11 +107,7 @@ class _SearchedVideosListState extends ConsumerState<SearchedVideosList> {
           if (canLoadNextPage && metrics.pixels >= limit) {
             canLoadNextPage = false;
 
-            Future.microtask(
-              () => ref
-                  .read(searchItemsNotifierProvider.notifier)
-                  .searchItems(query: widget.query, index: widget.index),
-            );
+            Future.microtask(searchItems);
           }
 
           return false;
@@ -141,7 +127,9 @@ class _SearchedVideosListState extends ConsumerState<SearchedVideosList> {
                 return SearchItem(
                   kind: searchItemsInfo.data[index].kind,
                   item: searchItemsInfo.data[index],
-                  isInViewToo: selectedVideo == null && screenIndex == widget.index,
+                  isInViewToo: isInViewToo,
+                  videoIndex: index,
+                  screenIndex: widget.screenIndex,
                 );
               } else {
                 return const LoadingVideosScreen();
@@ -157,7 +145,9 @@ class _SearchedVideosListState extends ConsumerState<SearchedVideosList> {
               return SearchItem(
                 kind: searchItemsInfo.data[index].kind,
                 item: searchItemsInfo.data[index],
-                isInViewToo: selectedVideo == null && screenIndex == widget.index,
+                isInViewToo: isInViewToo,
+                videoIndex: index,
+                screenIndex: widget.screenIndex,
               );
             },
             error: (searchItemsInfo, failure) {
@@ -165,14 +155,18 @@ class _SearchedVideosListState extends ConsumerState<SearchedVideosList> {
                 return SearchItem(
                   kind: searchItemsInfo.data[index].kind,
                   item: searchItemsInfo.data[index],
-                  isInViewToo: selectedVideo == null && screenIndex == widget.index,
+                  isInViewToo: isInViewToo,
+                  videoIndex: index,
+                  screenIndex: widget.screenIndex,
                 );
               } else {
                 return FailureTile(
                   failure: failure,
-                  onTap: () => ref
-                      .read(searchItemsNotifierProvider.notifier)
-                      .searchItems(query: widget.query, index: widget.index),
+                  onTap: () {
+                    final not = ref.read(searchItemsNotifierProvider(widget.screenIndex).notifier);
+                    not.removeLast();
+                    not.searchItems(query: widget.query, screenIndex: widget.screenIndex);
+                  },
                 );
               }
             },
