@@ -1,24 +1,19 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 
-import 'dart:developer';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:youtube_clone/logic/services/custom_screen.dart';
-
-import 'package:youtube_clone/logic/notifiers/screens_manager.dart';
-import 'package:youtube_clone/logic/services/common_classes.dart';
-import 'package:youtube_clone/logic/services/helper_class.dart';
+import 'package:youtube_clone/data/custom_screen.dart';
+import 'package:youtube_clone/data/info/common_classes.dart';
 import 'package:youtube_clone/logic/notifiers/providers.dart';
+import 'package:youtube_clone/logic/notifiers/screens_manager.dart';
+import 'package:youtube_clone/logic/services/helper_class.dart';
 import 'package:youtube_clone/logic/services/theme_notifier.dart';
 import 'package:youtube_clone/ui/screens/home_screen.dart';
 import 'package:youtube_clone/ui/screens/library_screen.dart';
 import 'package:youtube_clone/ui/screens/shorts_screen.dart';
 import 'package:youtube_clone/ui/screens/subs_screen.dart';
-import 'package:youtube_clone/ui/widgets/bodies/shorts_body_player.dart';
 import 'package:youtube_clone/ui/widgets/custom_miniplayer.dart';
 import 'package:youtube_clone/ui/widgets/my_miniplayer.dart';
 
@@ -92,17 +87,13 @@ class _NavScreenState extends ConsumerState<NavScreen> {
       showOptionsSP,
       (_, state) {
         state.maybeWhen(
-          // or else here is Neither()
+          // this is Neither()
           orElse: () {},
-          video: (videoId, screenAction, videoCardIndex) {
-            Helper.handleMoreVertPressed(
+          video: (videoAction) {
+            Helper.showVideoActions(
               context: context,
               ref: ref,
-              screenIdAndActions: ScreenIdAndActions(
-                id: videoId,
-                actions: screenAction,
-              ),
-              videoCardIndex: videoCardIndex,
+              videoAction: videoAction,
             );
           },
         );
@@ -394,7 +385,7 @@ class _NavScreenState extends ConsumerState<NavScreen> {
                   highlightElevation: 0,
                   focusElevation: 0,
                   elevation: 0,
-                  onPressed: () => Helper.handleAddButtonPressed(context: context, ref: ref),
+                  onPressed: () => Helper.showAddButtonActions(context: context, ref: ref),
                   child: Icon(
                     Icons.add_circle_outline_sharp,
                     size: 40,
