@@ -2,32 +2,28 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:youtube_clone/data/models/playlist_model_new.dart';
-import 'package:youtube_clone/ui/screens/playlist_screen_new.dart';
-import 'package:youtube_clone/logic/services/common_classes.dart';
 import 'package:youtube_clone/logic/services/helper_class.dart';
-import 'package:youtube_clone/logic/services/theme_notifier.dart';
+import 'package:youtube_clone/ui/screens/channel_playlist_screen.dart';
 
 class ChannelPlaylistCard extends ConsumerWidget {
   final Playlist playlist;
-  final int index;
+  final int screenIndex;
 
   const ChannelPlaylistCard({
     super.key,
     required this.playlist,
-    required this.index,
+    required this.screenIndex,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDarkTheme = ref.watch(themeNP);
-
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => PlaylistScreenNew(
+          builder: (context) => ChannelPlaylistScreen(
             playlist: playlist,
-            index: index,
+            screenIndex: screenIndex,
           ),
         ),
       ),
@@ -72,7 +68,7 @@ class ChannelPlaylistCard extends ConsumerWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.playlist_play,
                             size: 15,
                             // color: isDarkTheme ? Colors.white : Colors.black,
@@ -82,7 +78,7 @@ class ChannelPlaylistCard extends ConsumerWidget {
                             playlist.videoCount != null
                                 ? playlist.videoCount!.toString()
                                 : 'unknown',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 11,
                               // color: isDarkTheme ? Colors.white : Colors.black,
                             ),
@@ -122,13 +118,7 @@ class ChannelPlaylistCard extends ConsumerWidget {
             const SizedBox(width: 17),
             GestureDetector(
               // TODO change this
-              onTap: () => Helper.handleMoreVertPressed(
-                context: context,
-                ref: ref,
-                screenIdAndActions: const ScreenIdAndActions(
-                  actions: ScreenActions.playlistChannel,
-                ),
-              ),
+              onTap: () => Helper.showOtherActions(context),
               child: const Icon(Icons.more_vert),
             ),
           ],
