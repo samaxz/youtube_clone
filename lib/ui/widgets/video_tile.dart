@@ -16,10 +16,10 @@ import 'package:youtube_clone/ui/widgets/bodies/shorts_body.dart';
 import 'package:youtube_clone/ui/widgets/hidden_video_card.dart';
 import 'package:youtube_clone/ui/widgets/my_miniplayer.dart';
 import 'package:timeago/timeago.dart' as timeago;
-import 'package:youtube_clone/logic/services/common_classes.dart';
+import 'package:youtube_clone/data/info/common_classes.dart';
 import 'package:youtube_clone/logic/services/helper_class.dart';
 import 'package:youtube_clone/data/models/video/video_model.dart';
-import 'package:youtube_clone/logic/services/custom_screen.dart';
+import 'package:youtube_clone/data/custom_screen.dart';
 import 'package:youtube_clone/logic/notifiers/providers.dart';
 import 'package:youtube_clone/ui/widgets/video_info_tile.dart';
 
@@ -33,7 +33,8 @@ class VideoTile extends ConsumerStatefulWidget {
   final bool maximize;
   // this is for calling handleMoreVertPressed() on suggested
   // video under video info tile on miniplayer screen
-  final int elementAt;
+  // element's index in the list
+  final int videoIndex;
   final bool hidden;
   // final void Function(String videoId)? onHideVideo;
   final VoidCallback? onTap;
@@ -45,7 +46,7 @@ class VideoTile extends ConsumerStatefulWidget {
     required this.isInView,
     this.maximize = true,
     this.hidden = false,
-    this.elementAt = 0,
+    required this.videoIndex,
     // this.onHideVideo,
     this.onTap,
     this.onLongPress,
@@ -82,12 +83,23 @@ class _VideoTileState extends ConsumerState<VideoTile> with AutomaticKeepAliveCl
     final notifier = ref.read(showOptionsSP.notifier);
     notifier.update(
       (state) => VideoOptions(
-        videoId: widget.video.id,
-        screenActions: ScreenActions.videoCard,
-        // TODO rename this to videoTileIndex
-        videoCardIndex: widget.elementAt,
+        VideoAction(
+          playerController: playerController,
+          videoId: widget.video.id,
+          videoIndex: widget.videoIndex,
+        ),
       ),
     );
+    // this is for video suggestions under the mp
+    // Helper.showVideoActions(
+    //   context: context,
+    //   ref: ref,
+    //   videoAction: VideoAction(
+    //     playerController: playerController,
+    //     videoId: widget.video.id,
+    //     videoIndex: widget.videoIndex,
+    //   ),
+    // );
     // log('video tile index is: ${widget.elementAt}');
   }
 
@@ -151,15 +163,13 @@ class _VideoTileState extends ConsumerState<VideoTile> with AutomaticKeepAliveCl
   Widget build(BuildContext context) {
     super.build(context);
 
-    final hidden = ref.watch(visibilitySNP).elementAt(widget.elementAt);
-    // final isDarkTheme = ref.watch(themeNP);
+    final hidden = ref.watch(visibilitySNP).elementAt(widget.videoIndex);
 
     return hidden
-        ? HiddenVideoCard(index: widget.elementAt)
+        ? HiddenVideoCard(index: widget.videoIndex)
         : Material(
             color: Theme.of(context).cardColor,
             child: InkWell(
-              // behavior: HitTestBehavior.opaque,
               onTap: () {
                 Helper.handleVideoCardPressed(
                   ref: ref,
