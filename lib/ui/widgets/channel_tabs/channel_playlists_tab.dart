@@ -71,7 +71,7 @@ class _PlaylistsChannelTabState extends ConsumerState<ChannelPlaylistsTab>
 
             return ChannelPlaylistCard(
               playlist: playlists[index - 1],
-              index: widget.screenIndex,
+              screenIndex: widget.screenIndex,
             );
           },
         );
