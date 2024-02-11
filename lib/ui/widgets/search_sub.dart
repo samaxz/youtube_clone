@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:youtube_clone/data/custom_screen.dart';
 import 'package:youtube_clone/data/models/channel/channel_model.dart';
+import 'package:youtube_clone/logic/notifiers/channel/channel_subscription_notifier.dart';
 import 'package:youtube_clone/logic/notifiers/screens_manager.dart';
 import 'package:youtube_clone/logic/notifiers/subscription_notifier.dart';
-import 'package:youtube_clone/logic/services/custom_screen.dart';
 import 'package:youtube_clone/logic/services/helper_class.dart';
-import 'package:youtube_clone/logic/notifiers/providers.dart';
-import 'package:youtube_clone/logic/oauth2/auth_notifier.dart';
 
 // subscription card shown in search
 class SearchSub extends ConsumerStatefulWidget {
   final Channel sub;
   final String channelId;
+  final int screenIndex;
 
   const SearchSub({
     super.key,
     required this.sub,
     required this.channelId,
+    required this.screenIndex,
   });
 
   @override
@@ -24,9 +25,12 @@ class SearchSub extends ConsumerStatefulWidget {
 }
 
 class _SearchSubState extends ConsumerState<SearchSub> {
-  Future<void> getSubbedState() async {
-    final notifier = ref.read(subscriptionNotifierProvider(widget.channelId).notifier);
-    await notifier.getSubscriptionState();
+  Future<void> getSubbedState({bool isReloading = false}) async {
+    final notifier = ref.read(channelSubscriptionNotifierProvider(
+      channelId: widget.channelId,
+      screenIndex: widget.screenIndex,
+    ).notifier);
+    await notifier.getSubscriptionState(isReloading: isReloading);
   }
 
   @override
@@ -36,18 +40,25 @@ class _SearchSubState extends ConsumerState<SearchSub> {
   }
 
   void goToChannel() {
-    // TODO research this and probably use passed in index
-    final index = ref.read(currentScreenIndexSP);
-    final notifier = ref.read(screensManagerProvider(index).notifier);
+    final notifier = ref.read(screensManagerProvider(widget.screenIndex).notifier);
     notifier.pushScreen(
-      CustomScreen.channel(channelId: widget.channelId, screenIndex: index),
+      CustomScreen.channel(
+        channelId: widget.channelId,
+        screenIndex: widget.screenIndex,
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // TODO Change this in the future
-    const subscribed = AsyncLoading();
+    final subscribed = ref
+        .watch(
+          channelSubscriptionNotifierProvider(
+            channelId: widget.channelId,
+            screenIndex: widget.screenIndex,
+          ),
+        )
+        .last;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -70,11 +81,10 @@ class _SearchSubState extends ConsumerState<SearchSub> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(widget.sub.snippet.title),
-                    // TODO prolly do something with the nulls, idk
                     Text(
                       '${widget.sub.statistics?.subscriberCount != null ? Helper.numberFormatter(widget.sub.statistics!.subscriberCount) : 'unknown'}  •  ${widget.sub.statistics?.videoCount} videos',
                     ),
-                    // i think this'll be a bit too big, i'mma need to
+                    // i think this'll be a bit too big, i'ma need to
                     // make my own button
                     subscribed.when(
                       data: (data) => GestureDetector(
@@ -91,10 +101,10 @@ class _SearchSubState extends ConsumerState<SearchSub> {
                           ),
                         ),
                       ),
-                      // TODO finish these states
+                      // TODO finish this state
                       error: (error, stackTrace) => Center(
                         child: TextButton(
-                          onPressed: getSubbedState,
+                          onPressed: () => getSubbedState(isReloading: true),
                           child: const Text('try again'),
                         ),
                       ),

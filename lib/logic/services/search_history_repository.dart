@@ -30,14 +30,14 @@ class SearchHistoryRepository {
   }
 
   Future<void> addSearchTerm(String term) async {
-    return await _addSearchTerm(
+    await _addSearchTerm(
       term,
       _sembastDatabase.instance,
     );
   }
 
   Future<void> deleteSearchTerm(String term) async {
-    return await _deleteSearchTerm(
+    await _deleteSearchTerm(
       term,
       _sembastDatabase.instance,
     );
@@ -73,14 +73,14 @@ class SearchHistoryRepository {
 
     if (existingKey != null) {
       await putSearchTermFirst(term);
+
       return;
     }
 
-    await _store.add(
-      dbclient,
-      term,
-    );
+    await _store.add(dbclient, term);
+
     final count = await _store.count(dbclient);
+
     if (count > historyLength) {
       await _store.delete(
         dbclient,

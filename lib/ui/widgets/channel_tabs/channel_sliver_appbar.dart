@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:youtube_clone/data/models/channel/channel_model.dart';
-import 'package:youtube_clone/logic/services/common_classes.dart';
 import 'package:youtube_clone/logic/services/helper_class.dart';
 
 // this appbar is used for both channel and playlist screens
@@ -74,13 +73,8 @@ class ChannelSliverAppbar extends ConsumerWidget {
           ),
         ),
         IconButton(
-          onPressed: () => Helper.handleMoreVertPressed(
-            context: context,
-            ref: ref,
-            screenIdAndActions: const ScreenIdAndActions(
-              actions: ScreenActions.channel,
-            ),
-          ),
+          // TODO change this
+          onPressed: () => Helper.showOtherActions(context),
           icon: const Icon(Icons.more_vert),
         ),
       ],

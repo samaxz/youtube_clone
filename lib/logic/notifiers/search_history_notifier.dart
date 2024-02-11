@@ -4,18 +4,19 @@ import 'package:youtube_clone/logic/services/search_history_repository.dart';
 class SearchHistoryNotifier extends StateNotifier<AsyncValue<List<String>>> {
   final SearchHistoryRepository _repository;
 
-  SearchHistoryNotifier(this._repository) : super(const AsyncValue.loading());
+  SearchHistoryNotifier(this._repository) : super(const AsyncLoading());
 
+  // this could probably be inside constructor's body
   void watchSearchTerms({String? filter}) {
     _repository.watchSearchTerms(filter: filter).listen(
       (data) {
-        state = AsyncValue.data(data);
+        state = AsyncData(data);
       },
       onError: (
         Object error,
         StackTrace stackTrace,
       ) {
-        state = AsyncValue.error(
+        state = AsyncError(
           error,
           stackTrace,
         );
@@ -24,14 +25,14 @@ class SearchHistoryNotifier extends StateNotifier<AsyncValue<List<String>>> {
   }
 
   Future<void> addSearchTerm(String term) async {
-    return await _repository.addSearchTerm(term);
+    await _repository.addSearchTerm(term);
   }
 
   Future<void> deleteSearchTerm(String term) async {
-    return await _repository.deleteSearchTerm(term);
+    await _repository.deleteSearchTerm(term);
   }
 
   Future<void> putSearchTermFirst(String term) async {
-    return await _repository.putSearchTermFirst(term);
+    await _repository.putSearchTermFirst(term);
   }
 }

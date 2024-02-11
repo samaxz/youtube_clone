@@ -1,7 +1,5 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:youtube_clone/logic/notifiers/providers.dart';
@@ -12,7 +10,7 @@ import 'package:youtube_clone/ui/widgets/custom_sliver_app_bar.dart';
 
 class CommonBody extends ConsumerStatefulWidget {
   final int index;
-  // TODO delete these fields, for they are useless
+  // TODO delete these fields cause they're useless
   final bool? displayExpandedHeight;
   final Widget? body;
   final ScrollController? scrollController;

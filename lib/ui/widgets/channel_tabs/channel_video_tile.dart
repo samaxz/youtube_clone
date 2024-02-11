@@ -1,10 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:youtube_clone/data/models/video/video_model.dart';
-import 'package:youtube_clone/logic/services/common_classes.dart';
-import 'package:youtube_clone/logic/services/helper_class.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:youtube_clone/data/models/video/video_model.dart';
+import 'package:youtube_clone/logic/services/helper_class.dart';
 
 class ChannelVideoTile extends ConsumerWidget {
   final Video video;
@@ -113,13 +112,7 @@ class ChannelVideoTile extends ConsumerWidget {
             ],
             GestureDetector(
               // TODO change this
-              onTap: () => Helper.handleMoreVertPressed(
-                context: context,
-                ref: ref,
-                screenIdAndActions: const ScreenIdAndActions(
-                  actions: ScreenActions.channelCard,
-                ),
-              ),
+              onTap: () => Helper.showOtherActions(context),
               child: const Icon(Icons.more_vert),
             ),
           ],

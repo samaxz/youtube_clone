@@ -73,12 +73,7 @@ class _ChannelScreenState extends ConsumerState<ChannelScreen> with TickerProvid
           ),
         ),
         body: const Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(),
-            ],
-          ),
+          child: CircularProgressIndicator(),
         ),
       ),
       data: (data) => Scaffold(

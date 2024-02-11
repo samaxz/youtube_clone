@@ -56,7 +56,6 @@ class SearchItem extends ConsumerWidget {
 // can turn this into consumer widget
 class SearchedItemsList extends ConsumerStatefulWidget {
   final String query;
-  // this is a search index, not screen index
   final int screenIndex;
 
   const SearchedItemsList({
