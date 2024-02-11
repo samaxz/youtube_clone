@@ -3,12 +3,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xml/xml.dart';
-import 'package:youtube_clone/logic/notifiers/searched_items_notifier.dart';
+import 'package:youtube_clone/data/custom_screen.dart';
 import 'package:youtube_clone/logic/notifiers/providers.dart';
-import 'package:youtube_clone/ui/widgets/searched_videos_list.dart';
+import 'package:youtube_clone/logic/notifiers/screens_manager.dart';
+import 'package:youtube_clone/logic/notifiers/searched_items_notifier.dart';
+import 'package:youtube_clone/ui/widgets/searched_items_list.dart';
 
 // fetching search suggestions
-final suggestionsFP = FutureProvider.autoDispose.family<List<String>, String>((ref, query) async {
+final suggestionsFP = FutureProvider.autoDispose.family((ref, String query) async {
   final dio = ref.read(dioP);
   final response = await dio.getUri(
     Uri.parse('https://google.com/complete/search?output=xml&hl=en&q=$query'),
@@ -16,7 +18,11 @@ final suggestionsFP = FutureProvider.autoDispose.family<List<String>, String>((r
   final data = response.data.toString();
   final document = XmlDocument.parse(data);
   final suggestionElements = document.findAllElements('suggestion').toList();
-  final suggestions = suggestionElements.map((element) => element.getAttribute('data')!).toList();
+  final suggestions = suggestionElements
+      .map(
+        (element) => element.getAttribute('data')!,
+      )
+      .toList();
 
   return suggestions;
 });
@@ -30,18 +36,12 @@ class CustomSearchDelegate extends SearchDelegate {
     required this.screenIndex,
   });
 
-  // my guess is that this is the problem
-  // with this, i can (probably) remove indexes form the search SP
-  // late int screenIndex = ref.read(currentScreenIndexSP);
-
   @override
   void close(BuildContext context, result) {
     super.close(context, result);
+    showSuggestions(context);
 
     ref.read(isShowingSearchSP(screenIndex).notifier).update((state) => false);
-    // _ref.read(isShowingSearchSP.notifier).update((state) => false);
-    // TODO update other providers here
-    // _ref.read(pushedHomeChannelSP.notifier).update((state) => false);
   }
 
   @override
@@ -54,6 +54,8 @@ class CustomSearchDelegate extends SearchDelegate {
             close(context, null);
           } else {
             query = '';
+            showSuggestions(context);
+            ref.read(screensManagerProvider(screenIndex).notifier).popScreen();
           }
         },
         icon: const Icon(Icons.clear),
@@ -65,77 +67,116 @@ class CustomSearchDelegate extends SearchDelegate {
   Widget? buildLeading(BuildContext context) {
     return IconButton(
       onPressed: () => close(context, null),
-      icon: const Icon(Icons.arrow_back),
+      icon: const Icon(Icons.chevron_left, size: 31),
+    );
+  }
+
+  @override
+  void showResults(BuildContext context) {
+    super.showResults(context);
+
+    // could use read
+    final screensManager = ref.watch(screensManagerProvider(screenIndex));
+
+    Future.microtask(
+      () {
+        ref.read(isShowingSearchSP(screenIndex).notifier).update((state) => false);
+
+        // this fixes the pushing to searched list from channel screen problem
+        if (screensManager.last.screenTypeAndId.screenType == ScreenType.channel) return;
+
+        final notifier = ref.read(screensManagerProvider(screenIndex).notifier);
+        notifier.pushScreen(
+          CustomScreen.search(
+            query: query,
+            screenIndex: screenIndex,
+          ),
+          shouldPushNewScreen: false,
+        );
+      },
     );
   }
 
   @override
   Widget buildResults(BuildContext context) {
-    Future.microtask(
-      () => ref.read(isShowingSearchSP(screenIndex).notifier).update((state) => false),
-      // () => _ref.read(isShowingSearchSP.notifier).update((state) => false),
-    );
-
     if (query.trim().isEmpty) {
-      return const SizedBox.shrink();
+      return const Center(
+        child: Text('write a term to start searching'),
+      );
     } else {
       final newQuery = query.trim();
       ref.read(searchHistorySNP.notifier).addSearchTerm(newQuery);
 
-      return SearchedVideosList(
+      return SearchedItemsList(
         query: query,
-        index: screenIndex,
+        screenIndex: screenIndex,
       );
     }
   }
 
-  // this widget is responsible for displaying all the searching suggestions
+  Future<void> searchTerm(
+    String term,
+    BuildContext context, {
+    bool isSuggestion = false,
+  }) async {
+    query = term;
+    showResults(context);
+
+    final itemsNotifier = ref.read(searchItemsNotifierProvider(screenIndex).notifier);
+    await itemsNotifier.searchItems(query: query, screenIndex: screenIndex);
+
+    final historyNotifier = ref.read(searchHistorySNP.notifier);
+
+    if (isSuggestion) {
+      await historyNotifier.addSearchTerm(query);
+    } else {
+      await historyNotifier.putSearchTermFirst(query);
+    }
+  }
+
+  Future<void> removeTerm(String term) async {
+    final notifier = ref.read(searchHistorySNP.notifier);
+    notifier.deleteSearchTerm(term);
+  }
+
+  @override
+  void showSuggestions(BuildContext context) {
+    super.showSuggestions(context);
+    ref.read(isShowingSearchSP(screenIndex).notifier).update((state) => true);
+  }
+
   @override
   Widget buildSuggestions(BuildContext context) {
-    // TODO remove this
-    // Future.microtask(
-    //   () => _ref.read(isShowingSearchSP(screenIndex).notifier).update((state) => false),
-    // );
-
     return Material(
       color: Theme.of(context).cardColor,
       clipBehavior: Clip.hardEdge,
       elevation: 4,
       child: Consumer(
-        builder: (context, ref, child) {
-          ref.watch(searchHistorySNP.notifier).watchSearchTerms(filter: query);
+        builder: (context, ref, _) {
+          // not showing empty string
+          ref.watch(searchHistorySNP.notifier).watchSearchTerms(filter: query.trim());
 
-          final searchHistoryState = ref.watch(searchHistorySNP);
-          final searchNotifier = ref.read(searchItemsNotifierProvider.notifier);
+          final searchHistory = ref.watch(searchHistorySNP);
 
-          // this is a more of an elegant approach, which doesn't use
-          // nested whens, but does use one nested consumer, however
           return ListView(
             children: [
-              searchHistoryState.when(
+              searchHistory.when(
                 data: (data) => ListView.builder(
                   shrinkWrap: true,
                   itemCount: data.length,
                   itemBuilder: (context, index) => ListTile(
-                    onTap: () {
-                      query = data[index];
-                      showResults(context);
-                    },
+                    onTap: () => searchTerm(data[index], context),
                     title: Text(data[index]),
+                    // i could just make it an icon
                     leading: IconButton(
                       // when user presses this button, the query will be filled
                       // inside the search bar and the results for that query
                       // will be shown
-                      onPressed: () {
-                        query = data[index];
-                        searchNotifier.searchItems(query: query, index: screenIndex);
-                        showResults(context);
-                      },
+                      onPressed: () => searchTerm(data[index], context),
                       icon: const Icon(Icons.history),
                     ),
                     trailing: IconButton(
-                      onPressed: () =>
-                          ref.read(searchHistorySNP.notifier).deleteSearchTerm(data[index]),
+                      onPressed: () => removeTerm(data[index]),
                       icon: const Icon(Icons.clear),
                     ),
                   ),
@@ -147,7 +188,7 @@ class CustomSearchDelegate extends SearchDelegate {
                   child: CircularProgressIndicator(),
                 ),
               ),
-              if (query.isNotEmpty) ...[
+              if (query.trim().isNotEmpty) ...[
                 Consumer(
                   builder: (context, ref, _) {
                     final asyncSuggestions = ref.watch(
@@ -155,31 +196,35 @@ class CustomSearchDelegate extends SearchDelegate {
                     );
 
                     return asyncSuggestions.when(
-                      data: (data) => ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: data.length,
-                        itemBuilder: (context, index) => ListTile(
-                          onTap: () {
-                            ref.read(searchHistorySNP.notifier).addSearchTerm(data[index]);
-                            query = data[index];
-                            showResults(context);
-                          },
-                          title: Text(data[index]),
-                          leading: IconButton(
-                            onPressed: () {
-                              ref.read(searchHistorySNP.notifier).addSearchTerm(data[index]);
-                              query = data[index];
-                              showResults(context);
+                      data: (data) {
+                        // it won't be null, cause it's inside data state
+                        // this is safe to use, because searchHistory will always be in data state
+                        // (maybe except for a few very rare cases)
+                        final history = searchHistory.value!;
+                        data.removeWhere((element) => history.contains(element));
+
+                        return ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: data.length,
+                          itemBuilder: (context, index) => ListTile(
+                            onTap: () {
+                              searchTerm(data[index], context, isSuggestion: true);
                             },
-                            icon: const Icon(Icons.search),
+                            title: Text(data[index]),
+                            leading: IconButton(
+                              onPressed: () {
+                                searchTerm(data[index], context, isSuggestion: true);
+                              },
+                              icon: const Icon(Icons.search),
+                            ),
+                            // putting the search term inside search bar
+                            trailing: IconButton(
+                              onPressed: () => query = data[index],
+                              icon: const Icon(Icons.arrow_outward),
+                            ),
                           ),
-                          // putting the search term inside search bar
-                          trailing: IconButton(
-                            onPressed: () => query = data[index],
-                            icon: const Icon(Icons.arrow_outward),
-                          ),
-                        ),
-                      ),
+                        );
+                      },
                       // TODO prolly fix this
                       error: (error, stackTrace) => const Center(
                         child: Text('error happened'),
