@@ -1,16 +1,18 @@
+import 'dart:developer';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:youtube_clone/data/info/base_info.dart';
 import 'package:youtube_clone/data/info/base_info_state.dart';
 import 'package:youtube_clone/data/models/video/video_model.dart';
 import 'package:youtube_clone/logic/notifiers/providers.dart';
 
-part 'searched_playlist_notifier.g.dart';
+part 'search_playlist_notifier.g.dart';
 
-// this is used for SearchedPlaylistScreen
+// this is used for SearchPlaylistScreen
 @riverpod
-class SearchedPlaylistNotifier extends _$SearchedPlaylistNotifier {
+class SearchPlaylistNotifier extends _$SearchPlaylistNotifier {
   @override
-  List<BaseInfoState<Video>> build() {
+  List<BaseInfoState<Video>> build(int screenIndex) {
     return [
       const BaseInfoLoading(),
     ];
@@ -43,5 +45,7 @@ class SearchedPlaylistNotifier extends _$SearchedPlaylistNotifier {
         ),
       ],
     );
+
+    log('SearchPlaylistNotifier state after getPlaylistVideos($playlistId): $state');
   }
 }
