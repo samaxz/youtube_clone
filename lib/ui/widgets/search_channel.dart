@@ -7,13 +7,13 @@ import 'package:youtube_clone/logic/notifiers/screens_manager.dart';
 import 'package:youtube_clone/logic/notifiers/subscription_notifier.dart';
 import 'package:youtube_clone/logic/services/helper_class.dart';
 
-// subscription card shown in search
-class SearchSub extends ConsumerStatefulWidget {
+// channel card shown in search
+class SearchChannel extends ConsumerStatefulWidget {
   final Channel sub;
   final String channelId;
   final int screenIndex;
 
-  const SearchSub({
+  const SearchChannel({
     super.key,
     required this.sub,
     required this.channelId,
@@ -21,10 +21,10 @@ class SearchSub extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _SearchSubState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _SearchChannelState();
 }
 
-class _SearchSubState extends ConsumerState<SearchSub> {
+class _SearchChannelState extends ConsumerState<SearchChannel> {
   Future<void> getSubbedState({bool isReloading = false}) async {
     final notifier = ref.read(channelSubscriptionNotifierProvider(
       channelId: widget.channelId,
@@ -59,13 +59,17 @@ class _SearchSubState extends ConsumerState<SearchSub> {
           ),
         )
         .last;
-
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: goToChannel,
       onLongPress: goToChannel,
       child: Column(
         children: [
+          const Divider(
+            height: 0,
+            thickness: 0.2,
+            color: Colors.white,
+          ),
           Padding(
             padding: const EdgeInsets.all(8),
             child: Row(
@@ -82,22 +86,25 @@ class _SearchSubState extends ConsumerState<SearchSub> {
                   children: [
                     Text(widget.sub.snippet.title),
                     Text(
-                      '${widget.sub.statistics?.subscriberCount != null ? Helper.numberFormatter(widget.sub.statistics!.subscriberCount) : 'unknown'}  •  ${widget.sub.statistics?.videoCount} videos',
+                      '${widget.sub.statistics?.subscriberCount != null ? Helper.formatNumber(widget.sub.statistics!.subscriberCount) : 'unknown'}  •  ${widget.sub.statistics?.videoCount} videos',
                     ),
                     // i think this'll be a bit too big, i'ma need to
                     // make my own button
                     subscribed.when(
-                      data: (data) => GestureDetector(
-                        onTap: () {
-                          final notifier =
-                              ref.read(subscriptionNotifierProvider(widget.channelId).notifier);
-                          notifier.getSubscriptionState();
-                        },
-                        child: Text(
-                          data ? 'SUBSCRIBED' : 'SUBSCRIBE',
-                          style: TextStyle(
-                            color: data ? Colors.grey : Colors.red,
-                            fontWeight: FontWeight.w500,
+                      data: (data) => Material(
+                        color: Theme.of(context).cardColor,
+                        child: InkWell(
+                          onTap: () {
+                            final notifier =
+                                ref.read(subscriptionNotifierProvider(widget.channelId).notifier);
+                            notifier.getSubscriptionState();
+                          },
+                          child: Text(
+                            data ? 'SUBSCRIBED' : 'SUBSCRIBE',
+                            style: TextStyle(
+                              color: data ? Colors.grey : Colors.red,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
                       ),
@@ -118,7 +125,8 @@ class _SearchSubState extends ConsumerState<SearchSub> {
             ),
           ),
           const Divider(
-            thickness: 0.2,
+            height: 0,
+            thickness: 0.1,
             color: Colors.white,
           ),
         ],
