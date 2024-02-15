@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:youtube_clone/logic/notifiers/search_items_notifier.dart';
+import 'package:youtube_clone/data/info/item.dart';
 
 part 'playlist_model.freezed.dart';
 part 'playlist_model.g.dart';

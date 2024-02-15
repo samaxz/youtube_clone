@@ -1,16 +1,15 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:inview_notifier_list/inview_notifier_list.dart';
+import 'package:youtube_clone/data/info/item.dart';
 import 'package:youtube_clone/data/models/channel/channel_model.dart';
 import 'package:youtube_clone/data/models/playlist/playlist_model.dart';
 import 'package:youtube_clone/data/models/video/video_model.dart';
 import 'package:youtube_clone/logic/notifiers/providers.dart';
 import 'package:youtube_clone/logic/notifiers/search_items_notifier.dart';
 import 'package:youtube_clone/ui/widgets/failure_tile.dart';
-import 'package:youtube_clone/ui/widgets/search_playlist.dart';
 import 'package:youtube_clone/ui/widgets/search_channel.dart';
+import 'package:youtube_clone/ui/widgets/search_playlist.dart';
 import 'package:youtube_clone/ui/widgets/shimmers/loading_videos_screen.dart';
 import 'package:youtube_clone/ui/widgets/video_tile.dart';
 
@@ -72,22 +71,27 @@ class SearchItemsList extends ConsumerStatefulWidget {
 class _SearchItemsListState extends ConsumerState<SearchItemsList> {
   Future<void> searchItems() async {
     final notifier = ref.read(searchItemsNotifierProvider(widget.screenIndex).notifier);
-    await notifier.searchItems(
-      query: widget.query,
-      screenIndex: widget.screenIndex,
-    );
+    await notifier.searchItems(query: widget.query);
   }
 
-  @override
-  void didUpdateWidget(covariant SearchItemsList oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // not quite sure about screen index
-    if (widget.screenIndex != oldWidget.screenIndex || widget.query != oldWidget.query) {
-      log('time to load new data');
-    } else {
-      log('no need to load new data');
-    }
-  }
+  // TODO delete this
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   log('_SearchItemsListState`s initState() got called');
+  //   Future.microtask(searchItems);
+  // }
+  //
+  // @override
+  // void didUpdateWidget(covariant SearchItemsList oldWidget) {
+  //   super.didUpdateWidget(oldWidget);
+  //   // not quite sure about screen index
+  //   if (widget.query != oldWidget.query || widget.screenIndex != oldWidget.screenIndex) {
+  //     log('time to load new data');
+  //   } else {
+  //     log('no need to load new data');
+  //   }
+  // }
 
   bool canLoadNextPage = false;
 
@@ -173,7 +177,7 @@ class _SearchItemsListState extends ConsumerState<SearchItemsList> {
                   onTap: () {
                     final not = ref.read(searchItemsNotifierProvider(widget.screenIndex).notifier);
                     not.removeLast();
-                    not.searchItems(query: widget.query, screenIndex: widget.screenIndex);
+                    not.searchItems(query: widget.query);
                   },
                 );
               }

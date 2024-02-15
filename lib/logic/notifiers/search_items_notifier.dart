@@ -5,17 +5,11 @@ import 'dart:developer';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:youtube_clone/data/info/base_info.dart';
 import 'package:youtube_clone/data/info/base_info_state.dart';
+import 'package:youtube_clone/data/info/item.dart';
 
 import 'package:youtube_clone/logic/notifiers/providers.dart';
 
 part 'search_items_notifier.g.dart';
-
-// this mixin should have every single field of all
-// the unions it'll be used with
-mixin Item {
-  String get kind;
-  String get id;
-}
 
 // this solves the problem of results reloading after popping back
 // to the search items list
@@ -28,17 +22,18 @@ class SearchItemsNotifier extends _$SearchItemsNotifier {
     ];
   }
 
-  Future<void> searchItems({
-    required String query,
-    required int screenIndex,
-    bool added = false,
-  }) async {
+  // error proof - so that i don't accidentally modify this outside
+  String _prevQuery = '';
+
+  Future<void> searchItems({required String query}) async {
+    // this solved the problem with the function being called over and over again
+    if (_prevQuery == query) return;
+    _prevQuery = query;
     final service = ref.watch(youtubeServiceP);
     final itemsOrFailure = await service.searchItems(
       query,
       pageToken: state.last.baseInfo.nextPageToken,
     );
-
     state = itemsOrFailure.fold(
       (l) => [
         ...state,
@@ -62,18 +57,15 @@ class SearchItemsNotifier extends _$SearchItemsNotifier {
         ),
       ],
     );
-
     // log('SearchItemsNotifier state after searchItems($query, $screenIndex): $state');
-    // log('SearchItemsNotifier state length after searchItems($query, $screenIndex): ${state.length}');
+    log('SearchItemsNotifier state length after searchItems($query, $screenIndex): ${state.length}');
   }
 
   void removeLast() {
     // this is to prevent bad state inside search items list's build()
     if (state.length == 1) return;
-
     state = List.from(state)..removeLast();
-
     // log('SearchItemsNotifier state after removeLast(): $state');
-    // log('SearchItemsNotifier state length after removeLast(): ${state.length}');
+    log('SearchItemsNotifier state length after removeLast(): ${state.length}');
   }
 }

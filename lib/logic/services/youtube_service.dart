@@ -5,6 +5,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:youtube_clone/data/info/base_info.dart';
 import 'package:youtube_clone/data/info/common_classes.dart';
+import 'package:youtube_clone/data/info/item.dart';
 import 'package:youtube_clone/data/info/youtube_failure.dart';
 import 'package:youtube_clone/data/models/channel/channel_about_model.dart';
 import 'package:youtube_clone/data/models/channel/channel_model.dart';
@@ -17,7 +18,6 @@ import 'package:youtube_clone/data/models/playlist_model_new.dart' as playlist_n
 import 'package:youtube_clone/data/models/video/video_category_model.dart';
 import 'package:youtube_clone/data/models/video/video_model.dart';
 import 'package:youtube_clone/env/env.dart';
-import 'package:youtube_clone/logic/notifiers/search_items_notifier.dart';
 import 'package:youtube_clone/logic/services/dio.dart';
 import 'package:youtube_clone/logic/services/either_extension.dart';
 
