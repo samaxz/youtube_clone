@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:inview_notifier_list/inview_notifier_list.dart';
@@ -5,10 +7,10 @@ import 'package:youtube_clone/data/models/channel/channel_model.dart';
 import 'package:youtube_clone/data/models/playlist/playlist_model.dart';
 import 'package:youtube_clone/data/models/video/video_model.dart';
 import 'package:youtube_clone/logic/notifiers/providers.dart';
-import 'package:youtube_clone/logic/notifiers/searched_items_notifier.dart';
+import 'package:youtube_clone/logic/notifiers/search_items_notifier.dart';
 import 'package:youtube_clone/ui/widgets/failure_tile.dart';
 import 'package:youtube_clone/ui/widgets/search_playlist.dart';
-import 'package:youtube_clone/ui/widgets/search_sub.dart';
+import 'package:youtube_clone/ui/widgets/search_channel.dart';
 import 'package:youtube_clone/ui/widgets/shimmers/loading_videos_screen.dart';
 import 'package:youtube_clone/ui/widgets/video_tile.dart';
 
@@ -42,10 +44,9 @@ class SearchItem extends ConsumerWidget {
         : kind == 'youtube#playlist'
             ? SearchPlaylist(
                 playlist: item as Playlist,
-                // screenIndex: searchIndex,
                 screenIndex: screenIndex,
               )
-            : SearchSub(
+            : SearchChannel(
                 sub: item as Channel,
                 channelId: item.id,
                 screenIndex: screenIndex,
@@ -54,27 +55,38 @@ class SearchItem extends ConsumerWidget {
 }
 
 // can turn this into consumer widget
-class SearchedItemsList extends ConsumerStatefulWidget {
+class SearchItemsList extends ConsumerStatefulWidget {
   final String query;
   final int screenIndex;
 
-  const SearchedItemsList({
+  const SearchItemsList({
     super.key,
     required this.query,
     required this.screenIndex,
   });
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _SearchedItemsListState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _SearchItemsListState();
 }
 
-class _SearchedItemsListState extends ConsumerState<SearchedItemsList> {
+class _SearchItemsListState extends ConsumerState<SearchItemsList> {
   Future<void> searchItems() async {
     final notifier = ref.read(searchItemsNotifierProvider(widget.screenIndex).notifier);
     await notifier.searchItems(
       query: widget.query,
       screenIndex: widget.screenIndex,
     );
+  }
+
+  @override
+  void didUpdateWidget(covariant SearchItemsList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // not quite sure about screen index
+    if (widget.screenIndex != oldWidget.screenIndex || widget.query != oldWidget.query) {
+      log('time to load new data');
+    } else {
+      log('no need to load new data');
+    }
   }
 
   bool canLoadNextPage = false;
@@ -85,7 +97,6 @@ class _SearchedItemsListState extends ConsumerState<SearchedItemsList> {
     final selectedVideo = ref.watch(selectedVideoSP);
     final screenIndex = ref.watch(currentScreenIndexSP);
     final isInViewToo = selectedVideo == null && screenIndex == widget.screenIndex;
-
     ref.listen(
       searchItemsNotifierProvider(widget.screenIndex),
       (_, state) {
@@ -95,7 +106,6 @@ class _SearchedItemsListState extends ConsumerState<SearchedItemsList> {
         );
       },
     );
-
     return RefreshIndicator(
       // not gonna set isReloading to true
       onRefresh: () => searchItems(),
@@ -105,10 +115,8 @@ class _SearchedItemsListState extends ConsumerState<SearchedItemsList> {
           final limit = metrics.maxScrollExtent - metrics.viewportDimension / 3;
           if (canLoadNextPage && metrics.pixels >= limit) {
             canLoadNextPage = false;
-
             Future.microtask(searchItems);
           }
-
           return false;
         },
         child: InViewNotifierList(
@@ -116,6 +124,7 @@ class _SearchedItemsListState extends ConsumerState<SearchedItemsList> {
               deltaTop < (0.5 * vpHeight) && deltaBottom > (0.5 * vpHeight),
           shrinkWrap: true,
           itemCount: items.when(
+            // + 1 here causes RangeError index for video tile's hidden elementAt
             loading: (baseInfo) => baseInfo.data.length + 1,
             loaded: (baseInfo) => baseInfo.data.length,
             error: (baseInfo, _) => baseInfo.data.length + 1,
