@@ -385,7 +385,7 @@ class _NavScreenState extends ConsumerState<NavScreen> {
                   highlightElevation: 0,
                   focusElevation: 0,
                   elevation: 0,
-                  onPressed: () => Helper.showAddButtonActions(context: context, ref: ref),
+                  onPressed: () => Helper.pressAddButton(context: context, ref: ref),
                   child: Icon(
                     Icons.add_circle_outline_sharp,
                     size: 40,

@@ -139,7 +139,7 @@ class Helper {
   }
 
   // could also be called pressAddButton
-  static void showAddButtonActions({
+  static void pressAddButton({
     required BuildContext context,
     required WidgetRef ref,
   }) {
