@@ -45,7 +45,7 @@ class ChannelShortsCard extends ConsumerWidget {
                 child: InkWell(
                   enableFeedback: false,
                   // TODO make this work for different types of videos
-                  onTap: () => Helper.showDownloadPressed(
+                  onTap: () => Helper.downloadVideo(
                     context: context,
                     ref: ref,
                     videoId: short.id,
@@ -70,7 +70,7 @@ class ChannelShortsCard extends ConsumerWidget {
               left: 5,
               child: Text(
                 short.statistics?.viewCount != null
-                    ? '${Helper.numberFormatter(short.statistics!.viewCount!)} views'
+                    ? '${Helper.formatNumber(short.statistics!.viewCount!)} views'
                     : 'unknown views',
                 style: TextStyle(
                   fontSize: 12,

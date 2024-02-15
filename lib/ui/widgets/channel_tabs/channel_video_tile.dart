@@ -19,9 +19,9 @@ class ChannelVideoTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
       onTap: () {
-        Helper.handleVideoCardPressed(
+        Helper.pressVideoCard(
           ref: ref,
-          video: video,
+          newVideo: video,
         );
       },
       child: Padding(
@@ -88,7 +88,7 @@ class ChannelVideoTile extends ConsumerWidget {
                       Center(
                         child: Text(
                           video.statistics?.viewCount != null
-                              ? Helper.numberFormatter(
+                              ? Helper.formatNumber(
                                   video.statistics!.viewCount!,
                                 )
                               : 'unknown views',

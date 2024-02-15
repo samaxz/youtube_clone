@@ -8,7 +8,7 @@ import 'package:youtube_clone/data/info/base_info_state.dart';
 
 import 'package:youtube_clone/logic/notifiers/providers.dart';
 
-part 'searched_items_notifier.g.dart';
+part 'search_items_notifier.g.dart';
 
 // this mixin should have every single field of all
 // the unions it'll be used with
@@ -17,9 +17,8 @@ mixin Item {
   String get id;
 }
 
-// @riverpod
 // this solves the problem of results reloading after popping back
-// to the searched items list
+// to the search items list
 @Riverpod(keepAlive: true)
 class SearchItemsNotifier extends _$SearchItemsNotifier {
   @override
@@ -32,12 +31,8 @@ class SearchItemsNotifier extends _$SearchItemsNotifier {
   Future<void> searchItems({
     required String query,
     required int screenIndex,
-    // bool isReloading = false,
     bool added = false,
   }) async {
-    // log('SearchItemsNotifier state after searchItems($query, $screenIndex): $state');
-
-    // TODO uncomment this
     final service = ref.watch(youtubeServiceP);
     final itemsOrFailure = await service.searchItems(
       query,
@@ -68,15 +63,17 @@ class SearchItemsNotifier extends _$SearchItemsNotifier {
       ],
     );
 
-    log('SearchItemsNotifier state after searchItems($query, $screenIndex): $state');
+    // log('SearchItemsNotifier state after searchItems($query, $screenIndex): $state');
+    // log('SearchItemsNotifier state length after searchItems($query, $screenIndex): ${state.length}');
   }
 
   void removeLast() {
-    // this is to prevent bad state inside searched items list's build()
+    // this is to prevent bad state inside search items list's build()
     if (state.length == 1) return;
 
     state = List.from(state)..removeLast();
 
-    log('SearchItemsNotifier state after removeLast(): $state');
+    // log('SearchItemsNotifier state after removeLast(): $state');
+    // log('SearchItemsNotifier state length after removeLast(): ${state.length}');
   }
 }

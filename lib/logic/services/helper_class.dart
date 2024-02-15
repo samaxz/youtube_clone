@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:youtube_clone/data/custom_screen.dart';
 import 'package:youtube_clone/data/info/base_info.dart';
 import 'package:youtube_clone/data/info/common_classes.dart';
 import 'package:youtube_clone/data/models/comment_model.dart';
@@ -19,6 +20,7 @@ import 'package:youtube_clone/ui/screens/authorization_screen.dart';
 import 'package:youtube_clone/ui/widgets/build_action.dart';
 import 'package:youtube_clone/ui/widgets/comment_card.dart';
 import 'package:youtube_clone/ui/widgets/custom_search_delegate.dart';
+import 'package:youtube_clone/ui/widgets/my_miniplayer.dart';
 import 'package:youtube_clone/ui/widgets/popover.dart';
 import 'package:youtube_clone/ui/widgets/show_modal_bottom_sheet_builder.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart' as explode;
@@ -68,12 +70,12 @@ class Helper {
       BuildAction(
         Icons.file_download_outlined,
         'Download video',
-        onTap: () => showDownloadPressed(context: context, ref: ref, videoId: videoAction.videoId),
+        onTap: () => downloadVideo(context: context, ref: ref, videoId: videoAction.videoId),
       ),
       BuildAction(
         Icons.share,
         'Share',
-        onTap: () => share(context: context, videoId: videoAction.videoId),
+        onTap: () => share(context: context, id: videoAction.videoId),
       ),
       BuildAction(
         Icons.block,
@@ -203,21 +205,15 @@ class Helper {
   }
   // ***************************************
 
-  // resets all the data about a video and loads new data
-  // TODO remove unnecessary methods from here
-  // TODO rename this
-  // TODO remove this method, cause all it does is just sets
-  // new selected video state provider
-  static void handleVideoCardPressed({
+  static void pressVideoCard({
     required WidgetRef ref,
-    // new video that'll be selected
-    required Video video,
+    required Video newVideo,
   }) {
+    ref.read(miniPlayerControllerP).animateToHeight(state: PanelState.max);
     final selectedVideo = ref.read(selectedVideoSP);
-
-    if (selectedVideo?.id == video.id) return;
-
-    ref.read(selectedVideoSP.notifier).update((state) => video);
+    if (selectedVideo?.id == newVideo.id) return;
+    ref.read(selectedVideoSP.notifier).update((state) => newVideo);
+    // TODO add methods here
   }
 
   static void handleShowSearch({
@@ -227,136 +223,49 @@ class Helper {
   }) {
     // TODO remove this
     // ref.read(searchIndexProvider.notifier).setSearchIndex(screenIndex);
+    // this is needed
     ref.read(isShowingSearchSP(screenIndex).notifier).update((state) => true);
+    final screensNotifier = ref.read(screensManagerProvider(screenIndex).notifier);
+    final screensManager = ref.read(screensManagerProvider(screenIndex));
+    if (screensManager.last.screenTypeAndId.screenType != ScreenType.search) {
+      // this is the only way to make it work
+      screensNotifier.pushScreen(
+        CustomScreen.search(
+          query: 'this is from handleShowSearch()',
+          screenIndex: screenIndex,
+        ),
+        shouldPushNewScreen: false,
+      );
+    }
     showSearch(
       context: context,
       delegate: CustomSearchDelegate(
         ref: ref,
         screenIndex: screenIndex,
       ),
-    ).then((value) {
-      // log('showSearch() got called');
-      ref.read(screensManagerProvider(screenIndex).notifier).popScreen();
-    });
-    // log('did this get called?');
+    ).then((value) => screensNotifier.popScreen());
   }
-
-  // this is a method used when pressing more vert icon button
-  // TODO remove this
-  // static void handleMoreVertPressed({
-  //   required BuildContext context,
-  //   required WidgetRef ref,
-  //   // required ScreenIdAndActions screenIdAndActions,
-  //   // int? videoCardIndex,
-  //   required WidgetActions widgetAction,
-  // }) {
-  //   showModalBottomSheet(
-  //     backgroundColor: Colors.transparent,
-  //     elevation: 0,
-  //     context: context,
-  //     builder: (context) {
-  //       // switch (screenIdAndActions.actions) {
-  //       switch (widgetAction.action) {
-  //         case ScreenActions.videoCard:
-  //           return ShowModalBottomSheetBuilder(
-  //             actions: getVideoCardActions(
-  //               ref: ref,
-  //               context: context,
-  //               // videoId: screenIdAndActions.id!,
-  //               // videoCardIndex: videoCardIndex!,
-  //               // videoAction: WidgetActions.videoCard(videoAction),
-  //               // and wtf am i supposed to get this from?
-  //               // videoAction: WidgetActions.videoAction(
-  //               //   VideoAction(
-  //               //     videoPlayer: videoPlayer,
-  //               //     videoId: videoId,
-  //               //     videoIndex: videoIndex,
-  //               //   ),
-  //               // ),
-  //               // this'll throw, i just know it
-  //               // videoAction: widgetAction as VideoAction,
-  //               videoAction: widgetAction,
-  //             ),
-  //           );
-  //
-  //         // TODO finish these
-  //         case ScreenActions.channelCard:
-  //           return Container();
-  //
-  //         case ScreenActions.shortsBody:
-  //           return Container();
-  //
-  //         case ScreenActions.playlist:
-  //           return Container();
-  //
-  //         case ScreenActions.playlistChannel:
-  //           return Container();
-  //
-  //         case ScreenActions.channel:
-  //           return Container();
-  //       }
-  //     },
-  //   );
-  // }
-
-  // static void handleAddButtonPressed({
-  //   required BuildContext context,
-  //   required WidgetRef ref,
-  // }) {
-  //   showModalBottomSheet(
-  //     backgroundColor: Colors.transparent,
-  //     elevation: 0,
-  //     context: context,
-  //     builder: (context) => ShowModalBottomSheetBuilder(
-  //       actions: showAddButtonActions(ref),
-  //       enableHomeIndicator: false,
-  //       isAddContentButton: true,
-  //     ),
-  //   );
-  // }
-
-  // TODO remove this
-  // static void handleSharePressed({
-  //   required BuildContext context,
-  //   required String videoId,
-  // }) {
-  //   Share.shareUri(
-  //     Uri.https(
-  //       'www.youtube.com',
-  //       '/watch',
-  //       {'v': videoId},
-  //     ),
-  //   );
-  //   // showModalBottomSheet(
-  //   //   context: context,
-  //   //   backgroundColor: Colors.transparent,
-  //   //   elevation: 0,
-  //   //   // builder: (context) => ShowModalBottomSheetBuilder(
-  //   //   //   actions: [
-  //   //   //     BuildAction(
-  //   //   //       Icons.reply_outlined,
-  //   //   //       'Share the video',
-  //   //   //       onTap: () {},
-  //   //   //     ),
-  //   //   //   ],
-  //   //   // ),
-  //   //   // builder: (context) => Share.shareUri(
-  //   //   //   Uri.https(authority),
-  //   //   // ),
-  //   // );
-  // }
 
   static void share({
     required BuildContext context,
-    required String videoId,
+    required String id,
+    bool isVideoId = true,
   }) {
-    Share.shareUri(
-      Uri.https(
+    late final Uri url;
+    if (isVideoId) {
+      url = Uri.https(
         'www.youtube.com',
         '/watch',
-        {'v': videoId},
-      ),
-    );
+        {'v': id},
+      );
+    } else {
+      url = Uri.https(
+        'www.youtube.com',
+        '/playlist',
+        {'list': id},
+      );
+    }
+    Share.shareUri(url);
   }
 
   static Future<bool> requestPermission(Permission permission) async {
@@ -380,7 +289,7 @@ class Helper {
 
   static double progressIndicator = 0;
 
-  static Future<void> downloadVideo({
+  static Future<void> _downloadVideo({
     // can't i simply use the video id?
     required explode.VideoId videoId,
     required explode.VideoQuality quality,
@@ -466,7 +375,7 @@ class Helper {
     return '${txt.replaceAll(RegExp(r'[^0-9]'), '')}p';
   }
 
-  static void showDownloadPressed({
+  static void downloadVideo({
     required BuildContext context,
     required WidgetRef ref,
     required String videoId,
@@ -496,7 +405,6 @@ class Helper {
         content: qualities.when(
           data: (data) {
             log('data state');
-
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: data
@@ -512,7 +420,7 @@ class Helper {
                       child: ListTile(
                         dense: true,
                         onTap: () async {
-                          await downloadVideo(
+                          await _downloadVideo(
                             videoId: videoUrl,
                             quality: quality,
                           );
@@ -545,7 +453,6 @@ class Helper {
           },
           error: (error, stackTrace) {
             log('error state');
-
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -563,7 +470,6 @@ class Helper {
           },
           loading: () {
             log('loading state');
-
             return const Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -579,7 +485,7 @@ class Helper {
   }
 
   // TODO use data from notifier here
-  static void handleSavePressed(BuildContext context) {
+  static void saveToPlaylist(BuildContext context) {
     showModalBottomSheet(
       context: context,
       elevation: 0,
@@ -597,7 +503,7 @@ class Helper {
   }
 
   // shows the bottom sheet comments section
-  static void handleCommentsPressed({
+  static void showComments({
     required BuildContext context,
     required BaseInfo<Comment> commentsInfo,
   }) {
@@ -637,11 +543,9 @@ class Helper {
     );
   }
 
-  static String numberFormatter(String initialNumber) {
+  static String formatNumber(String initialNumber) {
     final numberAsString = initialNumber;
-
     late final String newNumber;
-
     switch (numberAsString.length) {
       // *********** thousands *********** //
       case 4:
@@ -777,7 +681,6 @@ class Helper {
   static String formatDuration(String isoDuration) {
     final duration = _parseDuration(isoDuration);
     final newDuration = _formatDuration(duration);
-
     return newDuration;
   }
 
@@ -788,7 +691,6 @@ class Helper {
     await ref.read(authNotifierProvider.notifier).signIn(
       (authorizationUrl) {
         final completer = Completer<Uri>();
-
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => AuthorizationScreen(
@@ -802,23 +704,19 @@ class Helper {
         return completer.future;
       },
     );
-
     if (!context.mounted) return;
-
     Navigator.of(context).popUntil((route) => route.isFirst);
-
     // TODO invalidate videos and other notifiers here
     // TODO update all the state notifier providers here to stop any
     // video and short, as well as hide the mp (and maybe do some other
     // stuff)
   }
 
-  static void handleAuthButtonPressed({
+  static void handleUnauthAttempt({
     required BuildContext context,
     required WidgetRef ref,
   }) {
     final authState = ref.read(authNotifierProvider);
-
     showModalBottomSheet(
       context: context,
       // this enables the mbs to be full screen
@@ -874,7 +772,6 @@ class Helper {
 
   static String removePrefix(String url) {
     final pattern = RegExp(r'^(https?://)?(www\.)?');
-
     return url.replaceAll(pattern, '');
   }
 }

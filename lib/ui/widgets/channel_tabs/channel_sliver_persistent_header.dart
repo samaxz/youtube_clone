@@ -87,7 +87,7 @@ class _ChannelSliverPersistentHeaderState extends ConsumerState<ChannelSliverPer
                     const SizedBox(width: 10),
                     Text(
                       widget.channel.statistics?.subscriberCount != null
-                          ? '${Helper.numberFormatter(widget.channel.statistics!.subscriberCount)} subscribers'
+                          ? '${Helper.formatNumber(widget.channel.statistics!.subscriberCount)} subscribers'
                           : 'unknown subscribers',
                     ),
                     const SizedBox(width: 10),

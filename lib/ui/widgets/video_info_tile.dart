@@ -100,7 +100,7 @@ class _VideoInfoTileState extends ConsumerState<VideoInfoTile> {
                     children: [
                       Text(
                         widget.video.statistics?.viewCount != null
-                            ? '${Helper.numberFormatter(widget.video.statistics!.viewCount!)} views  •'
+                            ? '${Helper.formatNumber(widget.video.statistics!.viewCount!)} views  •'
                             : 'unknown views  •',
                         // style: Theme.of(context).textTheme.bodySmall!.copyWith(fontSize: 14),
                         style: const TextStyle(fontSize: 14),
@@ -193,7 +193,7 @@ class _ActionsRow extends ConsumerWidget {
               const SizedBox(height: 5),
               Text(
                 video.statistics?.likeCount != null
-                    ? '${Helper.numberFormatter(video.statistics!.likeCount!)} '
+                    ? '${Helper.formatNumber(video.statistics!.likeCount!)} '
                     : 'Like',
               ),
             ],
@@ -227,8 +227,8 @@ class _ActionsRow extends ConsumerWidget {
               const Text('Share'),
             ],
           ),
-          onTap: () => Helper.share(context: context, videoId: video.id),
-          onLongPress: () => Helper.share(context: context, videoId: video.id),
+          onTap: () => Helper.share(context: context, id: video.id),
+          onLongPress: () => Helper.share(context: context, id: video.id),
         ),
         CustomInkWell(
           child: Column(
@@ -244,14 +244,14 @@ class _ActionsRow extends ConsumerWidget {
             ],
           ),
           onTap: () {
-            Helper.showDownloadPressed(
+            Helper.downloadVideo(
               context: context,
               ref: ref,
               videoId: video.id,
             );
           },
           onLongPress: () {
-            Helper.showDownloadPressed(
+            Helper.downloadVideo(
               context: context,
               ref: ref,
               videoId: video.id,
@@ -372,7 +372,7 @@ class _AuthorInfoState extends ConsumerState<_AuthorInfo> {
                     Flexible(
                       child: Text(
                         channel.statistics?.subscriberCount != null
-                            ? Helper.numberFormatter(channel.statistics!.subscriberCount)
+                            ? Helper.formatNumber(channel.statistics!.subscriberCount)
                             : 'unknown',
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -441,11 +441,11 @@ class _CommentsSection extends ConsumerWidget {
     return Material(
       color: Theme.of(context).cardColor,
       child: InkWell(
-        onTap: () => Helper.handleCommentsPressed(
+        onTap: () => Helper.showComments(
           context: context,
           commentsInfo: commentsInfo,
         ),
-        onLongPress: () => Helper.handleCommentsPressed(
+        onLongPress: () => Helper.showComments(
           context: context,
           commentsInfo: commentsInfo,
         ),

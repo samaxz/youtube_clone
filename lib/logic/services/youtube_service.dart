@@ -4,23 +4,22 @@ import 'dart:developer';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:youtube_clone/data/info/base_info.dart';
+import 'package:youtube_clone/data/info/common_classes.dart';
+import 'package:youtube_clone/data/info/youtube_failure.dart';
 import 'package:youtube_clone/data/models/channel/channel_about_model.dart';
 import 'package:youtube_clone/data/models/channel/channel_model.dart';
 import 'package:youtube_clone/data/models/channel/channel_subscription_new.dart';
-import 'package:youtube_clone/data/models/comment_model.dart';
-import 'package:youtube_clone/data/info/youtube_failure.dart';
 import 'package:youtube_clone/data/models/channel/community_post_model.dart';
+import 'package:youtube_clone/data/models/comment_model.dart';
 import 'package:youtube_clone/data/models/playlist/playlist_item_model.dart';
 import 'package:youtube_clone/data/models/playlist/playlist_model.dart';
 import 'package:youtube_clone/data/models/playlist_model_new.dart' as playlist_new;
 import 'package:youtube_clone/data/models/video/video_category_model.dart';
 import 'package:youtube_clone/data/models/video/video_model.dart';
 import 'package:youtube_clone/env/env.dart';
-import 'package:youtube_clone/data/info/common_classes.dart';
+import 'package:youtube_clone/logic/notifiers/search_items_notifier.dart';
 import 'package:youtube_clone/logic/services/dio.dart';
 import 'package:youtube_clone/logic/services/either_extension.dart';
-import 'package:youtube_clone/logic/services/helper_class.dart';
-import 'package:youtube_clone/logic/notifiers/searched_items_notifier.dart';
 
 class YoutubeService {
   final Dio _dio;
@@ -60,7 +59,6 @@ class YoutubeService {
         queryParameters,
       );
       // log('items url: $url');
-
       final response = await _dio.getUri(url);
       final items = List.from(response.data['items']);
 
@@ -137,7 +135,7 @@ class YoutubeService {
   // these are used for search to get details about videos,
   // playlists and channels
 
-  // this is for searched videos details (videos and their details)
+  // this is for search videos details (videos and their details)
   Future<List<Video>> _getVideoDetails(String videoId) async {
     if (videoId.isEmpty) return [];
 
@@ -182,7 +180,7 @@ class YoutubeService {
     }
   }
 
-  // this is for searched playlists' details
+  // this is for search playlists' details
   Future<List<Playlist>> _getPlaylistDetails(String playlistId) async {
     if (playlistId.isEmpty) return [];
 
@@ -226,7 +224,7 @@ class YoutubeService {
     }
   }
 
-  // this is for searched channel's details
+  // this is for search channel's details
   Future<List<Channel>> _getChannelDetails(String channelId) async {
     if (channelId.isEmpty) return [];
 

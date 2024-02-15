@@ -4,7 +4,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:youtube_clone/logic/notifiers/providers.dart';
 
 // shimmer for loading state of videos inside home
-// screen body and searched videos list
+// screen body and search videos list
 class LoadingVideosScreen extends ConsumerWidget {
   const LoadingVideosScreen({super.key});
 

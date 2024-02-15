@@ -58,7 +58,7 @@ class _ChannelSubState extends ConsumerState<ChannelSubCard> with AutomaticKeepA
             children: [
               Text(widget.sub.title),
               Text(
-                '${widget.sub.subscriberCount != null ? Helper.numberFormatter(widget.sub.subscriberCount!.toString()) : 'unknown'}  •  ${widget.sub.videoCount != null ? Helper.numberFormatter(widget.sub.videoCount.toString()) : 'unknown'} videos',
+                '${widget.sub.subscriberCount != null ? Helper.formatNumber(widget.sub.subscriberCount!.toString()) : 'unknown'}  •  ${widget.sub.videoCount != null ? Helper.formatNumber(widget.sub.videoCount.toString()) : 'unknown'} videos',
               ),
               // i think this'll be a bit too big, i'ma need to
               // make my own button

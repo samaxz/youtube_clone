@@ -106,7 +106,7 @@ class _NavScreenState extends ConsumerState<NavScreen> {
     // pop-up for him to sign in to perform authenticated actions
     ref.listen(unauthAttemptSP, (_, state) {
       if (state) {
-        Helper.handleAuthButtonPressed(context: context, ref: ref);
+        Helper.handleUnauthAttempt(context: context, ref: ref);
       }
 
       // this cancels it right away to allow continuous auth

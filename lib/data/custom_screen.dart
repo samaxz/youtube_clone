@@ -2,8 +2,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:youtube_clone/data/models/playlist/playlist_model.dart';
 import 'package:youtube_clone/ui/screens/channel_screen.dart';
-import 'package:youtube_clone/ui/screens/searched_playlist_screen.dart';
-import 'package:youtube_clone/ui/widgets/searched_items_list.dart';
+import 'package:youtube_clone/ui/screens/search_playlist_screen.dart';
+import 'package:youtube_clone/ui/widgets/search_items_list.dart';
 
 enum ScreenType {
   // initial is the home page for all the bottom nav bar indexes,
@@ -63,7 +63,7 @@ class ScreenTypeAndId {
       : screenId = query,
         screenType = ScreenType.search;
 
-  const ScreenTypeAndId.searchedPlaylist(String playlistId)
+  const ScreenTypeAndId.searchPlaylist(String playlistId)
       : screenId = playlistId,
         screenType = ScreenType.playlist;
 
@@ -137,16 +137,16 @@ class CustomScreen {
     required String query,
     required int screenIndex,
   })  : screenTypeAndId = ScreenTypeAndId.search(query),
-        screen = SearchedItemsList(
+        screen = SearchItemsList(
           query: query,
           screenIndex: screenIndex,
         );
 
-  CustomScreen.searchedPlaylist({
+  CustomScreen.searchPlaylist({
     required Playlist playlist,
     required int screenIndex,
-  })  : screenTypeAndId = ScreenTypeAndId.searchedPlaylist(playlist.id),
-        screen = SearchedPlaylistScreen(
+  })  : screenTypeAndId = ScreenTypeAndId.searchPlaylist(playlist.id),
+        screen = SearchPlaylistScreen(
           playlist: playlist,
           screenIndex: screenIndex,
         );

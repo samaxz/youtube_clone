@@ -240,7 +240,7 @@ class _ShortsBodyPlayerState extends ConsumerState<ShortsBodyPlayer>
                           const SizedBox(height: 5),
                           Text(
                             widget.short.statistics?.likeCount != null
-                                ? '${Helper.numberFormatter(widget.short.statistics!.likeCount!)} '
+                                ? '${Helper.formatNumber(widget.short.statistics!.likeCount!)} '
                                 : 'Like',
                             style: const TextStyle(color: Colors.white),
                           ),
@@ -287,14 +287,14 @@ class _ShortsBodyPlayerState extends ConsumerState<ShortsBodyPlayer>
                           const SizedBox(height: 5),
                           Text(
                             widget.short.statistics?.commentCount != null
-                                ? '${Helper.numberFormatter(widget.short.statistics!.commentCount!)} '
+                                ? '${Helper.formatNumber(widget.short.statistics!.commentCount!)} '
                                 : 'Comments',
                             style: const TextStyle(color: Colors.white),
                           ),
                         ],
                       ),
                       onTap: () {
-                        Helper.handleCommentsPressed(
+                        Helper.showComments(
                           context: context,
                           commentsInfo: data.comments,
                         );

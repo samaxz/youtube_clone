@@ -98,7 +98,6 @@ class _ChannelSubsTabState extends ConsumerState<ChannelAboutTab>
                                 onTap: () => launchUrlString(
                                   'http://www.youtube.com/${data.links[i]!.url}',
                                 ),
-                                // TODO fix this
                                 child: SizedBox(
                                   width: MediaQuery.of(context).size.width - 40,
                                   child: Text(
@@ -180,7 +179,7 @@ class _ChannelSubsTabState extends ConsumerState<ChannelAboutTab>
                   Icon(MdiIcons.chartLineVariant),
                   const SizedBox(width: 7),
                   Text(
-                    '${data.stats?.viewCount == null ? 'unknown' : Helper.numberFormatter(data.stats!.viewCount!.toString())} views',
+                    '${data.stats?.viewCount == null ? 'unknown' : Helper.formatNumber(data.stats!.viewCount!.toString())} views',
                   ),
                 ],
               ),
