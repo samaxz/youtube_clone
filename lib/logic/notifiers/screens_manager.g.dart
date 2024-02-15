@@ -6,7 +6,7 @@ part of 'screens_manager.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$screensManagerHash() => r'64140630c0565c9e07e41148121e504d186382e0';
+String _$screensManagerHash() => r'fb96625592774f988d797aae94bcefcc60820591';
 
 /// Copied from Dart SDK
 class _SystemHash {
