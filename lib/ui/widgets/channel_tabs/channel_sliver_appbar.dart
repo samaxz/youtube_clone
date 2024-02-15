@@ -24,16 +24,19 @@ class ChannelSliverAppbar extends ConsumerWidget {
       pinned: true,
       title: Text(channel?.snippet.title ?? ''),
       leading: IconButton(
-        onPressed: () {
-          Navigator.of(context).pop();
-          // TODO update providers here
-          // ref.read(pushedHomeChannelSP.notifier).update((state) => false);
-        },
-        icon: const Icon(Icons.chevron_left, size: 31),
+        onPressed: () => Navigator.of(context).pop(),
+        icon: Icon(
+          Icons.chevron_left,
+          size: 31,
+          color: Theme.of(context).buttonTheme.colorScheme?.onSurface,
+        ),
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.cast),
+          icon: Icon(
+            Icons.cast,
+            color: Theme.of(context).buttonTheme.colorScheme?.onSurface,
+          ),
           onPressed: () => showModalBottomSheet(
             context: context,
             isScrollControlled: true,
@@ -65,7 +68,10 @@ class ChannelSliverAppbar extends ConsumerWidget {
           ),
         ),
         IconButton(
-          icon: const Icon(Icons.search),
+          icon: Icon(
+            Icons.search,
+            color: Theme.of(context).buttonTheme.colorScheme?.onSurface,
+          ),
           onPressed: () => Helper.handleShowSearch(
             context: context,
             ref: ref,
@@ -75,7 +81,10 @@ class ChannelSliverAppbar extends ConsumerWidget {
         IconButton(
           // TODO change this
           onPressed: () => Helper.showOtherActions(context),
-          icon: const Icon(Icons.more_vert),
+          icon: Icon(
+            Icons.more_vert,
+            color: Theme.of(context).buttonTheme.colorScheme?.onSurface,
+          ),
         ),
       ],
     );
