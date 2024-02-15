@@ -124,21 +124,8 @@ class _VideoTileState extends ConsumerState<VideoTile> with AutomaticKeepAliveCl
   @override
   void didUpdateWidget(covariant VideoTile oldWidget) {
     super.didUpdateWidget(oldWidget);
-
     if (widget.isInView == oldWidget.isInView) return;
-
     if (widget.isInView) {
-      // this is bs, it's not how the widget should work
-      // Future.delayed(const Duration(seconds: 1), () {
-      //   if (!playerController.isInitialised) {
-      //     playerController.initialise().then((value) {
-      //       playerController.play();
-      //     });
-      //   } else {
-      //     playerController.play();
-      //   }
-      //   // if (playerController.isInitialised) playerController.play();
-      // });
       if (!playerController.isInitialised) {
         playerController.initialise().then((value) {
           playerController.play();
@@ -146,11 +133,9 @@ class _VideoTileState extends ConsumerState<VideoTile> with AutomaticKeepAliveCl
       } else {
         playerController.play();
       }
-      // if (playerController.isInitialised) playerController.play();
     } else {
       playerController.pause();
     }
-    // if (!widget.isInView) playerController.pause();
   }
 
   @override
@@ -162,31 +147,24 @@ class _VideoTileState extends ConsumerState<VideoTile> with AutomaticKeepAliveCl
   @override
   Widget build(BuildContext context) {
     super.build(context);
-
-    final hidden = ref.watch(visibilitySNP).elementAt(widget.videoIndex);
-
-    return hidden
+    final hidden = ref.watch(visibilitySNP).elementAtOrNull(widget.videoIndex);
+    return hidden != null && hidden
         ? HiddenVideoCard(index: widget.videoIndex)
         : Material(
             color: Theme.of(context).cardColor,
             child: InkWell(
               onTap: () {
-                Helper.handleVideoCardPressed(
+                Helper.pressVideoCard(
                   ref: ref,
-                  video: widget.video,
+                  newVideo: widget.video,
                 );
-
                 if (widget.maximize) {
                   ref.read(miniPlayerControllerP).animateToHeight(state: PanelState.max);
                 }
-
                 widget.onTap?.call();
-
-                // log('user clicked on video tile');
               },
               onLongPress: () {
                 handleMoreVertPressed();
-
                 // i don't need this
                 widget.onLongPress?.call();
               },
@@ -298,7 +276,7 @@ class _VideoTileState extends ConsumerState<VideoTile> with AutomaticKeepAliveCl
                               const SizedBox(height: 2),
                               Flexible(
                                 child: Text(
-                                  '${widget.video.snippet.channelTitle} • ${widget.video.statistics?.viewCount != null ? Helper.numberFormatter(widget.video.statistics!.viewCount!) : 'unknown'} views • ${timeago.format(widget.video.snippet.publishedAt)}',
+                                  '${widget.video.snippet.channelTitle} • ${widget.video.statistics?.viewCount != null ? Helper.formatNumber(widget.video.statistics!.viewCount!) : 'unknown'} views • ${timeago.format(widget.video.snippet.publishedAt)}',
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(fontSize: 13),
