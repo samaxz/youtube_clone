@@ -1,52 +1,52 @@
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:youtube_clone/data/models/playlist/playlist_model.dart';
-import 'package:youtube_clone/logic/notifiers/playlist/channel_playlist_notifier.dart';
-import 'package:youtube_clone/logic/notifiers/playlist/searched_playlist_notifier.dart';
+import 'package:youtube_clone/logic/notifiers/playlist/search_playlist_notifier.dart';
+import 'package:youtube_clone/logic/notifiers/providers.dart';
 import 'package:youtube_clone/logic/services/helper_class.dart';
 import 'package:youtube_clone/ui/widgets/channel_tabs/channel_sliver_appbar.dart';
 import 'package:youtube_clone/ui/widgets/channel_tabs/channel_video_tile.dart';
+import 'package:youtube_clone/ui/widgets/my_miniplayer.dart';
 
-// this widget is used for displaying searched playlists
-class SearchedPlaylistScreen extends ConsumerStatefulWidget {
+// this widget is used for displaying search playlists
+class SearchPlaylistScreen extends ConsumerStatefulWidget {
   final Playlist playlist;
   final int screenIndex;
 
-  const SearchedPlaylistScreen({
+  const SearchPlaylistScreen({
     super.key,
     required this.playlist,
     required this.screenIndex,
   });
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _SearchedPlaylistScreenState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _SearchPlaylistScreenState();
 }
 
-class _SearchedPlaylistScreenState extends ConsumerState<SearchedPlaylistScreen> {
-  void randomPressButton() {
-    final videos = ref.read(channelPlaylistNotifierProvider).last;
-
-    Helper.handleVideoCardPressed(
+class _SearchPlaylistScreenState extends ConsumerState<SearchPlaylistScreen> {
+  void playAll() {
+    final videos = ref.read(searchPlaylistNotifierProvider(widget.screenIndex)).last;
+    Helper.pressVideoCard(
       ref: ref,
-      video: videos.baseInfo.data[Random().nextInt(videos.baseInfo.data.length)],
+      newVideo: videos.baseInfo.data.first,
     );
   }
 
-  void firstPressButton() {
-    final videos = ref.read(channelPlaylistNotifierProvider).last;
-
-    Helper.handleVideoCardPressed(
+  void shuffle() {
+    final videos = ref.read(searchPlaylistNotifierProvider(widget.screenIndex)).last;
+    final randomNum = math.Random().nextInt(videos.baseInfo.data.length);
+    Helper.pressVideoCard(
       ref: ref,
-      video: videos.baseInfo.data.first,
+      newVideo: videos.baseInfo.data[randomNum],
     );
   }
 
   Future<void> loadPlaylistVideos({bool isReloading = false}) async {
-    final notifier = ref.read(searchedPlaylistNotifierProvider.notifier);
+    final notifier = ref.read(searchPlaylistNotifierProvider(widget.screenIndex).notifier);
     await notifier.getPlaylistVideos(widget.playlist.id, isReloading: isReloading);
   }
 
@@ -58,8 +58,7 @@ class _SearchedPlaylistScreenState extends ConsumerState<SearchedPlaylistScreen>
 
   @override
   Widget build(BuildContext context) {
-    final videos = ref.watch(channelPlaylistNotifierProvider).last;
-
+    final videos = ref.watch(searchPlaylistNotifierProvider(widget.screenIndex)).last;
     return videos.when(
       loaded: (videos) => CustomScrollView(
         slivers: [
@@ -110,11 +109,7 @@ class _SearchedPlaylistScreenState extends ConsumerState<SearchedPlaylistScreen>
                         enableFeedback: false,
                         radius: 20,
                         customBorder: const CircleBorder(),
-                        onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Saved to library'),
-                          ),
-                        ),
+                        onTap: () => ref.read(unauthAttemptSP.notifier).update((state) => true),
                         child: Material(
                           borderRadius: const BorderRadius.all(
                             Radius.circular(20),
@@ -128,7 +123,27 @@ class _SearchedPlaylistScreenState extends ConsumerState<SearchedPlaylistScreen>
                         ),
                       ),
                       const SizedBox(width: 10),
-                      Icon(MdiIcons.shareOutline),
+                      InkWell(
+                        enableFeedback: false,
+                        radius: 20,
+                        customBorder: const CircleBorder(),
+                        onTap: () => Helper.share(
+                          context: context,
+                          id: widget.playlist.id,
+                          isVideoId: false,
+                        ),
+                        child: Material(
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(20),
+                          ),
+                          color: Colors.transparent,
+                          child: SizedBox(
+                            height: 40,
+                            width: 40,
+                            child: Icon(MdiIcons.shareOutline),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -140,25 +155,26 @@ class _SearchedPlaylistScreenState extends ConsumerState<SearchedPlaylistScreen>
                       SizedBox(
                         width: 165,
                         child: TextButton(
-                          style: const ButtonStyle(
-                            backgroundColor: MaterialStatePropertyAll(Colors.white),
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStatePropertyAll(
+                              Theme.of(context).buttonTheme.colorScheme?.onSurface,
+                            ),
                           ),
-                          onPressed: firstPressButton,
-                          onLongPress: firstPressButton,
+                          onPressed: playAll,
+                          onLongPress: playAll,
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
                                 MdiIcons.play,
-                                color: Colors.black,
+                                color: Theme.of(context).colorScheme.secondaryContainer,
                               ),
                               const SizedBox(width: 5),
                               Text(
                                 'Play all',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge!
-                                    .copyWith(color: Colors.black),
+                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      color: Theme.of(context).colorScheme.secondaryContainer,
+                                    ),
                               ),
                             ],
                           ),
@@ -168,16 +184,18 @@ class _SearchedPlaylistScreenState extends ConsumerState<SearchedPlaylistScreen>
                         width: 165,
                         child: TextButton(
                           style: ButtonStyle(
-                            backgroundColor: MaterialStatePropertyAll(Colors.grey.shade800),
+                            backgroundColor: MaterialStatePropertyAll(
+                              Theme.of(context).colorScheme.secondaryContainer,
+                            ),
                           ),
-                          onPressed: randomPressButton,
-                          onLongPress: randomPressButton,
+                          onPressed: shuffle,
+                          onLongPress: shuffle,
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
                                 MdiIcons.shuffleVariant,
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                               const SizedBox(width: 5),
                               Text(
@@ -185,7 +203,7 @@ class _SearchedPlaylistScreenState extends ConsumerState<SearchedPlaylistScreen>
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyLarge!
-                                    .copyWith(color: Colors.white),
+                                    .copyWith(color: Theme.of(context).colorScheme.onSurface),
                               ),
                             ],
                           ),
@@ -211,7 +229,6 @@ class _SearchedPlaylistScreenState extends ConsumerState<SearchedPlaylistScreen>
       ),
       error: (_, failure) {
         final code = failure.failureData.code;
-
         return Center(
           child: Column(
             children: [
@@ -244,7 +261,7 @@ class _SearchedPlaylistScreenState extends ConsumerState<SearchedPlaylistScreen>
             icon: Icon(
               Icons.chevron_left,
               size: 31,
-              color: Theme.of(context).colorScheme.onSurface,
+              color: Theme.of(context).buttonTheme.colorScheme?.onSurface,
             ),
           ),
         ),
