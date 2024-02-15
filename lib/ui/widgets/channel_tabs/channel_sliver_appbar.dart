@@ -72,7 +72,7 @@ class ChannelSliverAppbar extends ConsumerWidget {
             Icons.search,
             color: Theme.of(context).buttonTheme.colorScheme?.onSurface,
           ),
-          onPressed: () => Helper.handleShowSearch(
+          onPressed: () => Helper.pressSearch(
             context: context,
             ref: ref,
             screenIndex: index,

@@ -3,8 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xml/xml.dart';
+import 'package:youtube_clone/data/custom_screen.dart';
 import 'package:youtube_clone/logic/notifiers/providers.dart';
 import 'package:youtube_clone/logic/notifiers/screens_manager.dart';
+import 'package:youtube_clone/logic/notifiers/search_items_notifier.dart';
 import 'package:youtube_clone/ui/widgets/search_items_list.dart';
 
 // fetching search suggestions
@@ -51,7 +53,8 @@ class CustomSearchDelegate extends SearchDelegate {
           } else {
             query = '';
             showSuggestions(context);
-            ref.read(screensManagerProvider(screenIndex).notifier).popScreen();
+            // UPD commented this out for now
+            // ref.read(screensManagerProvider(screenIndex).notifier).popScreen();
           }
         },
         icon: const Icon(Icons.clear),
@@ -70,8 +73,14 @@ class CustomSearchDelegate extends SearchDelegate {
   @override
   void showResults(BuildContext context) {
     super.showResults(context);
-    ref.read(isShowingSearchSP(screenIndex).notifier).update((state) => false);
     query = query.trim();
+    ref.read(searchHistoryRepositoryP).addSearchTerm(query);
+    ref.read(isShowingSearchSP(screenIndex).notifier).update((state) => false);
+    final screensManager = ref.read(screensManagerProvider(screenIndex));
+    if (screensManager.last.screenTypeAndId.screenType == ScreenType.search) {
+      final itemsNotifier = ref.read(searchItemsNotifierProvider(screenIndex).notifier);
+      itemsNotifier.searchItems(query: query);
+    }
   }
 
   @override

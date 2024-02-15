@@ -216,7 +216,7 @@ class Helper {
     // TODO add methods here
   }
 
-  static void handleShowSearch({
+  static void pressSearch({
     required BuildContext context,
     required WidgetRef ref,
     required int screenIndex,

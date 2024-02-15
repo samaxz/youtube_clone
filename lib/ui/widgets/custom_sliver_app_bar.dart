@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
@@ -203,7 +201,7 @@ class _CustomSliverAppBarState extends ConsumerState<CustomSliverAppBar> {
             Icons.search,
             color: Theme.of(context).colorScheme.onSurface,
           ),
-          onPressed: () => Helper.handleShowSearch(
+          onPressed: () => Helper.pressSearch(
             context: context,
             ref: ref,
             screenIndex: widget.index,

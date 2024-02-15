@@ -178,7 +178,7 @@ class _ShortsBodyState extends ConsumerState<ShortsBody> with AutomaticKeepAlive
                 const Spacer(),
               ],
               IconButton(
-                onPressed: () => Helper.handleShowSearch(
+                onPressed: () => Helper.pressSearch(
                   context: context,
                   ref: ref,
                   screenIndex: widget.screenIndex,
