@@ -1,9 +1,7 @@
-import 'dart:developer';
-
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:youtube_clone/data/custom_screen.dart';
 import 'package:youtube_clone/logic/notifiers/channel/channel_info_notifier.dart';
 import 'package:youtube_clone/logic/notifiers/providers.dart';
-import 'package:youtube_clone/data/custom_screen.dart';
 import 'package:youtube_clone/logic/notifiers/search_items_notifier.dart';
 import 'package:youtube_clone/ui/widgets/my_miniplayer.dart';
 

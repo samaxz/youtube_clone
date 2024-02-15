@@ -1,15 +1,12 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:volume_control/volume_control.dart';
-import 'package:youtube_clone/logic/notifiers/videos_notifier.dart';
+import 'package:youtube_clone/logic/notifiers/providers.dart';
 import 'package:youtube_clone/logic/oauth2/auth_notifier.dart';
+import 'package:youtube_clone/logic/services/theme_notifier.dart';
 import 'package:youtube_clone/ui/screens/nav_screen.dart';
 import 'package:youtube_clone/ui/screens/splash_screen.dart';
-import 'package:youtube_clone/logic/notifiers/providers.dart';
-import 'package:youtube_clone/logic/services/theme_notifier.dart';
 
 class MainApp extends ConsumerStatefulWidget {
   const MainApp({super.key});
@@ -54,7 +51,6 @@ class _MainAppState extends ConsumerState<MainApp> {
       [DeviceOrientation.portraitUp],
     );
     Future.delayed(const Duration(milliseconds: 600), init);
-    // Future.microtask(init);
   }
 
   @override
