@@ -3,11 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xml/xml.dart';
-import 'package:youtube_clone/data/custom_screen.dart';
 import 'package:youtube_clone/logic/notifiers/providers.dart';
 import 'package:youtube_clone/logic/notifiers/screens_manager.dart';
-import 'package:youtube_clone/logic/notifiers/searched_items_notifier.dart';
-import 'package:youtube_clone/ui/widgets/searched_items_list.dart';
+import 'package:youtube_clone/ui/widgets/search_items_list.dart';
 
 // fetching search suggestions
 final suggestionsFP = FutureProvider.autoDispose.family((ref, String query) async {
@@ -23,7 +21,6 @@ final suggestionsFP = FutureProvider.autoDispose.family((ref, String query) asyn
         (element) => element.getAttribute('data')!,
       )
       .toList();
-
   return suggestions;
 });
 
@@ -40,7 +37,6 @@ class CustomSearchDelegate extends SearchDelegate {
   void close(BuildContext context, result) {
     super.close(context, result);
     showSuggestions(context);
-
     ref.read(isShowingSearchSP(screenIndex).notifier).update((state) => false);
   }
 
@@ -74,27 +70,8 @@ class CustomSearchDelegate extends SearchDelegate {
   @override
   void showResults(BuildContext context) {
     super.showResults(context);
-
-    // could use read
-    final screensManager = ref.watch(screensManagerProvider(screenIndex));
-
-    Future.microtask(
-      () {
-        ref.read(isShowingSearchSP(screenIndex).notifier).update((state) => false);
-
-        // this fixes the pushing to searched list from channel screen problem
-        if (screensManager.last.screenTypeAndId.screenType == ScreenType.channel) return;
-
-        final notifier = ref.read(screensManagerProvider(screenIndex).notifier);
-        notifier.pushScreen(
-          CustomScreen.search(
-            query: query,
-            screenIndex: screenIndex,
-          ),
-          shouldPushNewScreen: false,
-        );
-      },
-    );
+    ref.read(isShowingSearchSP(screenIndex).notifier).update((state) => false);
+    query = query.trim();
   }
 
   @override
@@ -104,29 +81,23 @@ class CustomSearchDelegate extends SearchDelegate {
         child: Text('write a term to start searching'),
       );
     } else {
-      final newQuery = query.trim();
-      ref.read(searchHistorySNP.notifier).addSearchTerm(newQuery);
-
-      return SearchedItemsList(
+      return SearchItemsList(
         query: query,
         screenIndex: screenIndex,
       );
     }
   }
 
+  // when clicking on a search term
   Future<void> searchTerm(
     String term,
     BuildContext context, {
     bool isSuggestion = false,
   }) async {
-    query = term;
+    // without this, suggestions can't be searched
+    query = term.trim();
     showResults(context);
-
-    final itemsNotifier = ref.read(searchItemsNotifierProvider(screenIndex).notifier);
-    await itemsNotifier.searchItems(query: query, screenIndex: screenIndex);
-
     final historyNotifier = ref.read(searchHistorySNP.notifier);
-
     if (isSuggestion) {
       await historyNotifier.addSearchTerm(query);
     } else {
@@ -136,12 +107,14 @@ class CustomSearchDelegate extends SearchDelegate {
 
   Future<void> removeTerm(String term) async {
     final notifier = ref.read(searchHistorySNP.notifier);
-    notifier.deleteSearchTerm(term);
+    await notifier.deleteSearchTerm(term);
   }
 
   @override
   void showSuggestions(BuildContext context) {
     super.showSuggestions(context);
+    query = query.trim();
+    // this isn't quite working
     ref.read(isShowingSearchSP(screenIndex).notifier).update((state) => true);
   }
 
@@ -153,11 +126,8 @@ class CustomSearchDelegate extends SearchDelegate {
       elevation: 4,
       child: Consumer(
         builder: (context, ref, _) {
-          // not showing empty string
-          ref.watch(searchHistorySNP.notifier).watchSearchTerms(filter: query.trim());
-
+          ref.watch(searchHistorySNP.notifier).watchSearchTerms(filter: query);
           final searchHistory = ref.watch(searchHistorySNP);
-
           return ListView(
             children: [
               searchHistory.when(
