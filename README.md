@@ -40,3 +40,8 @@ This project is aimed at cloning most of functionality of the original youtube a
 <pre>
 <img src="assets/screenshots/channel/channel_home_tab.jpg" width="30%" alt="channel home tab">     <img src="assets/screenshots/channel/channel_home_tab_1.jpg" width="30%" alt="channel home tab 1">     <img src="assets/screenshots/channel/channel_videos_tab_latest.jpg" width="30%" alt="channel videos tab latest">     <img src="assets/screenshots/channel/channel_videos_tab_popular.jpg" width="30%" alt="channel videos tab popular">     <img src="assets/screenshots/channel/channel_shorts_tab_empty.jpg" width="30%" alt="channel shorts tab empty">     <img src="assets/screenshots/channel/channel_playlists_tab.jpg" width="30%" alt="channel playlists tab">     <img src="assets/screenshots/channel/channel_community_tab.jpg" width="30%" alt="channel community tab">
 </pre>
+
+### Search screen
+<pre>
+<img src="assets/screenshots/search/empty_search.png" width="30%" alt="empty search">     <img src="assets/screenshots/search/search_suggestions.jpg" width="30%" alt="search suggestions">     <img src="assets/screenshots/search/search_results.jpg" width="30%" alt="search results">     <img src="assets/screenshots/search/search_suggestions_full.jpg" width="30%" alt="search suggestions full">     <img src="assets/screenshots/search/search_history_long.jpg" width="30%" alt="search history long">
+</pre>
