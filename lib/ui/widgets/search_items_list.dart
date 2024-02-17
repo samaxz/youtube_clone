@@ -71,27 +71,8 @@ class SearchItemsList extends ConsumerStatefulWidget {
 class _SearchItemsListState extends ConsumerState<SearchItemsList> {
   Future<void> searchItems() async {
     final notifier = ref.read(searchItemsNotifierProvider(widget.screenIndex).notifier);
-    await notifier.searchItems(query: widget.query);
+    await notifier.searchItems(widget.query);
   }
-
-  // TODO delete this
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   log('_SearchItemsListState`s initState() got called');
-  //   Future.microtask(searchItems);
-  // }
-  //
-  // @override
-  // void didUpdateWidget(covariant SearchItemsList oldWidget) {
-  //   super.didUpdateWidget(oldWidget);
-  //   // not quite sure about screen index
-  //   if (widget.query != oldWidget.query || widget.screenIndex != oldWidget.screenIndex) {
-  //     log('time to load new data');
-  //   } else {
-  //     log('no need to load new data');
-  //   }
-  // }
 
   bool canLoadNextPage = false;
 
@@ -153,7 +134,6 @@ class _SearchItemsListState extends ConsumerState<SearchItemsList> {
                   child: Text('oops, looks like it`s empty'),
                 );
               }
-
               return SearchItem(
                 kind: searchItemsInfo.data[index].kind,
                 item: searchItemsInfo.data[index],
@@ -177,7 +157,7 @@ class _SearchItemsListState extends ConsumerState<SearchItemsList> {
                   onTap: () {
                     final not = ref.read(searchItemsNotifierProvider(widget.screenIndex).notifier);
                     not.removeLast();
-                    not.searchItems(query: widget.query);
+                    not.searchItems(widget.query);
                   },
                 );
               }
