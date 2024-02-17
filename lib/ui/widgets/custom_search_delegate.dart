@@ -35,6 +35,7 @@ class CustomSearchDelegate extends SearchDelegate {
     required this.screenIndex,
   });
 
+  // TODO change this (or don't)
   @override
   void close(BuildContext context, result) {
     super.close(context, result);
@@ -53,8 +54,6 @@ class CustomSearchDelegate extends SearchDelegate {
           } else {
             query = '';
             showSuggestions(context);
-            // UPD commented this out for now
-            // ref.read(screensManagerProvider(screenIndex).notifier).popScreen();
           }
         },
         icon: const Icon(Icons.clear),
@@ -74,12 +73,13 @@ class CustomSearchDelegate extends SearchDelegate {
   void showResults(BuildContext context) {
     super.showResults(context);
     query = query.trim();
-    ref.read(searchHistoryRepositoryP).addSearchTerm(query);
     ref.read(isShowingSearchSP(screenIndex).notifier).update((state) => false);
     final screensManager = ref.read(screensManagerProvider(screenIndex));
     if (screensManager.last.screenTypeAndId.screenType == ScreenType.search) {
+      ref.read(searchHistoryRepositoryP).addSearchTerm(query);
       final itemsNotifier = ref.read(searchItemsNotifierProvider(screenIndex).notifier);
-      itemsNotifier.searchItems(query: query);
+      itemsNotifier.customInvalidation();
+      itemsNotifier.searchItems(query);
     }
   }
 
@@ -100,18 +100,13 @@ class CustomSearchDelegate extends SearchDelegate {
   // when clicking on a search term
   Future<void> searchTerm(
     String term,
-    BuildContext context, {
-    bool isSuggestion = false,
-  }) async {
+    BuildContext context,
+  ) async {
     // without this, suggestions can't be searched
     query = term.trim();
     showResults(context);
     final historyNotifier = ref.read(searchHistorySNP.notifier);
-    if (isSuggestion) {
-      await historyNotifier.addSearchTerm(query);
-    } else {
-      await historyNotifier.putSearchTermFirst(query);
-    }
+    await historyNotifier.putSearchTermFirst(query);
   }
 
   Future<void> removeTerm(String term) async {
@@ -124,6 +119,7 @@ class CustomSearchDelegate extends SearchDelegate {
     super.showSuggestions(context);
     query = query.trim();
     // this isn't quite working
+    // TODO probably remove this
     ref.read(isShowingSearchSP(screenIndex).notifier).update((state) => true);
   }
 
@@ -140,26 +136,37 @@ class CustomSearchDelegate extends SearchDelegate {
           return ListView(
             children: [
               searchHistory.when(
-                data: (data) => ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: data.length,
-                  itemBuilder: (context, index) => ListTile(
-                    onTap: () => searchTerm(data[index], context),
-                    title: Text(data[index]),
-                    // i could just make it an icon
-                    leading: IconButton(
-                      // when user presses this button, the query will be filled
-                      // inside the search bar and the results for that query
-                      // will be shown
-                      onPressed: () => searchTerm(data[index], context),
-                      icon: const Icon(Icons.history),
+                data: (data) {
+                  if (query.trim().isEmpty && data.isEmpty) {
+                    // this makes the empty text look nice
+                    return const ListTile(
+                      title: Text(
+                        'oops, looks like it`s empty',
+                        textAlign: TextAlign.center,
+                      ),
+                    );
+                  }
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: data.length,
+                    itemBuilder: (context, index) => ListTile(
+                      onTap: () => searchTerm(data[index], context),
+                      title: Text(data[index]),
+                      // i could just make it an icon
+                      leading: IconButton(
+                        // when user presses this button, the query will be filled
+                        // inside the search bar and the results for that query
+                        // will be shown
+                        onPressed: () => searchTerm(data[index], context),
+                        icon: const Icon(Icons.history),
+                      ),
+                      trailing: IconButton(
+                        onPressed: () => removeTerm(data[index]),
+                        icon: const Icon(Icons.clear),
+                      ),
                     ),
-                    trailing: IconButton(
-                      onPressed: () => removeTerm(data[index]),
-                      icon: const Icon(Icons.clear),
-                    ),
-                  ),
-                ),
+                  );
+                },
                 error: (error, stackTrace) => const Center(
                   child: Text('error happened'),
                 ),
@@ -187,12 +194,12 @@ class CustomSearchDelegate extends SearchDelegate {
                           itemCount: data.length,
                           itemBuilder: (context, index) => ListTile(
                             onTap: () {
-                              searchTerm(data[index], context, isSuggestion: true);
+                              searchTerm(data[index], context);
                             },
                             title: Text(data[index]),
                             leading: IconButton(
                               onPressed: () {
-                                searchTerm(data[index], context, isSuggestion: true);
+                                searchTerm(data[index], context);
                               },
                               icon: const Icon(Icons.search),
                             ),
