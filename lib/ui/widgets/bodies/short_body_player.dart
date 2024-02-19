@@ -4,48 +4,58 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:pod_player/pod_player.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 import 'package:youtube_clone/data/custom_screen.dart';
 import 'package:youtube_clone/data/info/youtube_failure.dart';
 import 'package:youtube_clone/data/models/video/video_model.dart';
+import 'package:youtube_clone/logic/notifiers/channel/subscription_notifier.dart';
 import 'package:youtube_clone/logic/notifiers/providers.dart';
 import 'package:youtube_clone/logic/notifiers/rating_notifier.dart';
 import 'package:youtube_clone/logic/notifiers/screens_manager.dart';
 import 'package:youtube_clone/logic/notifiers/shorts/shorts_details_notifier.dart';
-import 'package:youtube_clone/logic/notifiers/subscription_notifier.dart';
+import 'package:youtube_clone/logic/notifiers/mp_subscription_notifier.dart';
+import 'package:youtube_clone/logic/notifiers/shorts/shorts_rating_notifier.dart';
 import 'package:youtube_clone/logic/services/helper_class.dart';
+import 'package:youtube_clone/ui/widgets/bodies/shorts_body.dart';
 import 'package:youtube_clone/ui/widgets/custom_inkwell.dart';
 import 'package:youtube_clone/ui/widgets/failure_tile.dart';
 import 'package:youtube_clone/ui/widgets/shimmers/loading_shorts_body.dart';
+import 'package:youtube_clone/ui/widgets/short_player_controller_provider.dart';
 
-class ShortsBodyPlayer extends ConsumerStatefulWidget {
+class ShortBodyPlayer extends ConsumerStatefulWidget {
   final Video short;
   // this comes from the passed in nav bar tab index
   final int screenIndex;
+  // the index of the current short on channel's shorts tab
+  // this is the latest index, which i don't necessarily need
+  // all the time
+  final int shortIndex;
+  // last viewed short id
+  final String lastId;
   // this comes from the state provider
   final int? currentScreenIndex;
   final bool shouldAutoPlay;
+  final PodPlayerController? playerController;
   final void Function(PodPlayerController controller)? onLoad;
-  // the index of the current short on channel's shorts tab
-  final int? shortIndex;
 
-  const ShortsBodyPlayer({
+  const ShortBodyPlayer({
     super.key,
     required this.short,
     required this.screenIndex,
+    required this.shortIndex,
+    required this.lastId,
     this.currentScreenIndex,
+    this.playerController,
     this.shouldAutoPlay = false,
     this.onLoad,
-    this.shortIndex,
   });
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _ShortsBodyPlayerState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _ShortBodyPlayerState();
 }
 
-class _ShortsBodyPlayerState extends ConsumerState<ShortsBodyPlayer>
+class _ShortBodyPlayerState extends ConsumerState<ShortBodyPlayer>
     with AutomaticKeepAliveClientMixin {
-  late final PodPlayerController playerController;
-
   @override
   bool get wantKeepAlive => true;
 
@@ -60,157 +70,234 @@ class _ShortsBodyPlayerState extends ConsumerState<ShortsBodyPlayer>
   }
 
   Future<void> getDetails() async {
-    final shortsNotifier = ref.read(shortsDetailsNotifierProvider(widget.screenIndex).notifier);
+    // **** this plays the sound and the percentage bar is moving
+    // but the image is still
+    // UPD both of these were done with ..initialize() at the end inside
+    // provider's build()
+    // final playerController = ref.read(
+    //   shortPlayerControllerProvider(
+    //     shortId: widget.short.id,
+    //     shortIndex: widget.shortIndex,
+    //   ),
+    // );
+    // // should i also add a listener or something
+    // await playerController.initialise();
+    // playerController.play();
+    // *********
+    // final playerController = ref.read(
+    //   shortPlayerControllerProvider(
+    //     shortId: widget.short.id,
+    //     shortIndex: widget.shortIndex,
+    //   ).notifier,
+    // );
+    // // should i also add a listener or something
+    // await playerController.initialize();
+    // playerController.play();
+    // *********
+    ref.read(shortIdSP.notifier).update((state) => widget.short.id);
+    final shortsNotifier = ref.read(shortsDetailsNotifierProvider(widget.short.id).notifier);
     await shortsNotifier.getDetails(
       videoId: widget.short.id,
       channelId: widget.short.snippet.channelId,
     );
-
-    final subsNotifier =
-        ref.read(subscriptionNotifierProvider(widget.short.snippet.channelId).notifier);
+    final subsNotifier = ref.read(subscriptionNotifierProvider(
+      channelId: widget.short.snippet.channelId,
+      screenIndex: widget.screenIndex,
+    ).notifier);
     await subsNotifier.getSubscriptionState();
   }
 
   @override
   void initState() {
     super.initState();
-
-    playerController = PodPlayerController(
-      playVideoFrom: PlayVideoFrom.youtube(
-        'https://youtu.be/${widget.short.id}',
-      ),
-      podPlayerConfig: const PodPlayerConfig(
-        autoPlay: false,
-        isLooping: true,
-      ),
-    );
-    // TODO remove this, as it'll always initialize the video
-    if (!playerController.isInitialised) {
-      playerController.initialise().then((value) {
-        playerController.play();
-      });
-    } else {
-      playerController.play();
-    }
     Future.microtask(getDetails);
     // log('_ShortsBodyPlayerState`s initState()');
   }
 
   @override
-  void didUpdateWidget(covariant ShortsBodyPlayer oldWidget) {
+  void didUpdateWidget(covariant ShortBodyPlayer oldWidget) {
     super.didUpdateWidget(oldWidget);
-
-    // if (widget.screenIndex == oldWidget.screenIndex) return;
-
-    // if (widget.shortIndex == oldWidget.shortIndex) {
-    //   log('short index is the same');
-    // } else if (widget.shortIndex != oldWidget.shortIndex) {
-    //   log('short index is different');
-    // }
-
-    // playerController.pause();
-    // if (!playerController.isInitialised) {
-    //   playerController.initialise().then((value) {
-    //     playerController.play();
-    //   });
-    // } else {
-    //   playerController.play();
-    // }
+    // log('new short index: ${widget.shortIndex}');
+    // log('old short index: ${oldWidget.shortIndex}');
+    log('didUpdateWidget() inside shorts body player`s state');
+    // ** this kinda works
+    // ref
+    //     .watch(
+    //       shortPlayerControllerProvider(
+    //         shortId: widget.short.id,
+    //         shortIndex: widget.shortIndex,
+    //       ),
+    //     )
+    //     .play();
+    // this is the current controller
+    // i should also probably watch
+    final playerController = ref.watch(
+      shortPlayerControllerProvider(
+        // shortId: widget.short.id,
+        shortId: widget.lastId,
+        // shortIndex: widget.shortIndex,
+      ),
+    );
+    final screenIndex = ref.read(currentScreenIndexSP);
+    final screensManager = ref.read(screensManagerProvider(widget.screenIndex)).last;
+    final isShort = screensManager.screenTypeAndId.screenType == ScreenType.short;
+    // if (widget.screenIndex != widget.currentScreenIndex) {
+    if (widget.screenIndex != screenIndex || !isShort) {
+      // ||
+      // widget.shortIndex != oldWidget.shortIndex) {
+      // widget.short.id != oldWidget.short.id) {
+      playerController.pause();
+    } else {
+      playerController.play();
+    }
   }
 
   @override
   void dispose() {
-    playerController.dispose();
-    // log('_ShortsBodyPlayerState`s playerController disposed');
+    // if (widget.shortIndex! > 0) playerController.dispose();
+    // if (playerController.isInitialised) playerController.dispose();
+    log('_ShortsBodyPlayerState`s playerController disposed');
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-
-    final shortsDetails = ref.watch(shortsDetailsNotifierProvider(widget.screenIndex)).last;
-    final screenIndex = ref.watch(currentScreenIndexSP);
-    final rating = ref.watch(ratingNotifierProvider(widget.short.id));
-    // TODO change this in the future
-    const subscribed = AsyncLoading();
-    final currentScreen = ref.watch(screensManagerProvider(widget.screenIndex)).last;
-
-    ref.listen(screensManagerProvider(widget.screenIndex), (_, state) {
-      if (!playerController.isInitialised) return;
-
-      if (state.last.screenTypeAndId.screenType == ScreenType.short &&
-          widget.screenIndex == screenIndex) {
-        playerController.play();
-      } else {
-        playerController.pause();
-      }
-    });
-
-    ref.listen(currentScreenIndexSP, (_, state) {
-      if (!playerController.isInitialised) return;
-
-      if (widget.screenIndex == state &&
-          currentScreen.screenTypeAndId.screenType == ScreenType.short) {
-        playerController.play();
-      } else {
-        log('or is this stopping the video?');
-        playerController.pause();
-      }
-    });
-
+    // log('_ShortsBodyPlayerState`s build()');
+    final shortsDetails = ref.watch(shortsDetailsNotifierProvider(widget.short.id)).last;
+    final rating = ref.watch(shortsRatingNotifierProvider(widget.short.id)).last;
+    final subscribed = ref
+        .watch(
+          subscriptionNotifierProvider(
+            channelId: widget.short.snippet.channelId,
+            screenIndex: widget.screenIndex,
+          ),
+        )
+        .last;
+    // current player controller (duh)
+    final playerController = ref.watch(
+      shortPlayerControllerProvider(
+        shortId: widget.short.id,
+        // shortIndex: widget.shortIndex,
+      ),
+    );
+    // TODO use current short id notifier here
+    // ref.listen(shortIndexSP, (previous, next) {
+    //   log('prev index: $previous');
+    //   log('next index: $next');
+    // });
+    // ref.listen(videoIdSP, (previous, next) {
+    //   log('prev id: $previous');
+    //   log('next id: $next');
+    //   ref
+    //       .read(
+    //         shortPlayerControllerProvider(
+    //           shortIndex: widget.shortIndex,
+    //           shortId: next,
+    //         ).notifier,
+    //       )
+    //       .play();
+    // });
+    // this isn't working
+    // ref.listen(shortSP, (previous, next) {
+    //   if (previous != null) {
+    //     // ref
+    //     //     .watch(
+    //     //       shortPlayerControllerProvider(
+    //     //         shortId: previous.shortId,
+    //     //         shortIndex: previous.shortIndex,
+    //     //       ),
+    //     //     )
+    //     //     .pause();
+    //   }
+    //   ref
+    //       .read(
+    //         shortPlayerControllerProvider(
+    //           shortIndex: next.shortIndex,
+    //           shortId: next.shortId,
+    //         ),
+    //       )
+    //       .play();
+    // });
+    // strange, i can't even listen to it
+    // ref.listen(
+    //   shortPlayerControllerProvider(
+    //     // shortIndex: widget.shortIndex,
+    //     shortId: widget.short.id,
+    //   ),
+    //   (previous, next) {
+    //     log('previous: $previous');
+    //     log('next: $next');
+    //     isPlaying = next.isVideoPlaying;
+    //     // next.play();
+    //     // ref
+    //     //     .read(
+    //     //       shortPlayerControllerProvider(
+    //     //         shortId: widget.short.id,
+    //     //         // shortIndex: widget.shortIndex,
+    //     //       ),
+    //     //     )
+    //     //     .play();
+    //     // log('thasdf;lajf;alskdjf');
+    //   },
+    // );
+    ref.listen(
+      screensManagerProvider(widget.screenIndex),
+      (_, state) {
+        if (state.last.screenTypeAndId.screenType != ScreenType.short) {
+          playerController.pause();
+        }
+      },
+    );
     return Stack(
       fit: StackFit.expand,
       children: [
-        // TODO remove positioned
-        Positioned(
-          // top: -10,
-          child: GestureDetector(
-            onTap: () {
-              // log('is video playing: ${playerController.isVideoPlaying}');
-
-              if (playerController.isVideoPlaying) {
-                playerController.pause();
-              } else {
-                playerController.play();
-              }
-            },
-            child: FittedBox(
-              // fit: BoxFit.fitHeight,
-              // fit: BoxFit.fill,
-              fit: BoxFit.cover,
-              child: SizedBox(
-                // without this, the player's aspect ratio throws
-                width: MediaQuery.of(context).size.width,
-                child: PodVideoPlayer(
-                  controller: playerController,
-                  onVideoError: () => Center(
-                    child: TextButton(
-                      onPressed: () => playerController
-                          .changeVideo(
-                            playVideoFrom: PlayVideoFrom.youtube(
-                              'https://youtu.be/${widget.short.id}',
-                            ),
-                          )
-                          .then((value) => playerController.play()),
-                      child: const Text('Error happened, try again'),
-                    ),
+        GestureDetector(
+          onTap: () {
+            // log('is video playing: ${playerController.isVideoPlaying}');
+            if (playerController.isVideoPlaying) {
+              playerController.pause();
+            } else {
+              playerController.play();
+            }
+          },
+          child: FittedBox(
+            fit: BoxFit.cover,
+            child: SizedBox(
+              // without this, the player's aspect ratio throws
+              width: MediaQuery.of(context).size.width,
+              child: PodVideoPlayer(
+                controller: playerController,
+                onVideoError: () => Center(
+                  child: TextButton(
+                    onPressed: () => playerController
+                        .changeVideo(
+                          playVideoFrom: PlayVideoFrom.youtube(
+                            'https://youtu.be/${widget.short.id}',
+                          ),
+                        )
+                        .then(
+                          (value) => playerController.play(),
+                        ),
+                    child: const Text('Error happened, try again'),
                   ),
-                  matchVideoAspectRatioToFrame: true,
-                  matchFrameAspectRatioToVideo: true,
-                  overlayBuilder: (options) => Align(
+                ),
+                matchVideoAspectRatioToFrame: true,
+                matchFrameAspectRatioToVideo: true,
+                overlayBuilder: (options) => Padding(
+                  padding: playerController.isVideoPlaying
+                      ? EdgeInsets.zero
+                      : const EdgeInsets.only(bottom: 4),
+                  child: Align(
                     alignment: Alignment.bottomCenter,
-                    // alignment: options.podProgresssBar.alignment,
                     child: options.podProgresssBar,
                   ),
-                  // overlayBuilder: (options) => Positioned(
-                  //   bottom: 5,
-                  //   child: Container(
-                  //     width: MediaQuery.of(context).size.width,
-                  //     child: options.podProgresssBar,
-                  //   ),
-                  // ),
                 ),
+                // podProgressBarConfig: PodProgressBarConfig(
+                //   // this isn't working
+                //   circleHandlerRadius: playerController.isVideoPlaying ? 3 : 8,
+                // ),
+                alwaysShowProgressBar: false,
               ),
             ),
           ),
@@ -293,12 +380,10 @@ class _ShortsBodyPlayerState extends ConsumerState<ShortsBodyPlayer>
                           ),
                         ],
                       ),
-                      onTap: () {
-                        Helper.showComments(
-                          context: context,
-                          commentsInfo: data.comments,
-                        );
-                      },
+                      onTap: () => Helper.showComments(
+                        context: context,
+                        commentsInfo: data.comments,
+                      ),
                     ),
                     CustomInkWell(
                       child: Column(
@@ -316,7 +401,7 @@ class _ShortsBodyPlayerState extends ConsumerState<ShortsBodyPlayer>
                           ),
                         ],
                       ),
-                      onTap: () {},
+                      onTap: () => Helper.share(context: context, id: widget.short.id),
                     ),
                     CustomInkWell(
                       child: const Column(
@@ -334,7 +419,10 @@ class _ShortsBodyPlayerState extends ConsumerState<ShortsBodyPlayer>
                           ),
                         ],
                       ),
-                      onTap: () {},
+                      onTap: () {
+                        // TODO change this in the future
+                        ref.read(unauthAttemptSP.notifier).update((state) => true);
+                      },
                     ),
                   ],
                 ),
@@ -369,7 +457,8 @@ class _ShortsBodyPlayerState extends ConsumerState<ShortsBodyPlayer>
                         InkWell(
                           onTap: () {
                             final notifier = ref.read(
-                              subscriptionNotifierProvider(widget.short.snippet.channelId).notifier,
+                              miniplayerSubscriptionNotifierProvider(widget.short.snippet.channelId)
+                                  .notifier,
                             );
                             notifier.changeSubscriptionState();
                           },
@@ -416,7 +505,9 @@ class _ShortsBodyPlayerState extends ConsumerState<ShortsBodyPlayer>
                         'https://youtu.be/${widget.short.id}',
                       ),
                     )
-                    .then((value) => playerController.play()),
+                    .then(
+                      (value) => playerController.play(),
+                    ),
                 getDetails(),
               ]),
             ),
