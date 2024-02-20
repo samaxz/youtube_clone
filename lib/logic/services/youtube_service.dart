@@ -61,13 +61,10 @@ class YoutubeService {
       // log('items url: $url');
       final response = await _dio.getUri(url);
       final items = List.from(response.data['items']);
-
       // log('items: $items');
-
       final videoIds = <String>[];
       final playlistIds = <String>[];
       final channelIds = <String>[];
-
       for (final element in items) {
         if (element['id']['kind'] == 'youtube#video') {
           // final video = await _getVideoDetails(element['id']['videoId']);
@@ -79,26 +76,20 @@ class YoutubeService {
           channelIds.add(element['id']['channelId']);
         }
       }
-
       // log('channel ids: $channelIds');
-
       final videos = await _getVideoDetails(videoIds.join(','));
       final playlists = await _getPlaylistDetails(playlistIds.join(','));
       final channels = await _getChannelDetails(channelIds.join(','));
-
       final searchItems = <Item>[];
-
       searchItems
         ..addAll(videos)
         ..addAll(playlists)
         ..addAll(channels);
-
       final nextPageToken = response.data['nextPageToken'];
       final totalResults = response.data['pageInfo']['totalResults'];
       final resultsPerPage = response.data['pageInfo']['resultsPerPage'];
       final wholePages = totalResults ~/ resultsPerPage;
       final totalPages = totalResults % resultsPerPage != 0 ? (wholePages + 1) : (wholePages);
-
       return right(
         BaseInfo(
           data: searchItems,
@@ -240,19 +231,13 @@ class YoutubeService {
         queryParameters,
       );
       // log('url: $url');
-
       final response = await _dio.getUri(url);
-      // final channels = response.data['items'] as List<Map<String, dynamic>>?;
       final channels = List<Map<String, dynamic>>.from(response.data['items']);
-
-      // if (channels == null || channels.isEmpty) return [];
-
       final channelResponse = channels
           .map(
             (channel) => Channel.fromJson(channel),
           )
           .toList();
-
       return channelResponse;
     } on DioException catch (e, st) {
       log(
@@ -278,6 +263,7 @@ class YoutubeService {
   Future<Either<YoutubeFailure, BaseInfo<Video>>> getPopularVideos({
     String? pageToken,
     String maxResults = maxResults,
+    // TODO change this before uploading apk
     String regionCode = 'US',
     String videoCategoryId = '0',
   }) async {
@@ -297,19 +283,18 @@ class YoutubeService {
         videosEnd,
         queryParameters,
       );
-
       final response = await _dio.getUri(url);
-      final videos =
-          (response.data['items'] as List).map((video) => Video.fromJson(video)).toList();
-
+      final videos = (response.data['items'] as List)
+          .map(
+            (video) => Video.fromJson(video),
+          )
+          .toList();
       final nextPageToken = response.data['nextPageToken'];
       final totalResults = response.data['pageInfo']['totalResults'];
       final resultsPerPage = response.data['pageInfo']['resultsPerPage'];
       final nextPageAvailable = nextPageToken != null && nextPageToken.isNotEmpty;
-
       final wholePages = totalResults ~/ resultsPerPage;
       final totalPages = totalResults % resultsPerPage != 0 ? (wholePages + 1) : (wholePages);
-
       return right(
         BaseInfo<Video>(
           data: videos,
@@ -320,13 +305,88 @@ class YoutubeService {
         ),
       );
     } on DioException catch (e, st) {
-      log('dio caught exception inside getPopularVideos()', error: e, stackTrace: st);
-
+      log(
+        'dio caught exception inside getPopularVideos()',
+        error: e,
+        stackTrace: st,
+      );
       final failure = FailureData(
         code: e.response?.statusCode,
         message: e.response?.statusMessage,
       );
+      if (e.isNoConnectionError) {
+        return left(
+          const NoConnectionFailure(),
+        );
+      } else {
+        return left(
+          YoutubeFailure(failure),
+        );
+      }
+    }
+  }
 
+  // UPD this isn't working
+  Future<Either<YoutubeFailure, BaseInfo<Video>>> getPopularShorts({
+    String maxResults = '5',
+    String? pageToken,
+  }) async {
+    try {
+      final videosOrFailure = await getPopularVideos(
+        maxResults: maxResults,
+        pageToken: pageToken,
+      );
+      final videosInfo = videosOrFailure.rightOrDefault!;
+      final videos = videosInfo.data;
+      final ids = videos.map((video) => video.id).toList().join(',');
+      final queryParameters = {
+        'part': 'short',
+        'id': ids,
+      };
+      final uri = Uri.https(
+        'yt.lemnoslife.com',
+        'videos',
+        queryParameters,
+      );
+      // log('new uri: $uri');
+      final response = await _dio.getUri(uri);
+      if (response.data['items'] == null) {
+        return right(
+          // disabled may also indicate a problem in the unoff api
+          const BaseInfo(disabled: true),
+        );
+      }
+      final items = response.data['items'] as List<dynamic>;
+      final newShortsList = <Video>[];
+      for (final item in items) {
+        // if it is a short, then i should add the video to the
+        // shorts list - a list of normal videos from get
+        // liked videos func
+        if (item['short']['available'] == true) {
+          newShortsList.add(
+            videos.firstWhere((element) => element.id == item['id']),
+          );
+        }
+      }
+      return right(
+        BaseInfo<Video>(
+          data: newShortsList,
+          nextPageToken: videosInfo.nextPageToken,
+          nextPageAvailable: videosInfo.nextPageAvailable,
+          totalPages: videosInfo.totalPages,
+          itemsPerPage: videosInfo.itemsPerPage,
+        ),
+      );
+    } on DioException catch (e, st) {
+      log(
+        'dio caught exception inside getLikedShorts()',
+        error: e,
+        stackTrace: st,
+      );
+      final failure = FailureData(
+        code: e.response?.statusCode,
+        message: e.response?.statusMessage,
+      );
       if (e.isNoConnectionError) {
         return left(
           const NoConnectionFailure(),
@@ -379,48 +439,6 @@ class YoutubeService {
         throw const NoConnectionFailure();
       } else {
         throw YoutubeFailure(failure);
-      }
-    }
-  }
-
-  // this is for shorts
-  // this method uses unofficial api under the hood
-  Future<Either<YoutubeFailure, BaseInfo<Video>>> getPopularShorts({
-    String? pageToken,
-  }) async {
-    try {
-      final popularVideosOrFailure = await getPopularVideos(pageToken: pageToken);
-      final popularVideosBaseInfo = popularVideosOrFailure.rightOrDefault!;
-      // TODO delete this
-      // final popularVideos = popularVideosOrFailure.rightOrDefault!.data;
-      //
-      // final shorts = <Video>[];
-      //
-      // // TODO refactor this
-      // await _getShortsFromVideos(
-      //   videos: popularVideos,
-      //   nextPageToken: pageToken,
-      // ).then(
-      //   (value) => shorts.addAll(value.rightOrDefault!.videos),
-      // );
-
-      return right(popularVideosBaseInfo);
-    } on DioException catch (e, st) {
-      log('dio caught exception inside getPopularShorts()', error: e, stackTrace: st);
-
-      final failure = FailureData(
-        code: e.response?.statusCode,
-        message: e.response?.statusMessage,
-      );
-
-      if (e.isNoConnectionError) {
-        return left(
-          const NoConnectionFailure(),
-        );
-      } else {
-        return left(
-          YoutubeFailure(failure),
-        );
       }
     }
   }
@@ -524,14 +542,12 @@ class YoutubeService {
         videosEnd,
         queryParameters,
       );
-
       final response = await _dio.getUri(url);
       final videosResponse = (response.data['items'] as List)
           .map(
             (video) => Video.fromJson(video),
           )
           .toList();
-
       return right(videosResponse);
     } on DioException catch (e, st) {
       log(
