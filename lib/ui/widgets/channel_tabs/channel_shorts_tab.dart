@@ -1,12 +1,12 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:youtube_clone/data/custom_screen.dart';
 import 'package:youtube_clone/data/info/base_info.dart';
 import 'package:youtube_clone/data/info/base_info_state.dart';
 import 'package:youtube_clone/data/info/youtube_failure.dart';
 import 'package:youtube_clone/logic/notifiers/channel/channel_shorts_notifier.dart';
 import 'package:youtube_clone/logic/notifiers/screens_manager.dart';
-import 'package:youtube_clone/data/custom_screen.dart';
 import 'package:youtube_clone/logic/services/theme_notifier.dart';
 import 'package:youtube_clone/ui/widgets/bodies/shorts_body.dart';
 import 'package:youtube_clone/ui/widgets/channel_tabs/channel_shorts_card.dart';
@@ -48,10 +48,8 @@ class _ChannelShortsTabState extends ConsumerState<ChannelShortsTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-
     final shorts = ref.watch(channelShortsNotifierProvider(widget.screenIndex)).last;
     final isDarkTheme = ref.watch(themeNP);
-
     return CustomScrollView(
       slivers: [
         if (!shorts.isLoading && !shorts.hasError && shorts.hasValue && shorts.value!.isNotEmpty)
@@ -114,7 +112,6 @@ class _ChannelShortsTabState extends ConsumerState<ChannelShortsTab>
                 ),
               );
             }
-
             return SliverGrid.builder(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
@@ -125,14 +122,11 @@ class _ChannelShortsTabState extends ConsumerState<ChannelShortsTab>
               // i feel like the problem is here
               itemBuilder: (context, index) => ChannelShortsCard(
                 short: data[index],
-                // UPD deleted the pushed screens implementation
-                // TODO refactor this
                 onTap: () {
                   final notifier = ref.read(screensManagerProvider(widget.screenIndex).notifier);
                   notifier.pushScreen(
                     CustomScreen.short(
                       shortId: data[index].id,
-                      // wtf is this?
                       screen: ShortsBody(
                         shorts: shorts.when(
                           data: (data) => BaseInfoLoaded(
@@ -146,66 +140,13 @@ class _ChannelShortsTabState extends ConsumerState<ChannelShortsTab>
                             baseInfo: BaseInfo(data: data),
                           ),
                         ),
-                        onLoadVideos: () {},
+                        onLoadMoreShorts: () {},
                         onError: () => loadShorts(isReloading: true),
                         screenIndex: widget.screenIndex,
                         shortIndex: index,
                       ),
                     ),
-                    // shouldPushNewScreen: false,
                   );
-                  // *******************************
-                  // final notifier = ref.read(pushedScreensListNotifierProvider.notifier);
-                  // notifier.addScreen(
-                  //   // pushedScreens: pushedScreens,
-                  //   pushedScreens: screenTypesList,
-                  //   newScreen: ScreenTypeAndId(
-                  //     screenType: ScreenType.short,
-                  //     screenId: data[index].id,
-                  //   ),
-                  //   index: widget.index,
-                  // );
-                  //
-                  // // log('pushed screens are: $pushedScreens');
-                  //
-                  // ref.read(playShortSP.notifier).update((state) => {...state, widget.index: true});
-                  // Navigator.of(context)
-                  //     .push(
-                  //   MaterialPageRoute(
-                  //     builder: (context) => ShortsBody(
-                  //       index: widget.index,
-                  //       shortIndex: index,
-                  //       onLoadVideos: () {},
-                  //       onError: getShorts,
-                  //       shorts: shorts.when(
-                  //         data: (data) => BaseInfoLoaded(
-                  //           BaseInfo(data: data),
-                  //         ),
-                  //         error: (error, stackTrace) => BaseInfoError(
-                  //           baseInfo: BaseInfo(data: data),
-                  //           failure: error as YoutubeFailure,
-                  //         ),
-                  //         loading: () => BaseInfoLoading(
-                  //           baseInfo: BaseInfo(data: data),
-                  //         ),
-                  //       ),
-                  //     ),
-                  //   ),
-                  // )
-                  //     .whenComplete(() {
-                  //   notifier.removeLast(widget.index);
-                  //   // log('state now is: $pushedScreensList');
-                  //   // i can put this inside removeLast() above
-                  //   // shortScreenIsShort
-                  //   isShortScreen
-                  //       ? ref
-                  //           .read(playShortSP.notifier)
-                  //           .update((state) => {...state, widget.index: true})
-                  //       : ref
-                  //           .read(playShortSP.notifier)
-                  //           .update((state) => {...state, widget.index: false});
-                  // });
-                  // *******************************
                 },
               ),
             );
@@ -213,7 +154,6 @@ class _ChannelShortsTabState extends ConsumerState<ChannelShortsTab>
           error: (error, stackTrace) {
             final failure = error as YoutubeFailure;
             final code = failure.failureData.code;
-
             return SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.only(top: 90),
@@ -222,16 +162,21 @@ class _ChannelShortsTabState extends ConsumerState<ChannelShortsTab>
                     children: [
                       if (code == 403) ...[
                         const Text('too many requests, try again later'),
+                        const SizedBox(height: 10),
+                        ElevatedButton(
+                          onPressed: () => loadShorts(isReloading: true),
+                          child: const Text('tap to retry'),
+                        ),
                       ] else if (code == 404) ...[
                         const Text('oops, looks like it`s empty'),
                       ] else ...[
                         const Text('unknown error, try again later'),
+                        const SizedBox(height: 10),
+                        ElevatedButton(
+                          onPressed: () => loadShorts(isReloading: true),
+                          child: const Text('tap to retry'),
+                        ),
                       ],
-                      const SizedBox(height: 10),
-                      ElevatedButton(
-                        onPressed: () => loadShorts(isReloading: true),
-                        child: const Text('tap to retry'),
-                      ),
                     ],
                   ),
                 ),
