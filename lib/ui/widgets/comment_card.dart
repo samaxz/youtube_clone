@@ -12,7 +12,7 @@ import 'package:timeago/timeago.dart' as timeago;
 class CommentCard extends ConsumerStatefulWidget {
   final String channelId;
   final String channelHandle;
-  // TODO probably delete this
+  // TODO use this in the future
   final String? profileImageUrl;
   final String text;
   final int likeCount;
@@ -35,11 +35,6 @@ class CommentCard extends ConsumerStatefulWidget {
 }
 
 class _CommentCardState extends ConsumerState<CommentCard> {
-  // String displayText(bool isOverflow) {
-  //   final newText = '$text';
-  //
-  // }
-
   bool expanded = false;
 
   Widget showMoreOrLess(BuildContext context) {
@@ -47,7 +42,12 @@ class _CommentCardState extends ConsumerState<CommentCard> {
       text: TextSpan(
         children: [
           TextSpan(
-            text: expanded ? widget.text : '${widget.text.substring(0, 183)}...',
+            text: expanded
+                ? widget.text
+                : '${widget.text.substring(
+                    0,
+                    widget.text.length - 50,
+                  )}...',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           if (!expanded) ...[
@@ -74,16 +74,6 @@ class _CommentCardState extends ConsumerState<CommentCard> {
       textAlign: TextAlign.start,
       textDirection: TextDirection.ltr,
     );
-
-    // final newText = Text(
-    //   // this need a function
-    //   widget.text,
-    //   maxLines: expanded ? null : 4,
-    //   style: const TextStyle(
-    //     overflow: TextOverflow.ellipsis,
-    //   ),
-    // );
-
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8),
@@ -121,108 +111,20 @@ class _CommentCardState extends ConsumerState<CommentCard> {
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 4),
-                      // ****************
-                      // Row(
-                      //   mainAxisSize: MainAxisSize.min,
-                      //   children: [
-                      //     Flexible(
-                      //       child: Text(
-                      //         // this need a function
-                      //         text,
-                      //         maxLines: 4,
-                      //         style: const TextStyle(
-                      //           overflow: TextOverflow.ellipsis,
-                      //         ),
-                      //         // softWrap: true,
-                      //       ),
-                      //     ),
-                      //     // if (overflowed) ...[
-                      //     //   Text(
-                      //     //     'hello there',
-                      //     //     style: TextStyle(color: Colors.red),
-                      //     //   ),
-                      //     // ],
-                      //   ],
-                      // ),
-                      // ****************
                       LayoutBuilder(
                         builder: (context, constrains) {
                           textPainter.layout(maxWidth: constrains.maxWidth);
                           final overflowed = textPainter.didExceedMaxLines;
-
-                          // log('expanded: $expanded');
-
                           if (overflowed) {
                             return InkWell(
                               // this'll expand the text
-                              onTap: () {
-                                setState(() => expanded = !expanded);
-                                // log('expanded: $expanded');
-                                // log('text painter`s width: ${textPainter.width}');
-                              },
+                              onTap: () => setState(() => expanded = !expanded),
                               child: showMoreOrLess(context),
-                              // child: expanded
-                              //       ? Text(
-                              //     widget.text,
-                              //     // style: const TextStyle(color: Colors.red),
-                              //   )
-                              //       : Text(
-                              //     // this is the problem
-                              //     '${widget.text.substring(0, 183)}...read more',
-                              //     // '${widget.text}...read more',
-                              //     maxLines: 4,
-                              //     style: const TextStyle(
-                              //       overflow: TextOverflow.ellipsis,
-                              //     ),
-                              //   ),
-                              // Text('${widget.text}...read more'),
                             );
                           }
-
                           return Text(widget.text);
-
-                          // return InkWell(
-                          //   // onTap: () => setState(() => expanded = !expanded),
-                          //   child: Text(widget.text),
-                          // );
-                          // return newText;
-                          // return expanded
-                          //     ? Text(widget.text)
-                          //     : Text(
-                          //         // this needs a function
-                          //         widget.text,
-                          //         maxLines: 4,
-                          //         style: const TextStyle(
-                          //           overflow: TextOverflow.ellipsis,
-                          //         ),
-                          //       );
-                          // return Text(
-                          //   // this needs a function
-                          //   widget.text,
-                          //   maxLines: 4,
-                          //   style: const TextStyle(
-                          //     overflow: TextOverflow.ellipsis,
-                          //   ),
-                          // );
                         },
                       ),
-                      // ***********************
-                      // ReadMoreText(
-                      //   widget.text,
-                      //   trimLines: 4,
-                      //   colorClickableText: Colors.pink,
-                      //   trimMode: TrimMode.Line,
-                      //   trimCollapsedText: 'show more',
-                      //   trimExpandedText: ' show less',
-                      //   moreStyle: const TextStyle(
-                      //     fontSize: 14,
-                      //     fontWeight: FontWeight.bold,
-                      //   ),
-                      //   lessStyle: const TextStyle(
-                      //     fontSize: 14,
-                      //     fontWeight: FontWeight.bold,
-                      //   ),
-                      // ),
                       const SizedBox(height: 8),
                       Row(
                         children: [
