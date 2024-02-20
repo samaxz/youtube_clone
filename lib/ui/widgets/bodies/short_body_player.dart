@@ -1,22 +1,18 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:pod_player/pod_player.dart';
-import 'package:visibility_detector/visibility_detector.dart';
 import 'package:youtube_clone/data/custom_screen.dart';
 import 'package:youtube_clone/data/info/youtube_failure.dart';
 import 'package:youtube_clone/data/models/video/video_model.dart';
 import 'package:youtube_clone/logic/notifiers/channel/subscription_notifier.dart';
+import 'package:youtube_clone/logic/notifiers/mp_subscription_notifier.dart';
 import 'package:youtube_clone/logic/notifiers/providers.dart';
 import 'package:youtube_clone/logic/notifiers/rating_notifier.dart';
 import 'package:youtube_clone/logic/notifiers/screens_manager.dart';
 import 'package:youtube_clone/logic/notifiers/shorts/shorts_details_notifier.dart';
-import 'package:youtube_clone/logic/notifiers/mp_subscription_notifier.dart';
 import 'package:youtube_clone/logic/notifiers/shorts/shorts_rating_notifier.dart';
 import 'package:youtube_clone/logic/services/helper_class.dart';
-import 'package:youtube_clone/ui/widgets/bodies/shorts_body.dart';
 import 'package:youtube_clone/ui/widgets/custom_inkwell.dart';
 import 'package:youtube_clone/ui/widgets/failure_tile.dart';
 import 'package:youtube_clone/ui/widgets/shimmers/loading_shorts_body.dart';
@@ -31,6 +27,8 @@ class ShortBodyPlayer extends ConsumerStatefulWidget {
   // all the time
   final int shortIndex;
   // last viewed short id
+  // UPD i don't need it
+  // TODO remove this
   final String lastId;
   // this comes from the state provider
   final int? currentScreenIndex;
@@ -70,40 +68,17 @@ class _ShortBodyPlayerState extends ConsumerState<ShortBodyPlayer>
   }
 
   Future<void> getDetails() async {
-    // **** this plays the sound and the percentage bar is moving
-    // but the image is still
-    // UPD both of these were done with ..initialize() at the end inside
-    // provider's build()
-    // final playerController = ref.read(
-    //   shortPlayerControllerProvider(
-    //     shortId: widget.short.id,
-    //     shortIndex: widget.shortIndex,
-    //   ),
-    // );
-    // // should i also add a listener or something
-    // await playerController.initialise();
-    // playerController.play();
-    // *********
-    // final playerController = ref.read(
-    //   shortPlayerControllerProvider(
-    //     shortId: widget.short.id,
-    //     shortIndex: widget.shortIndex,
-    //   ).notifier,
-    // );
-    // // should i also add a listener or something
-    // await playerController.initialize();
-    // playerController.play();
-    // *********
-    ref.read(shortIdSP.notifier).update((state) => widget.short.id);
     final shortsNotifier = ref.read(shortsDetailsNotifierProvider(widget.short.id).notifier);
     await shortsNotifier.getDetails(
       videoId: widget.short.id,
       channelId: widget.short.snippet.channelId,
     );
-    final subsNotifier = ref.read(subscriptionNotifierProvider(
-      channelId: widget.short.snippet.channelId,
-      screenIndex: widget.screenIndex,
-    ).notifier);
+    final subsNotifier = ref.read(
+      subscriptionNotifierProvider(
+        channelId: widget.short.snippet.channelId,
+        screenIndex: widget.screenIndex,
+      ).notifier,
+    );
     await subsNotifier.getSubscriptionState();
   }
 
@@ -111,59 +86,11 @@ class _ShortBodyPlayerState extends ConsumerState<ShortBodyPlayer>
   void initState() {
     super.initState();
     Future.microtask(getDetails);
-    // log('_ShortsBodyPlayerState`s initState()');
-  }
-
-  @override
-  void didUpdateWidget(covariant ShortBodyPlayer oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // log('new short index: ${widget.shortIndex}');
-    // log('old short index: ${oldWidget.shortIndex}');
-    log('didUpdateWidget() inside shorts body player`s state');
-    // ** this kinda works
-    // ref
-    //     .watch(
-    //       shortPlayerControllerProvider(
-    //         shortId: widget.short.id,
-    //         shortIndex: widget.shortIndex,
-    //       ),
-    //     )
-    //     .play();
-    // this is the current controller
-    // i should also probably watch
-    final playerController = ref.watch(
-      shortPlayerControllerProvider(
-        // shortId: widget.short.id,
-        shortId: widget.lastId,
-        // shortIndex: widget.shortIndex,
-      ),
-    );
-    final screenIndex = ref.read(currentScreenIndexSP);
-    final screensManager = ref.read(screensManagerProvider(widget.screenIndex)).last;
-    final isShort = screensManager.screenTypeAndId.screenType == ScreenType.short;
-    // if (widget.screenIndex != widget.currentScreenIndex) {
-    if (widget.screenIndex != screenIndex || !isShort) {
-      // ||
-      // widget.shortIndex != oldWidget.shortIndex) {
-      // widget.short.id != oldWidget.short.id) {
-      playerController.pause();
-    } else {
-      playerController.play();
-    }
-  }
-
-  @override
-  void dispose() {
-    // if (widget.shortIndex! > 0) playerController.dispose();
-    // if (playerController.isInitialised) playerController.dispose();
-    log('_ShortsBodyPlayerState`s playerController disposed');
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    // log('_ShortsBodyPlayerState`s build()');
     final shortsDetails = ref.watch(shortsDetailsNotifierProvider(widget.short.id)).last;
     final rating = ref.watch(shortsRatingNotifierProvider(widget.short.id)).last;
     final subscribed = ref
@@ -174,87 +101,38 @@ class _ShortBodyPlayerState extends ConsumerState<ShortBodyPlayer>
           ),
         )
         .last;
-    // current player controller (duh)
+    // this is for playing the newest loaded short for the first time
     final playerController = ref.watch(
-      shortPlayerControllerProvider(
-        shortId: widget.short.id,
-        // shortIndex: widget.shortIndex,
-      ),
+      shortPlayerControllerProvider(widget.short.id),
     );
-    // TODO use current short id notifier here
-    // ref.listen(shortIndexSP, (previous, next) {
-    //   log('prev index: $previous');
-    //   log('next index: $next');
-    // });
-    // ref.listen(videoIdSP, (previous, next) {
-    //   log('prev id: $previous');
-    //   log('next id: $next');
-    //   ref
-    //       .read(
-    //         shortPlayerControllerProvider(
-    //           shortIndex: widget.shortIndex,
-    //           shortId: next,
-    //         ).notifier,
-    //       )
-    //       .play();
-    // });
-    // this isn't working
-    // ref.listen(shortSP, (previous, next) {
-    //   if (previous != null) {
-    //     // ref
-    //     //     .watch(
-    //     //       shortPlayerControllerProvider(
-    //     //         shortId: previous.shortId,
-    //     //         shortIndex: previous.shortIndex,
-    //     //       ),
-    //     //     )
-    //     //     .pause();
-    //   }
-    //   ref
-    //       .read(
-    //         shortPlayerControllerProvider(
-    //           shortIndex: next.shortIndex,
-    //           shortId: next.shortId,
-    //         ),
-    //       )
-    //       .play();
-    // });
-    // strange, i can't even listen to it
-    // ref.listen(
-    //   shortPlayerControllerProvider(
-    //     // shortIndex: widget.shortIndex,
-    //     shortId: widget.short.id,
-    //   ),
-    //   (previous, next) {
-    //     log('previous: $previous');
-    //     log('next: $next');
-    //     isPlaying = next.isVideoPlaying;
-    //     // next.play();
-    //     // ref
-    //     //     .read(
-    //     //       shortPlayerControllerProvider(
-    //     //         shortId: widget.short.id,
-    //     //         // shortIndex: widget.shortIndex,
-    //     //       ),
-    //     //     )
-    //     //     .play();
-    //     // log('thasdf;lajf;alskdjf');
-    //   },
-    // );
+    final screenIndex = ref.watch(currentScreenIndexSP);
+    final customScreen = ref.watch(screensManagerProvider(widget.screenIndex)).last;
+    // these 2 listeners work together
     ref.listen(
       screensManagerProvider(widget.screenIndex),
       (_, state) {
-        if (state.last.screenTypeAndId.screenType != ScreenType.short) {
+        if (state.last.screenTypeAndId.screenType == ScreenType.short &&
+            widget.screenIndex == screenIndex) {
+          playerController.play();
+          // i should probably add other checks here too
+        } else {
           playerController.pause();
         }
       },
     );
+    ref.listen(currentScreenIndexSP, (_, state) {
+      if (state == widget.screenIndex &&
+          customScreen.screenTypeAndId.screenType == ScreenType.short) {
+        playerController.play();
+      } else {
+        playerController.pause();
+      }
+    });
     return Stack(
       fit: StackFit.expand,
       children: [
         GestureDetector(
           onTap: () {
-            // log('is video playing: ${playerController.isVideoPlaying}');
             if (playerController.isVideoPlaying) {
               playerController.pause();
             } else {
@@ -270,15 +148,17 @@ class _ShortBodyPlayerState extends ConsumerState<ShortBodyPlayer>
                 controller: playerController,
                 onVideoError: () => Center(
                   child: TextButton(
-                    onPressed: () => playerController
-                        .changeVideo(
-                          playVideoFrom: PlayVideoFrom.youtube(
-                            'https://youtu.be/${widget.short.id}',
-                          ),
-                        )
-                        .then(
-                          (value) => playerController.play(),
-                        ),
+                    onPressed: () {
+                      playerController
+                          .changeVideo(
+                            playVideoFrom: PlayVideoFrom.youtube(
+                              'https://youtu.be/${widget.short.id}',
+                            ),
+                          )
+                          .then(
+                            (value) => playerController.play(),
+                          );
+                    },
                     child: const Text('Error happened, try again'),
                   ),
                 ),
@@ -293,10 +173,8 @@ class _ShortBodyPlayerState extends ConsumerState<ShortBodyPlayer>
                     child: options.podProgresssBar,
                   ),
                 ),
-                // podProgressBarConfig: PodProgressBarConfig(
-                //   // this isn't working
-                //   circleHandlerRadius: playerController.isVideoPlaying ? 3 : 8,
-                // ),
+                // hide the built-in progress bar, since i'm already using my own
+                // inside overlayBuilder
                 alwaysShowProgressBar: false,
               ),
             ),
