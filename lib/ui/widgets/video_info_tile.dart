@@ -12,7 +12,7 @@ import 'package:youtube_clone/data/models/video/video_model.dart';
 import 'package:youtube_clone/logic/notifiers/providers.dart';
 import 'package:youtube_clone/logic/notifiers/rating_notifier.dart';
 import 'package:youtube_clone/logic/notifiers/screens_manager.dart';
-import 'package:youtube_clone/logic/notifiers/subscription_notifier.dart';
+import 'package:youtube_clone/logic/notifiers/mp_subscription_notifier.dart';
 import 'package:youtube_clone/logic/services/helper_class.dart';
 import 'package:youtube_clone/ui/widgets/custom_inkwell.dart';
 
@@ -40,7 +40,6 @@ class _VideoInfoTileState extends ConsumerState<VideoInfoTile> {
       final (i, chunk) = e;
       final index = i == 0 ? 0 : chunk.indexOf(RegExp('\\s|\\)|\$'));
       final link = chunk.substring(0, index);
-
       return [
         if (i != 0)
           TextSpan(
@@ -63,7 +62,6 @@ class _VideoInfoTileState extends ConsumerState<VideoInfoTile> {
         ),
       ];
     });
-
     return TextSpan(
       children: [...spans],
     );
@@ -102,7 +100,6 @@ class _VideoInfoTileState extends ConsumerState<VideoInfoTile> {
                         widget.video.statistics?.viewCount != null
                             ? '${Helper.formatNumber(widget.video.statistics!.viewCount!)} views  •'
                             : 'unknown views  •',
-                        // style: Theme.of(context).textTheme.bodySmall!.copyWith(fontSize: 14),
                         style: const TextStyle(fontSize: 14),
                       ),
                       const SizedBox(width: 5),
@@ -159,7 +156,6 @@ class _ActionsRow extends ConsumerWidget {
               liked: () => Icon(
                 Icons.thumb_up,
                 size: 28,
-                // color: Colors.white,
                 color: Theme.of(context).colorScheme.onSurface,
               ),
             ))
@@ -175,7 +171,6 @@ class _ActionsRow extends ConsumerWidget {
               liked: () => Icon(
                 Icons.thumb_down,
                 size: 28,
-                // color: Colors.white,
                 color: Theme.of(context).colorScheme.onSurface,
               ),
             ))
@@ -311,29 +306,27 @@ class _AuthorInfoState extends ConsumerState<_AuthorInfo> {
   @override
   void initState() {
     super.initState();
+    final notifier = ref.read(miniplayerSubscriptionNotifierProvider(widget.channel.id).notifier);
     Future.microtask(
-      () {
-        final notifier = ref.read(subscriptionNotifierProvider(widget.channel.id).notifier);
-        notifier.getSubscriptionState();
-      },
+      () => notifier.getSubscriptionState(),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // TODO remove this
-    final channel = widget.channel;
-    final subscription = ref.watch(subscriptionNotifierProvider(channel.id));
+    final subscription = ref.watch(miniplayerSubscriptionNotifierProvider(widget.channel.id));
 
     final subscribed = subscription
         .whenData(
           (subscribed) => TextButton(
             onPressed: () {
-              final notifier = ref.read(subscriptionNotifierProvider(channel.id).notifier);
+              final notifier =
+                  ref.read(miniplayerSubscriptionNotifierProvider(widget.channel.id).notifier);
               notifier.changeSubscriptionState();
             },
             onLongPress: () {
-              final notifier = ref.read(subscriptionNotifierProvider(channel.id).notifier);
+              final notifier =
+                  ref.read(miniplayerSubscriptionNotifierProvider(widget.channel.id).notifier);
               notifier.changeSubscriptionState();
             },
             // TODO change styles here when the user is subbed or unsubbed
@@ -363,7 +356,7 @@ class _AuthorInfoState extends ConsumerState<_AuthorInfo> {
                   children: [
                     Flexible(
                       child: Text(
-                        channel.snippet.title,
+                        widget.channel.snippet.title,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 15),
@@ -371,8 +364,8 @@ class _AuthorInfoState extends ConsumerState<_AuthorInfo> {
                     ),
                     Flexible(
                       child: Text(
-                        channel.statistics?.subscriberCount != null
-                            ? Helper.formatNumber(channel.statistics!.subscriberCount)
+                        widget.channel.statistics?.subscriberCount != null
+                            ? Helper.formatNumber(widget.channel.statistics!.subscriberCount)
                             : 'unknown',
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -456,7 +449,6 @@ class _CommentsSection extends ConsumerWidget {
             alignment: Alignment.centerLeft,
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              // surfaceTint, surfaceVariant, secondaryContainer, primaryContainer (meh)
               color: Theme.of(context).buttonTheme.colorScheme?.secondaryContainer,
               borderRadius: BorderRadius.circular(4),
             ),
