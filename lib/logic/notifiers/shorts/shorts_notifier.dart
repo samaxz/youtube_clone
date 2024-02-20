@@ -19,7 +19,6 @@ class ShortsNotifier extends _$ShortsNotifier {
     ];
   }
 
-  // TODO make this sync
   Future<void> getShorts() async {
     final authState = ref.read(authNotifierProvider);
     authState.when(
@@ -29,15 +28,13 @@ class ShortsNotifier extends _$ShortsNotifier {
       // TODO make this show a snack bar with failure message
       failure: (failure) {},
     );
-    // log('getShorts() inside ShortsNotifier');
   }
 
   Future<void> _getLikedShorts() async {
     final authService = ref.read(authYoutubeServiceP);
-    final shortsOrFailure = await authService.getLikedVideos(
+    final shortsOrFailure = await authService.getLikedShorts(
       pageToken: state.last.baseInfo.nextPageToken,
     );
-
     state = shortsOrFailure.fold(
       (l) => [
         ...state,
@@ -63,9 +60,9 @@ class ShortsNotifier extends _$ShortsNotifier {
   Future<void> _getPopularShorts() async {
     final service = ref.read(youtubeServiceP);
     final shortsOrFailure = await service.getPopularVideos(
+      maxResults: '5',
       pageToken: state.last.baseInfo.nextPageToken,
     );
-
     state = shortsOrFailure.fold(
       (l) => [
         ...state,
