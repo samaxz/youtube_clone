@@ -27,6 +27,7 @@ class AuthYoutubeService {
   const AuthYoutubeService(this._dio);
 
   Future<Either<YoutubeFailure, BaseInfo<Video>>> getLikedVideos({
+    String maxResults = maxResults,
     String? pageToken,
   }) async {
     try {
@@ -42,18 +43,18 @@ class AuthYoutubeService {
         videosEnd,
         queryParameters,
       );
-
       final response = await _dio.getUri(url);
-      final videos =
-          (response.data['items'] as List).map((video) => Video.fromJson(video)).toList();
-
+      final videos = (response.data['items'] as List)
+          .map(
+            (video) => Video.fromJson(video),
+          )
+          .toList();
       final nextPageToken = response.data['nextPageToken'];
       final totalResults = response.data['pageInfo']['totalResults'];
       final resultsPerPage = response.data['pageInfo']['resultsPerPage'];
       final nextPageAvailable = nextPageToken != null && nextPageToken.isNotEmpty;
       final wholePages = totalResults ~/ resultsPerPage;
       final totalPages = totalResults % resultsPerPage != 0 ? (wholePages + 1) : (wholePages);
-
       return right(
         BaseInfo<Video>(
           data: videos,
@@ -64,13 +65,15 @@ class AuthYoutubeService {
         ),
       );
     } on DioException catch (e, st) {
-      log('dio caught exception inside getLikedVideos()', error: e, stackTrace: st);
-
+      log(
+        'dio caught exception inside getLikedVideos()',
+        error: e,
+        stackTrace: st,
+      );
       final failure = FailureData(
         code: e.response?.statusCode,
         message: e.response?.statusMessage,
       );
-
       if (e.isNoConnectionError) {
         return left(
           const NoConnectionFailure(),
@@ -85,15 +88,17 @@ class AuthYoutubeService {
 
   // these are shorts from liked videos
   Future<Either<YoutubeFailure, BaseInfo<Video>>> getLikedShorts({
-    String? nextPageToken,
+    String maxResults = '5',
+    String? pageToken,
   }) async {
     try {
-      final videosOrFailure = await getLikedVideos(pageToken: nextPageToken);
+      final videosOrFailure = await getLikedVideos(
+        maxResults: maxResults,
+        pageToken: pageToken,
+      );
       final videosInfo = videosOrFailure.rightOrDefault!;
       final videos = videosInfo.data;
-
       final ids = videos.map((video) => video.id).toList().join(',');
-
       final queryParameters = {
         'part': 'short',
         'id': ids,
@@ -103,21 +108,17 @@ class AuthYoutubeService {
         'videos',
         queryParameters,
       );
-
       // TODO add interceptors here to handle offline cases
-      final Dio dio = Dio();
+      final dio = Dio();
       final response = await dio.getUri(uri);
-
       if (response.data['items'] == null) {
         return right(
           // disabled may also indicate a problem in the unoff api
           const BaseInfo(disabled: true),
         );
       }
-
       final items = response.data['items'] as List<dynamic>;
       final newShortsList = <Video>[];
-
       for (final item in items) {
         // if it is a short, then i should add the video to the
         // shorts list - a list of normal videos from get
@@ -128,7 +129,6 @@ class AuthYoutubeService {
           );
         }
       }
-
       return right(
         BaseInfo<Video>(
           data: newShortsList,
@@ -139,13 +139,15 @@ class AuthYoutubeService {
         ),
       );
     } on DioException catch (e, st) {
-      log('dio caught exception inside getLikedShorts()', error: e, stackTrace: st);
-
+      log(
+        'dio caught exception inside getLikedShorts()',
+        error: e,
+        stackTrace: st,
+      );
       final failure = FailureData(
         code: e.response?.statusCode,
         message: e.response?.statusMessage,
       );
-
       if (e.isNoConnectionError) {
         return left(
           const NoConnectionFailure(),
