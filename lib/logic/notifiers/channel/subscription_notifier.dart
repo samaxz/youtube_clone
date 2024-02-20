@@ -6,11 +6,11 @@ import 'package:youtube_clone/logic/notifiers/video_details_notifier.dart';
 import 'package:youtube_clone/logic/oauth2/auth_notifier.dart';
 import 'package:youtube_clone/logic/services/auth_youtube_service.dart';
 
-part 'channel_subscription_notifier.g.dart';
+part 'subscription_notifier.g.dart';
 
 // this is used for all screens, except for miniplayer screen
 @riverpod
-class ChannelSubscriptionNotifier extends _$ChannelSubscriptionNotifier {
+class SubscriptionNotifier extends _$SubscriptionNotifier {
   @override
   List<AsyncValue<bool>> build({
     required int screenIndex,
