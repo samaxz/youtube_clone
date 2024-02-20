@@ -1,10 +1,9 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:youtube_clone/data/models/rating_state.dart';
+import 'package:youtube_clone/logic/notifiers/providers.dart';
 import 'package:youtube_clone/logic/notifiers/shorts/shorts_details_notifier.dart';
-import 'package:youtube_clone/logic/notifiers/video_details_notifier.dart';
 import 'package:youtube_clone/logic/oauth2/auth_notifier.dart';
 import 'package:youtube_clone/logic/services/auth_youtube_service.dart';
-import 'package:youtube_clone/logic/notifiers/providers.dart';
 
 part 'shorts_rating_notifier.g.dart';
 
@@ -12,10 +11,7 @@ part 'shorts_rating_notifier.g.dart';
 @riverpod
 class ShortsRatingNotifier extends _$ShortsRatingNotifier {
   @override
-  List<AsyncValue<RatingState>> build({
-    required String videoId,
-    required int screenIndex,
-  }) {
+  List<AsyncValue<RatingState>> build(String shortId) {
     return [
       const AsyncLoading(),
     ];
@@ -27,13 +23,11 @@ class ShortsRatingNotifier extends _$ShortsRatingNotifier {
   Future<void> getVideoRating() async {
     final rating = await AsyncValue.guard(
       () => authService.getVideoRating(
-        videoId: videoId,
+        videoId: shortId,
         authState: authState,
       ),
     );
-
-    final shortsDetailsNot = ref.read(shortsDetailsNotifierProvider(screenIndex).notifier);
-
+    final shortsDetailsNot = ref.read(shortsDetailsNotifierProvider(shortId).notifier);
     state = [
       ...state,
       rating
@@ -56,7 +50,7 @@ class ShortsRatingNotifier extends _$ShortsRatingNotifier {
         state = [
           ...state,
           AsyncValue.data(
-            await authService.likeVideo(videoId: videoId, authState: authState),
+            await authService.likeVideo(videoId: shortId, authState: authState),
           ),
         ];
       },
@@ -74,7 +68,7 @@ class ShortsRatingNotifier extends _$ShortsRatingNotifier {
           ...state,
           AsyncValue.data(
             await authService.dislikeVideo(
-              videoId: videoId,
+              videoId: shortId,
               authState: authState,
             ),
           ),
