@@ -1,13 +1,11 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pod_player/pod_player.dart';
 import 'package:youtube_clone/data/info/youtube_failure.dart';
 import 'package:youtube_clone/data/models/video/video_model.dart';
+import 'package:youtube_clone/logic/notifiers/mp_subscription_notifier.dart';
 import 'package:youtube_clone/logic/notifiers/providers.dart';
-import 'package:youtube_clone/logic/notifiers/subscription_notifier.dart';
 import 'package:youtube_clone/logic/notifiers/video_details_notifier.dart';
 import 'package:youtube_clone/logic/services/helper_class.dart';
 import 'package:youtube_clone/ui/widgets/failure_tile.dart';
@@ -50,12 +48,9 @@ class _MiniplayerScreenState extends ConsumerState<MiniplayerScreen> {
   Future<void> reloadData() async {
     // may as well show snack bar here
     if (!await Helper.hasInternet()) return;
-
     ref.invalidate(videoDetailsNotifierProvider);
-    ref.invalidate(subscriptionNotifierProvider);
-
+    ref.invalidate(miniplayerSubscriptionNotifierProvider);
     final videoDetailsNotifier = ref.read(videoDetailsNotifierProvider.notifier);
-
     await Future.wait([
       videoDetailsNotifier.loadDetails(
         videoId: widget.video.id,
@@ -67,7 +62,6 @@ class _MiniplayerScreenState extends ConsumerState<MiniplayerScreen> {
         ),
       ),
     ]);
-
     playerController.play();
   }
 
@@ -91,7 +85,6 @@ class _MiniplayerScreenState extends ConsumerState<MiniplayerScreen> {
   @override
   void didUpdateWidget(covariant MiniplayerScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-
     if (mounted && widget.video.id != oldWidget.video.id) {
       Future.microtask(
         () => Future.wait([
@@ -110,16 +103,10 @@ class _MiniplayerScreenState extends ConsumerState<MiniplayerScreen> {
   @override
   void dispose() {
     if (!mounted) {
-      // TODO probably delete these
-      // ref.invalidate(videoDetailsNotifierProvider);
-      // ref.invalidate(subscriptionNotifierProvider);
-
       playerController.dispose();
       scrollController.dispose();
     }
-
     // log('dispose() got called inside miniplayer screen`s state');
-
     super.dispose();
   }
 
@@ -138,7 +125,6 @@ class _MiniplayerScreenState extends ConsumerState<MiniplayerScreen> {
           percentage: value,
         ) /
         30;
-
     // this is used to avoid overflow when player in full screen
     return value > 2
         ? const SizedBox()

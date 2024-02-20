@@ -1,7 +1,6 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:youtube_clone/data/info/youtube_failure.dart';
-import 'package:youtube_clone/logic/notifiers/providers.dart';
 import 'package:youtube_clone/ui/widgets/channel_tabs/channel_sliver_appbar.dart';
 
 class ErrorScreen extends ConsumerWidget {

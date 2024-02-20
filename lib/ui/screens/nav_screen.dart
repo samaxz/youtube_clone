@@ -76,10 +76,9 @@ class _NavScreenState extends ConsumerState<NavScreen> {
     final screenIndex = ref.watch(currentScreenIndexSP);
     final isShowingSearch = ref.watch(isShowingSearchSP(screenIndex));
     final screensManager = ref.watch(screensManagerProvider(screenIndex));
-    final isShortsScreen =
-        screensManager.lastOrNull?.screenTypeAndId.screenType == ScreenType.short;
+    final screenType = screensManager.lastOrNull?.screenTypeAndId.screenType;
+    final isShortsScreen = screenType == ScreenType.short;
     final isDarkTheme = ref.watch(themeNP);
-
     // this shows different pop-ups, depending on the chosen item:
     // video, channel, short...
     // it's shown on top of the MP
@@ -97,23 +96,19 @@ class _NavScreenState extends ConsumerState<NavScreen> {
             );
           },
         );
-
         ref.read(showOptionsSP.notifier).update((state) => const Neither());
       },
     );
-
     // when the user is not authenticated, this shows the authentication
     // pop-up for him to sign in to perform authenticated actions
     ref.listen(unauthAttemptSP, (_, state) {
       if (state) {
         Helper.handleUnauthAttempt(context: context, ref: ref);
       }
-
       // this cancels it right away to allow continuous auth
       // actions to be performed - over and over again
       ref.read(unauthAttemptSP.notifier).update((state) => false);
     });
-
     // this listens to the current inet connection and displays
     // bottom sheet if there's none, then hides it
     ref.listen(
@@ -122,7 +117,6 @@ class _NavScreenState extends ConsumerState<NavScreen> {
         state.when(
           offline: () {
             offline = true;
-
             Helper.scaffoldKey.currentState!.showBottomSheet(
               (context) => ValueListenableBuilder(
                 valueListenable: playerExpandProgressVN,
@@ -143,7 +137,6 @@ class _NavScreenState extends ConsumerState<NavScreen> {
           online: () {
             if (!offline) return;
             offline = false;
-
             Helper.scaffoldKey.currentState?.showBottomSheet(
               (context) => Container(
                 height: 30,
@@ -153,7 +146,6 @@ class _NavScreenState extends ConsumerState<NavScreen> {
                 child: const Text('Internet is back up'),
               ),
             );
-
             Future.delayed(
               const Duration(seconds: 3),
               () => Navigator.of(context).pop(),
@@ -162,14 +154,11 @@ class _NavScreenState extends ConsumerState<NavScreen> {
         );
       },
     );
-
     return MiniplayerWillPopScope(
       onWillPop: () async {
         final navigator = screenKeyList[screenIndex].currentState!;
-
         if (!navigator.canPop()) return true;
         navigator.pop();
-
         return false;
       },
       child: Scaffold(
@@ -235,7 +224,6 @@ class _NavScreenState extends ConsumerState<NavScreen> {
         body: SafeArea(
           // this is used to make the shorts body visible behind system bar
           top: !isShortsScreen,
-          // bottom: false,
           child: Stack(
             children: [
               PageView(
@@ -271,10 +259,8 @@ class _NavScreenState extends ConsumerState<NavScreen> {
               value: height,
             );
             double opacity = 1 - value;
-
             if (opacity < 0) opacity = 0;
             if (opacity > 1) opacity = 1;
-
             return SizedBox(
               height:
                   value <= 1 ? kBottomNavigationBarHeight - kBottomNavigationBarHeight * value : 0,
@@ -300,20 +286,14 @@ class _NavScreenState extends ConsumerState<NavScreen> {
                   currentIndex: screenIndex,
                   onTap: (index) {
                     if (index == 2) return;
-
                     pageController.jumpToPage(index);
                     ref.read(currentScreenIndexSP.notifier).update((state) => index);
-
                     if (screenIndex == index) {
                       // pop all the previous routes from the navigation stack
                       if (screenKeyList[screenIndex].currentState!.canPop()) {
                         screenKeyList[screenIndex].currentState!.popUntil((route) => route.isFirst);
-
-                        // TODO change this or delete this
                         // TODO update some state notifiers here if necessary
-                        // ref.read(pushedHomeChannelSP.notifier).update((state) => false);
-
-                        // scroll all the way to the top
+                        // scroll all the way to the top on different screen indexes
                       } else if (index == 0) {
                         homeScrollController.animateTo(
                           0,
@@ -335,7 +315,6 @@ class _NavScreenState extends ConsumerState<NavScreen> {
                       }
                     }
                   },
-                  // unselectedItemColor: isDarkTheme ? Colors.white : Colors.black,
                   unselectedItemColor: Theme.of(context).colorScheme.onSurface,
                   selectedFontSize: 10,
                   unselectedFontSize: 10,
@@ -389,7 +368,6 @@ class _NavScreenState extends ConsumerState<NavScreen> {
                   child: Icon(
                     Icons.add_circle_outline_sharp,
                     size: 40,
-                    // color: isDarkTheme ? Colors.white : Colors.black,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),

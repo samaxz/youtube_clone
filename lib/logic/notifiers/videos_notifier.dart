@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:youtube_clone/data/info/base_info.dart';
 import 'package:youtube_clone/data/info/base_info_state.dart';
@@ -8,7 +6,6 @@ import 'package:youtube_clone/data/models/video/video_model.dart';
 import 'package:youtube_clone/logic/notifiers/providers.dart';
 import 'package:youtube_clone/logic/notifiers/video_category_notifier.dart';
 import 'package:youtube_clone/logic/oauth2/auth_notifier.dart';
-import 'package:youtube_clone/logic/services/videos_service.dart';
 
 part 'videos_notifier.g.dart';
 

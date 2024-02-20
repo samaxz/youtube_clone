@@ -12,9 +12,7 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.listen(screensManagerProvider(0), (_, state) {
       final notifier = ref.read(screensManagerProvider(0).notifier);
-
       if (!notifier.shouldPush) return;
-
       Navigator.of(context)
           .push(
             MaterialPageRoute(builder: (context) => state.last.screen),
@@ -23,14 +21,6 @@ class HomeScreen extends ConsumerWidget {
             () => notifier.popScreen(),
           );
     });
-
-    // final scrollController = ref.watch(homeScrollControllerP);
-
-    return const CommonBody(
-      index: 0,
-      // displayExpandedHeight: true,
-      // scrollController: scrollController,
-      // body: const HomeScreenBody(),
-    );
+    return const CommonBody(index: 0);
   }
 }

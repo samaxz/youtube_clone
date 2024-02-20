@@ -2,7 +2,6 @@
 import 'dart:async';
 import 'dart:developer';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:youtube_clone/data/models/subscription_model.dart';
 import 'package:youtube_clone/logic/notifiers/video_details_notifier.dart';
@@ -10,7 +9,7 @@ import 'package:youtube_clone/logic/oauth2/auth_notifier.dart';
 import 'package:youtube_clone/logic/services/auth_youtube_service.dart';
 import 'package:youtube_clone/logic/notifiers/providers.dart';
 
-part 'subscription_notifier.g.dart';
+part 'mp_subscription_notifier.g.dart';
 
 // subscription state
 class SubState {
@@ -42,7 +41,7 @@ Future<SubState> subscriptions(SubscriptionsRef ref) async {
 
 // this is used for the miniplayer screen
 @riverpod
-class SubscriptionNotifier extends _$SubscriptionNotifier {
+class MiniplayerSubscriptionNotifier extends _$MiniplayerSubscriptionNotifier {
   @override
   AsyncValue<bool> build(String channelId) {
     return const AsyncLoading();
@@ -100,57 +99,3 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
     }
   }
 }
-
-// TODO delete this
-// class SubscriptionNotifier extends StateNotifier<AsyncValue<bool>> {
-//   final Ref _ref;
-//   final AuthYoutubeService _authService;
-//
-//   SubscriptionNotifier(
-//     this._ref,
-//     this._authService,
-//   ) : super(
-//           const AsyncValue.loading(),
-//         );
-//
-//   bool _isLoading = false;
-//
-//   late final authState = _ref.read(authNotifierProvider);
-//
-//   Future<void> getSubscriptionState({
-//     required String channelId,
-//   }) async {
-//     if (_isLoading) return;
-//
-//     _isLoading = true;
-//
-//     final subscribed = await _authService.subscribed(
-//       channelId: channelId,
-//       authState: authState,
-//     );
-//
-//     if (!mounted) return;
-//
-//     state = AsyncData(subscribed);
-//
-//     _isLoading = false;
-//   }
-//
-//   Future<void> changeSubscriptionState(String channelId) async {
-//     authState.maybeWhen(
-//       orElse: () {},
-//       authenticated: () async {
-//         if (!mounted) return;
-//
-//         state = AsyncValue.data(
-//           await _authService.changeSubscription(
-//             channelId,
-//             state.value!,
-//             authState: authState,
-//           ),
-//         );
-//       },
-//       unauthenticated: () => _ref.read(unauthAttemptSP.notifier).update((state) => true),
-//     );
-//   }
-// }

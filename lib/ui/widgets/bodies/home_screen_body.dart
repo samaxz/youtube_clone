@@ -25,7 +25,6 @@ class _HomeScreenBodyState extends ConsumerState<HomeScreenBody>
   Future<void> init() async {
     final videosNotifier = ref.read(videosNotifierProvider.notifier);
     await videosNotifier.getVideos();
-
     final visibilityNotifier = ref.read(visibilitySNP.notifier);
     visibilityNotifier.toggleSelection(20);
   }
@@ -42,14 +41,12 @@ class _HomeScreenBodyState extends ConsumerState<HomeScreenBody>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-
     final videos = ref.watch(videosNotifierProvider);
     final selectedVideo = ref.watch(selectedVideoSP);
     final screenIndex = ref.watch(currentScreenIndexSP);
     final screensManager = ref.watch(screensManagerProvider(screenIndex));
     final lastPageEmpty = screensManager.last.screenTypeAndId.screenType == ScreenType.initial;
     final shouldAutoPlay = selectedVideo == null && screenIndex == 0 && lastPageEmpty;
-
     ref.listen(
       videosNotifierProvider,
       (_, state) {
@@ -59,24 +56,16 @@ class _HomeScreenBodyState extends ConsumerState<HomeScreenBody>
         );
       },
     );
-
-    // log('can load next page: $canLoadNextPage');
-
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
         final metrics = notification.metrics;
         final limit = metrics.maxScrollExtent - metrics.viewportDimension / 3;
-
         if (canLoadNextPage && metrics.pixels >= limit) {
           canLoadNextPage = false;
-
-          // log('method for pagination should now be called');
-
           Future.microtask(ref.read(videosNotifierProvider.notifier).getVideos).then(
             (value) => ref.read(visibilitySNP.notifier).toggleSelection(lastIndex),
           );
         }
-
         return false;
       },
       child: RefreshIndicator(
@@ -95,7 +84,6 @@ class _HomeScreenBodyState extends ConsumerState<HomeScreenBody>
             // TODO update the visibility NP here and not this local var
             // TODO prolly move this down into successful states
             lastIndex = index;
-
             return videos.when(
               loading: (videoInfo) {
                 if (index < videoInfo.data.length) {
@@ -118,7 +106,6 @@ class _HomeScreenBodyState extends ConsumerState<HomeScreenBody>
                     child: Text('oops, looks like it`s empty'),
                   );
                 }
-
                 return InViewNotifierWidget(
                   id: videoInfo.data[index].id,
                   builder: (context, isInView, child) => VideoTile(

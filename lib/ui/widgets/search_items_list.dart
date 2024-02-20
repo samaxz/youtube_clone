@@ -109,7 +109,6 @@ class _SearchItemsListState extends ConsumerState<SearchItemsList> {
               deltaTop < (0.5 * vpHeight) && deltaBottom > (0.5 * vpHeight),
           shrinkWrap: true,
           itemCount: items.when(
-            // + 1 here causes RangeError index for video tile's hidden elementAt
             loading: (baseInfo) => baseInfo.data.length + 1,
             loaded: (baseInfo) => baseInfo.data.length,
             error: (baseInfo, _) => baseInfo.data.length + 1,

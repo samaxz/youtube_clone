@@ -1,12 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:youtube_clone/data/info/base_info.dart';
 import 'package:youtube_clone/data/info/base_info_state.dart';
 import 'package:youtube_clone/data/info/youtube_failure.dart';
 import 'package:youtube_clone/data/models/video/video_model.dart';
-import 'package:youtube_clone/logic/services/videos_service.dart';
-import 'package:youtube_clone/logic/notifiers/videos_notifier.dart';
-import 'package:mocktail/mocktail.dart';
+import 'package:youtube_clone/logic/services/test_videos_service.dart';
 
 class Listener<T> extends Mock {
   void call(T? previous, T next);
