@@ -45,3 +45,8 @@ This project is aimed at cloning most of functionality of the original youtube a
 <pre>
 <img src="assets/screenshots/search/empty_search.png" width="30%" alt="empty search">     <img src="assets/screenshots/search/search_suggestions.jpg" width="30%" alt="search suggestions">     <img src="assets/screenshots/search/search_results.jpg" width="30%" alt="search results">     <img src="assets/screenshots/search/search_suggestions_full.jpg" width="30%" alt="search suggestions full">     <img src="assets/screenshots/search/search_history_long.jpg" width="30%" alt="search history long">
 </pre>
+
+### Short screen
+<pre>
+<img src="assets/screenshots/shorts/short_playing.jpg" width="30%" alt="short playing">     <img src="assets/screenshots/shorts/short_unauth_action.jpg" width="30%" alt="short unauth action">     <img src="assets/screenshots/shorts/short_comment_default.jpg" width="30%" alt="short comments section">     <img src="assets/screenshots/shorts/short_comment_expanded.jpg" width="30%" alt="short expanded comment">     <img src="assets/screenshots/shorts/share_short_url.jpg" width="30%" alt="short share url">
+</pre>
