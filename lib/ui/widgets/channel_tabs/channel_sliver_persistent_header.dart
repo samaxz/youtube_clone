@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:youtube_clone/data/models/channel/channel_model.dart';
-import 'package:youtube_clone/logic/notifiers/channel/channel_subs_notifier.dart';
-import 'package:youtube_clone/logic/notifiers/channel/channel_subscription_notifier.dart';
-import 'package:youtube_clone/logic/notifiers/subscription_notifier.dart';
+import 'package:youtube_clone/logic/notifiers/channel/subscription_notifier.dart';
 import 'package:youtube_clone/logic/services/helper_class.dart';
-import 'package:youtube_clone/logic/notifiers/providers.dart';
 import 'package:youtube_clone/logic/services/theme_notifier.dart';
 import 'package:youtube_clone/ui/widgets/channel_tabs/channel_custom_sliver_header_delegate.dart';
 
@@ -30,10 +27,12 @@ class ChannelSliverPersistentHeader extends ConsumerStatefulWidget {
 
 class _ChannelSliverPersistentHeaderState extends ConsumerState<ChannelSliverPersistentHeader> {
   Future<void> getSubbedState({bool isReloading = false}) async {
-    final notifier = ref.read(channelSubscriptionNotifierProvider(
-      screenIndex: widget.screenIndex,
-      channelId: widget.channelId,
-    ).notifier);
+    final notifier = ref.read(
+      subscriptionNotifierProvider(
+        screenIndex: widget.screenIndex,
+        channelId: widget.channelId,
+      ).notifier,
+    );
     await notifier.getSubscriptionState(isReloading: isReloading);
   }
 
@@ -46,13 +45,12 @@ class _ChannelSliverPersistentHeaderState extends ConsumerState<ChannelSliverPer
   @override
   Widget build(BuildContext context) {
     final subbed = ref
-        .watch(channelSubscriptionNotifierProvider(
+        .watch(subscriptionNotifierProvider(
           screenIndex: widget.screenIndex,
           channelId: widget.channelId,
         ))
         .last;
     final isDarkTheme = ref.watch(themeNP);
-
     return SliverPersistentHeader(
       floating: true,
       pinned: false,
@@ -145,8 +143,12 @@ class _ChannelSliverPersistentHeaderState extends ConsumerState<ChannelSliverPer
                                     ),
                             ),
                       onPressed: () {
-                        final notifier =
-                            ref.read(subscriptionNotifierProvider(widget.channel.id).notifier);
+                        final notifier = ref.read(
+                          subscriptionNotifierProvider(
+                            screenIndex: widget.screenIndex,
+                            channelId: widget.channelId,
+                          ).notifier,
+                        );
                         notifier.changeSubscriptionState();
                       },
                       child: Text(

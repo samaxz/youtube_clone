@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:youtube_clone/data/custom_screen.dart';
 import 'package:youtube_clone/data/models/channel/channel_model.dart';
-import 'package:youtube_clone/logic/notifiers/channel/channel_subscription_notifier.dart';
+import 'package:youtube_clone/logic/notifiers/channel/subscription_notifier.dart';
 import 'package:youtube_clone/logic/notifiers/screens_manager.dart';
-import 'package:youtube_clone/logic/notifiers/subscription_notifier.dart';
 import 'package:youtube_clone/logic/services/helper_class.dart';
 
 // channel card shown in search
@@ -26,10 +25,12 @@ class SearchChannel extends ConsumerStatefulWidget {
 
 class _SearchChannelState extends ConsumerState<SearchChannel> {
   Future<void> getSubbedState({bool isReloading = false}) async {
-    final notifier = ref.read(channelSubscriptionNotifierProvider(
-      channelId: widget.channelId,
-      screenIndex: widget.screenIndex,
-    ).notifier);
+    final notifier = ref.read(
+      subscriptionNotifierProvider(
+        channelId: widget.channelId,
+        screenIndex: widget.screenIndex,
+      ).notifier,
+    );
     await notifier.getSubscriptionState(isReloading: isReloading);
   }
 
@@ -53,7 +54,7 @@ class _SearchChannelState extends ConsumerState<SearchChannel> {
   Widget build(BuildContext context) {
     final subscribed = ref
         .watch(
-          channelSubscriptionNotifierProvider(
+          subscriptionNotifierProvider(
             channelId: widget.channelId,
             screenIndex: widget.screenIndex,
           ),
@@ -95,8 +96,12 @@ class _SearchChannelState extends ConsumerState<SearchChannel> {
                         color: Theme.of(context).cardColor,
                         child: InkWell(
                           onTap: () {
-                            final notifier =
-                                ref.read(subscriptionNotifierProvider(widget.channelId).notifier);
+                            final notifier = ref.read(
+                              subscriptionNotifierProvider(
+                                channelId: widget.channelId,
+                                screenIndex: widget.screenIndex,
+                              ).notifier,
+                            );
                             notifier.getSubscriptionState();
                           },
                           child: Text(
@@ -108,7 +113,6 @@ class _SearchChannelState extends ConsumerState<SearchChannel> {
                           ),
                         ),
                       ),
-                      // TODO finish this state
                       error: (error, stackTrace) => Center(
                         child: TextButton(
                           onPressed: () => getSubbedState(isReloading: true),
